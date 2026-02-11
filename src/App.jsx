@@ -12,6 +12,12 @@ import About from './components/UI/About';
 import LoadingScreen from './components/UI/LoadingScreen';
 import Gallery from './components/Gallery/Gallery';
 import CursorGlow from './components/Effects/CursorGlow';
+import PaintingGuides from './components/Guides/PaintingGuides';
+import GuideDetail from './components/Guides/GuideDetail';
+import BattleReports from './components/BattleReports/BattleReports';
+import BattleReportDetail from './components/BattleReports/BattleReportDetail';
+import CommunityFeed from './components/Community/CommunityFeed';
+import LoreLibrary from './components/Lore/LoreLibrary';
 
 import { useStore } from './stores/useStore';
 
@@ -82,6 +88,36 @@ function App() {
         {currentView === 'planet' && selectedPlanet && (
           <Gallery />
         )}
+      </AnimatePresence>
+
+      {/* Painting Guides */}
+      <AnimatePresence>
+        {currentView === 'guides' && <PaintingGuides />}
+      </AnimatePresence>
+
+      {/* Guide Detail */}
+      <AnimatePresence>
+        {currentView === 'guideDetail' && <GuideDetail />}
+      </AnimatePresence>
+
+      {/* Battle Reports */}
+      <AnimatePresence>
+        {currentView === 'battleReports' && <BattleReports />}
+      </AnimatePresence>
+
+      {/* Battle Report Detail */}
+      <AnimatePresence>
+        {currentView === 'battleReportDetail' && <BattleReportDetail />}
+      </AnimatePresence>
+
+      {/* Community Feed */}
+      <AnimatePresence>
+        {currentView === 'community' && <CommunityFeed />}
+      </AnimatePresence>
+
+      {/* Lore Library */}
+      <AnimatePresence>
+        {currentView === 'lore' && <LoreLibrary />}
       </AnimatePresence>
 
       {/* Cursor Glow Effect */}

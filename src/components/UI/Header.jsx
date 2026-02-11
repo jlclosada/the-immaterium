@@ -77,6 +77,58 @@ export default function Header() {
             className="nav-button"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
+            onClick={() => useStore.getState().setCurrentView('guides')}
+            style={{
+              opacity: currentView === 'guides' || currentView === 'guideDetail' ? 1 : 0.7,
+              borderColor: currentView === 'guides' || currentView === 'guideDetail' ? 'var(--color-primary)' : 'var(--glass-border)'
+            }}
+          >
+            GUÍAS
+          </motion.button>
+
+          <motion.button
+            className="nav-button"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => useStore.getState().setCurrentView('battleReports')}
+            style={{
+              opacity: currentView === 'battleReports' || currentView === 'battleReportDetail' ? 1 : 0.7,
+              borderColor: currentView === 'battleReports' || currentView === 'battleReportDetail' ? 'var(--color-primary)' : 'var(--glass-border)'
+            }}
+          >
+            BATALLAS
+          </motion.button>
+
+          <motion.button
+            className="nav-button"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => useStore.getState().setCurrentView('community')}
+            style={{
+              opacity: currentView === 'community' ? 1 : 0.7,
+              borderColor: currentView === 'community' ? 'var(--color-primary)' : 'var(--glass-border)'
+            }}
+          >
+            COMUNIDAD
+          </motion.button>
+
+          <motion.button
+            className="nav-button"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => useStore.getState().setCurrentView('lore')}
+            style={{
+              opacity: currentView === 'lore' ? 1 : 0.7,
+              borderColor: currentView === 'lore' ? 'var(--color-primary)' : 'var(--glass-border)'
+            }}
+          >
+            LORE
+          </motion.button>
+
+          <motion.button
+            className="nav-button"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => useStore.getState().setCurrentView('about')}
           >
             ACERCA DE
@@ -141,6 +193,30 @@ export default function Header() {
               style={{ background: 'none', border: 'none', color: '#fff', fontSize: '1.2rem', textAlign: 'left', cursor: 'pointer' }}
             >
               ⚔️ EJÉRCITOS
+            </button>
+            <button
+              onClick={() => handleNav(() => setCurrentView('guides'))}
+              style={{ background: 'none', border: 'none', color: '#fff', fontSize: '1.2rem', textAlign: 'left', cursor: 'pointer' }}
+            >
+              🎨 GUÍAS DE PINTURA
+            </button>
+            <button
+              onClick={() => handleNav(() => setCurrentView('battleReports'))}
+              style={{ background: 'none', border: 'none', color: '#fff', fontSize: '1.2rem', textAlign: 'left', cursor: 'pointer' }}
+            >
+              ⚔️ INFORMES DE BATALLA
+            </button>
+            <button
+              onClick={() => handleNav(() => setCurrentView('community'))}
+              style={{ background: 'none', border: 'none', color: '#fff', fontSize: '1.2rem', textAlign: 'left', cursor: 'pointer' }}
+            >
+              🌐 COMUNIDAD
+            </button>
+            <button
+              onClick={() => handleNav(() => setCurrentView('lore'))}
+              style={{ background: 'none', border: 'none', color: '#fff', fontSize: '1.2rem', textAlign: 'left', cursor: 'pointer' }}
+            >
+              📚 LORE
             </button>
             <button
               onClick={() => handleNav(() => setCurrentView('about'))}
