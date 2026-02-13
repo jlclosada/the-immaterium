@@ -1,5 +1,6 @@
 // Use relative URL in development (with Vite proxy) or absolute URL in production
-const API_URL = import.meta.env.DEV ? '/api' : 'http://localhost:8000/api';
+const API_URL = import.meta.env.VITE_API_URL;
+
 
 export const api = {
     // Armies
