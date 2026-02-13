@@ -216,10 +216,30 @@ export default function PaintingGuides() {
                                 gap: '1rem',
                                 marginBottom: '1rem',
                                 fontSize: '0.9rem',
-                                color: '#aaa'
+                                color: '#aaa',
+                                alignItems: 'center',
+                                flexWrap: 'wrap'
                             }}>
                                 <span>⏱️ {guide.estimatedTime}</span>
                                 <span>📊 {guide.difficulty}</span>
+                                {guide.faction && (
+                                    <span style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.3rem'
+                                    }}>
+                                        <img 
+                                            src={guide.faction.iconUrl} 
+                                            alt={guide.faction.name}
+                                            style={{
+                                                width: '16px',
+                                                height: '16px',
+                                                objectFit: 'contain'
+                                            }}
+                                        />
+                                        {guide.faction.name}
+                                    </span>
+                                )}
                             </div>
 
                             <div style={{

@@ -34,11 +34,11 @@
 
 html, body, #root {
   width: 100%;
-  height: 100%;
-  overflow: hidden;
+  min-height: 100vh;
   background: var(--color-darker);
   font-family: var(--font-body);
   color: var(--color-light);
+  overflow-x: hidden; /* Prevent horizontal scroll but allow vertical */
 }
 
 /* Canvas container */

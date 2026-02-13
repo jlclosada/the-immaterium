@@ -1,105 +1,97 @@
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { useStore } from '../../stores/useStore';
-import { useState, useEffect } from 'react';
+import { api } from '../services/api';
+import { useStore } from '../stores/useStore';
 
-export default function GuideDetail() {
-    const { selectedGuide, clearSelectedGuide, returnToGalaxy, toggleLike, userLikes, incrementViews, addComment } = useStore();
+const GuideDetailPage = () => {
+    const { id } = useParams();
+    const navigate = useNavigate();
+    const { toggleLike, userLikes, incrementViews, addComment } = useStore();
+    const [guide, setGuide] = useState(null);
+    const [loading, setLoading] = useState(true);
     const [commentText, setCommentText] = useState('');
 
     useEffect(() => {
-        if (selectedGuide) {
-            incrementViews(selectedGuide.id, 'guide');
-        }
-    }, [selectedGuide]);
+        const fetchGuide = async () => {
+            try {
+                const data = await api.getGuide(id);
+                setGuide(data);
+                incrementViews(id, 'guide');
+            } catch (error) {
+                console.error('Failed to fetch guide:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    if (!selectedGuide) {
-        return null;
+        if (id) {
+            fetchGuide();
+        }
+    }, [id]);
+
+    if (loading) {
+        return (
+            <div style={{
+                minHeight: '100vh',
+                background: 'var(--color-darker)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+            }}>
+                <div className="loading-spinner"></div>
+            </div>
+        );
     }
 
-    const isLiked = userLikes.includes(selectedGuide.id);
+    if (!guide) {
+        return (
+            <div style={{
+                minHeight: '100vh',
+                background: 'var(--color-darker)',
+                padding: '4rem 2rem',
+                color: 'var(--color-light)',
+                textAlign: 'center'
+            }}>
+                <h1>Guía no encontrada</h1>
+                <Link to="/guides" style={{ color: 'var(--color-primary)' }}>Volver a Guías</Link>
+            </div>
+        );
+    }
 
-    const handleBack = () => {
-        clearSelectedGuide();
-        useStore.getState().setCurrentView('guides');
-    };
+    const isLiked = userLikes.includes(guide.id);
 
     const handleAddComment = () => {
         if (commentText.trim()) {
-            addComment(selectedGuide.id, 'guide', commentText);
+            addComment(guide.id, 'guide', commentText);
             setCommentText('');
+            // Refresh guide to show new comment
+            api.getGuide(id).then(setGuide);
         }
     };
 
     return (
-        <motion.div
-            className="guide-detail"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                padding: '6rem 2rem 2rem',
-                overflowY: 'auto',
-                background: 'linear-gradient(180deg, rgba(10,10,20,0.95) 0%, rgba(5,5,15,0.98) 100%)',
-                zIndex: 100
-            }}
-        >
-            {/* Close Button */}
-            <motion.button
-                onClick={() => {
-                    clearSelectedGuide();
-                    setCurrentView('galaxy');
-                }}
-                whileHover={{ scale: 1.1, rotate: 90 }}
-                whileTap={{ scale: 0.9 }}
-                style={{
-                    position: 'fixed',
-                    top: '1.5rem',
-                    right: '1.5rem',
-                    width: '50px',
-                    height: '50px',
-                    borderRadius: '50%',
-                    background: 'rgba(255,255,255,0.1)',
-                    border: '2px solid rgba(255,255,255,0.3)',
-                    color: '#fff',
-                    fontSize: '1.5rem',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    zIndex: 1000,
-                    backdropFilter: 'blur(10px)'
-                }}
-            >
-                ✕
-            </motion.button>
-
+        <div style={{
+            minHeight: '100vh',
+            background: 'var(--color-darker)',
+            padding: '4rem 2rem',
+            color: 'var(--color-light)'
+        }}>
             <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-                {/* Back Button */}
-                <motion.button
-                    onClick={handleBack}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                <Link 
+                    to="/guides"
                     style={{
-                        padding: '0.8rem 1.5rem',
-                        background: 'rgba(255,255,255,0.1)',
-                        border: '1px solid rgba(255,255,255,0.2)',
-                        borderRadius: '8px',
-                        color: '#fff',
-                        cursor: 'pointer',
-                        marginBottom: '2rem',
-                        display: 'flex',
+                        display: 'inline-flex',
                         alignItems: 'center',
-                        gap: '0.5rem'
+                        gap: '0.5rem',
+                        color: 'var(--color-primary)',
+                        textDecoration: 'none',
+                        marginBottom: '2rem',
+                        fontSize: '1.1rem'
                     }}
                 >
-                    <span>←</span>
-                    <span>Volver a Guías</span>
-                </motion.button>
+                    ← Volver a Guías
+                </Link>
 
                 {/* Header */}
                 <motion.div
@@ -113,7 +105,7 @@ export default function GuideDetail() {
                         marginBottom: '1rem',
                         color: '#fff'
                     }}>
-                        {selectedGuide.title}
+                        {guide.title}
                     </h1>
 
                     <div style={{
@@ -123,32 +115,32 @@ export default function GuideDetail() {
                         flexWrap: 'wrap',
                         color: '#aaa'
                     }}>
-                        <span>👤 {selectedGuide.author}</span>
-                        <span>⏱️ {selectedGuide.estimatedTime}</span>
-                        <span>📊 {selectedGuide.difficulty}</span>
-                        <span>📅 {new Date(selectedGuide.dateCreated).toLocaleDateString('es-ES')}</span>
-                        {selectedGuide.faction && (
+                        <span>👤 {guide.author}</span>
+                        <span>⏱️ {guide.estimatedTime}</span>
+                        <span>📊 {guide.difficulty}</span>
+                        <span>📅 {new Date(guide.dateCreated).toLocaleDateString('es-ES')}</span>
+                        {guide.faction && (
                             <span style={{
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '0.5rem'
                             }}>
                                 <img 
-                                    src={selectedGuide.faction.iconUrl} 
-                                    alt={selectedGuide.faction.name}
+                                    src={guide.faction.iconUrl} 
+                                    alt={guide.faction.name}
                                     style={{
                                         width: '20px',
                                         height: '20px',
                                         objectFit: 'contain'
                                     }}
                                 />
-                                {selectedGuide.faction.name}
+                                {guide.faction.name}
                             </span>
                         )}
                     </div>
 
                     <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
-                        {selectedGuide.tags.map(tag => (
+                        {guide.tags && guide.tags.map(tag => (
                             <span
                                 key={tag}
                                 style={{
@@ -166,7 +158,7 @@ export default function GuideDetail() {
 
                     <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
                         <button
-                            onClick={() => toggleLike(selectedGuide.id, 'guide')}
+                            onClick={() => toggleLike(guide.id, 'guide')}
                             style={{
                                 padding: '0.8rem 1.5rem',
                                 background: isLiked ? 'rgba(255,0,100,0.3)' : 'rgba(255,255,255,0.1)',
@@ -180,60 +172,64 @@ export default function GuideDetail() {
                             }}
                         >
                             <span>{isLiked ? '❤️' : '🤍'}</span>
-                            <span>{selectedGuide.likes}</span>
+                            <span>{guide.likes}</span>
                         </button>
 
-                        <span style={{ color: '#888' }}>👁️ {selectedGuide.views} vistas</span>
+                        <span style={{ color: '#888' }}>👁️ {guide.views} vistas</span>
                     </div>
                 </motion.div>
 
                 {/* Cover Image */}
-                <motion.div
-                    initial={{ scale: 0.95, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    style={{
-                        marginBottom: '2rem',
-                        borderRadius: '12px',
-                        overflow: 'hidden',
-                        boxShadow: '0 10px 40px rgba(0,0,0,0.5)'
-                    }}
-                >
-                    <img
-                        src={selectedGuide.coverImage}
-                        alt={selectedGuide.title}
-                        style={{ width: '100%', height: 'auto', display: 'block' }}
-                    />
-                </motion.div>
+                {guide.coverImage && (
+                    <motion.div
+                        initial={{ scale: 0.95, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        style={{
+                            marginBottom: '2rem',
+                            borderRadius: '12px',
+                            overflow: 'hidden',
+                            boxShadow: '0 10px 40px rgba(0,0,0,0.5)'
+                        }}
+                    >
+                        <img
+                            src={guide.coverImage}
+                            alt={guide.title}
+                            style={{ width: '100%', height: 'auto', display: 'block' }}
+                        />
+                    </motion.div>
+                )}
 
                 {/* Materials List */}
-                <motion.div
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.2 }}
-                    className="glass-panel"
-                    style={{ padding: '2rem', marginBottom: '2rem' }}
-                >
-                    <h2 style={{ fontSize: '1.8rem', marginBottom: '1rem', color: '#00ced1' }}>
-                        Materiales Necesarios
-                    </h2>
-                    <ul style={{ listStyle: 'none', padding: 0 }}>
-                        {selectedGuide.materials.map((material, index) => (
-                            <li
-                                key={index}
-                                style={{
-                                    padding: '0.8rem 0',
-                                    borderBottom: index < selectedGuide.materials.length - 1 ? '1px solid rgba(255,255,255,0.1)' : 'none',
-                                    color: '#ddd'
-                                }}
-                            >
-                                ✓ {material}
-                            </li>
-                        ))}
-                    </ul>
-                </motion.div>
+                {guide.materials && guide.materials.length > 0 && (
+                    <motion.div
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.2 }}
+                        className="glass-panel"
+                        style={{ padding: '2rem', marginBottom: '2rem' }}
+                    >
+                        <h2 style={{ fontSize: '1.8rem', marginBottom: '1rem', color: '#00ced1' }}>
+                            Materiales Necesarios
+                        </h2>
+                        <ul style={{ listStyle: 'none', padding: 0 }}>
+                            {guide.materials.map((material, index) => (
+                                <li
+                                    key={index}
+                                    style={{
+                                        padding: '0.8rem 0',
+                                        borderBottom: index < guide.materials.length - 1 ? '1px solid rgba(255,255,255,0.1)' : 'none',
+                                        color: '#ddd'
+                                    }}
+                                >
+                                    ✓ {material}
+                                </li>
+                            ))}
+                        </ul>
+                    </motion.div>
+                )}
 
                 {/* Steps */}
-                {selectedGuide.steps.map((step, index) => (
+                {guide.steps && guide.steps.map((step, index) => (
                     <motion.div
                         key={step.stepNumber}
                         initial={{ y: 20, opacity: 0 }}
@@ -271,7 +267,7 @@ export default function GuideDetail() {
                             {step.description}
                         </p>
 
-                        {step.images.length > 0 && (
+                        {step.images && step.images.length > 0 && (
                             <div style={{
                                 display: 'grid',
                                 gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
@@ -293,7 +289,7 @@ export default function GuideDetail() {
                             </div>
                         )}
 
-                        {step.tips.length > 0 && (
+                        {step.tips && step.tips.length > 0 && (
                             <div style={{
                                 background: 'rgba(0,206,209,0.1)',
                                 border: '1px solid rgba(0,206,209,0.3)',
@@ -320,7 +316,7 @@ export default function GuideDetail() {
                     style={{ padding: '2rem' }}
                 >
                     <h2 style={{ fontSize: '1.8rem', marginBottom: '1.5rem', color: '#fff' }}>
-                        Comentarios ({selectedGuide.comments.length})
+                        Comentarios ({guide.comments ? guide.comments.length : 0})
                     </h2>
 
                     <div style={{ marginBottom: '2rem' }}>
@@ -358,7 +354,7 @@ export default function GuideDetail() {
                         </button>
                     </div>
 
-                    {selectedGuide.comments.map((comment) => (
+                    {guide.comments && guide.comments.map((comment) => (
                         <div
                             key={comment.id}
                             style={{
@@ -377,13 +373,16 @@ export default function GuideDetail() {
                         </div>
                     ))}
 
-                    {selectedGuide.comments.length === 0 && (
+                    {(!guide.comments || guide.comments.length === 0) && (
                         <p style={{ color: '#888', textAlign: 'center', padding: '2rem 0' }}>
                             Sé el primero en comentar esta guía
                         </p>
                     )}
                 </motion.div>
             </div>
-        </motion.div>
+        </div>
     );
-}
+};
+
+export default GuideDetailPage;
+

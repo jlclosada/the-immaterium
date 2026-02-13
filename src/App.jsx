@@ -1,128 +1,61 @@
-import { Suspense, useState, useEffect } from 'react';
-import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Preload } from '@react-three/drei';
+import { useEffect } from 'react';
+import { Routes, Route, useLocation } from 'react-router-dom';
+import { useStore } from './stores/useStore';
 import { AnimatePresence } from 'framer-motion';
 
-import Galaxy from './components/Galaxy/Galaxy';
-import PostProcessing from './components/Effects/PostProcessing';
-import Header from './components/UI/Header';
-import PlanetInfo from './components/UI/PlanetInfo';
-import ArmyList from './components/UI/ArmyList';
-import About from './components/UI/About';
-import LoadingScreen from './components/UI/LoadingScreen';
-import Gallery from './components/Gallery/Gallery';
-import CursorGlow from './components/Effects/CursorGlow';
-import PaintingGuides from './components/Guides/PaintingGuides';
-import GuideDetail from './components/Guides/GuideDetail';
-import BattleReports from './components/BattleReports/BattleReports';
-import BattleReportDetail from './components/BattleReports/BattleReportDetail';
-import CommunityFeed from './components/Community/CommunityFeed';
-import LoreLibrary from './components/Lore/LoreLibrary';
+import GalaxyPage from './pages/GalaxyPage';
+import LandingPage from './pages/LandingPage';
+import LoginPage from './pages/LoginPage';
+import AdminLayout from './layouts/AdminLayout';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import ArmyManager from './components/Admin/ArmyManager';
+import GuideManager from './components/Admin/GuideManager';
+import ReportManager from './components/Admin/ReportManager';
 
-import { useStore } from './stores/useStore';
+import ArmiesPage from './pages/ArmiesPage';
+import ArmyDetailPage from './pages/ArmyDetailPage';
+import GuidesPage from './pages/GuidesPage';
+import GuideDetailPage from './pages/GuideDetailPage';
+import BattleReportsPage from './pages/BattleReportsPage';
+import BattleReportDetailPage from './pages/BattleReportDetailPage';
 
 import './styles/index.css';
 
 function App() {
-  const [isLoading, setIsLoading] = useState(true);
-  const { currentView, selectedPlanet } = useStore();
+  const { fetchInitialData } = useStore();
+  const location = useLocation();
 
   useEffect(() => {
-    // Simulate loading time for assets
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 2500);
-
-    return () => clearTimeout(timer);
+    fetchInitialData();
   }, []);
 
   return (
-    <>
-      {/* Loading Screen */}
-      <AnimatePresence>
-        {isLoading && <LoadingScreen />}
-      </AnimatePresence>
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/galaxy" element={<GalaxyPage />} />
 
-      {/* 3D Canvas */}
-      <div className="canvas-container">
-        <Canvas
-          camera={{
-            position: [0, 5, 50],
-            fov: 60,
-            near: 0.1,
-            far: 1000
-          }}
-          gl={{
-            antialias: true,
-            alpha: true,
-            powerPreference: 'high-performance'
-          }}
-          dpr={[1, 1.5]} // Clamp to 1.5 to save GPU load while keeping quality
-        >
-          <Suspense fallback={null}>
-            {/* Lighting */}
-            <ambientLight intensity={0.6} />
-            <pointLight position={[0, 0, 0]} intensity={3.0} color="#ff6600" />
-            <pointLight position={[50, 50, 50]} intensity={1.0} color="#00d4ff" />
-            <pointLight position={[-50, -50, -50]} intensity={1.0} color="#ff00ff" />
+        {/* Public Content Routes */}
+        <Route path="/armies" element={<ArmiesPage />} />
+        <Route path="/armies/:id" element={<ArmyDetailPage />} />
+        <Route path="/guides" element={<GuidesPage />} />
+        <Route path="/guides/:id" element={<GuideDetailPage />} />
+        <Route path="/battle-reports" element={<BattleReportsPage />} />
+        <Route path="/battle-reports/:id" element={<BattleReportDetailPage />} />
 
-            {/* Galaxy Scene */}
-            <Galaxy />
+        {/* Admin Routes */}
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<AdminDashboard />} />
+          <Route path="armies" element={<ArmyManager />} />
+          <Route path="guides" element={<GuideManager />} />
+          <Route path="reports" element={<ReportManager />} />
+        </Route>
 
-            {/* Post Processing Effects */}
-            <PostProcessing />
-
-            <Preload all />
-          </Suspense>
-        </Canvas>
-      </div>
-
-      {/* UI Overlay */}
-      <Header />
-      <PlanetInfo />
-      <ArmyList />
-      <About />
-
-      {/* Gallery View */}
-      <AnimatePresence>
-        {currentView === 'planet' && selectedPlanet && (
-          <Gallery />
-        )}
-      </AnimatePresence>
-
-      {/* Painting Guides */}
-      <AnimatePresence>
-        {currentView === 'guides' && <PaintingGuides />}
-      </AnimatePresence>
-
-      {/* Guide Detail */}
-      <AnimatePresence>
-        {currentView === 'guideDetail' && <GuideDetail />}
-      </AnimatePresence>
-
-      {/* Battle Reports */}
-      <AnimatePresence>
-        {currentView === 'battleReports' && <BattleReports />}
-      </AnimatePresence>
-
-      {/* Battle Report Detail */}
-      <AnimatePresence>
-        {currentView === 'battleReportDetail' && <BattleReportDetail />}
-      </AnimatePresence>
-
-      {/* Community Feed */}
-      <AnimatePresence>
-        {currentView === 'community' && <CommunityFeed />}
-      </AnimatePresence>
-
-      {/* Lore Library */}
-      <AnimatePresence>
-        {currentView === 'lore' && <LoreLibrary />}
-      </AnimatePresence>
-
-      {/* Cursor Glow Effect */}
-      <CursorGlow />
-    </>
+        {/* Fallback */}
+        <Route path="*" element={<LandingPage />} />
+      </Routes>
+    </AnimatePresence>
   );
 }
 
