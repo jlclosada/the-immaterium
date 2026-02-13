@@ -5,20 +5,20 @@ const API_URL = import.meta.env.VITE_API_URL;
 export const api = {
     // Armies
     getArmies: async () => {
-        const response = await fetch(`${API_URL}/armies/`);
+        const response = await fetch(`${API_URL}/api/armies/`);
         if (!response.ok) throw new Error('Failed to fetch armies');
         const data = await response.json();
         return data.results || data;
     },
 
     getArmy: async (id) => {
-        const response = await fetch(`${API_URL}/armies/${id}/`);
+        const response = await fetch(`${API_URL}/api/armies/${id}/`);
         if (!response.ok) throw new Error('Failed to fetch army');
         return response.json();
     },
 
     createArmy: async (data, token) => {
-        const response = await fetch(`${API_URL}/armies/`, {
+        const response = await fetch(`${API_URL}/api/armies/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -31,7 +31,7 @@ export const api = {
     },
 
     updateArmy: async (id, data, token) => {
-        const response = await fetch(`${API_URL}/armies/${id}/`, {
+        const response = await fetch(`${API_URL}/api/armies/${id}/`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
@@ -47,7 +47,7 @@ export const api = {
     },
 
     deleteArmy: async (id, token) => {
-        const response = await fetch(`${API_URL}/armies/${id}/`, {
+        const response = await fetch(`${API_URL}/api/armies/${id}/`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Token ${token}`
@@ -59,20 +59,20 @@ export const api = {
 
     // Painting Guides
     getPaintingGuides: async () => {
-        const response = await fetch(`${API_URL}/guides/`);
+        const response = await fetch(`${API_URL}/api/guides/`);
         if (!response.ok) throw new Error('Failed to fetch guides');
         const data = await response.json();
         return data.results || data;
     },
 
     getGuide: async (id) => {
-        const response = await fetch(`${API_URL}/guides/${id}/`);
+        const response = await fetch(`${API_URL}/api/guides/${id}/`);
         if (!response.ok) throw new Error('Failed to fetch guide');
         return response.json();
     },
 
     createGuide: async (data, token) => {
-        const response = await fetch(`${API_URL}/guides/`, {
+        const response = await fetch(`${API_URL}/api/guides/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -85,7 +85,7 @@ export const api = {
     },
 
     updateGuide: async (id, data, token) => {
-        const response = await fetch(`${API_URL}/guides/${id}/`, {
+        const response = await fetch(`${API_URL}/api/guides/${id}/`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -98,7 +98,7 @@ export const api = {
     },
 
     deleteGuide: async (id, token) => {
-        const response = await fetch(`${API_URL}/guides/${id}/`, {
+        const response = await fetch(`${API_URL}/api/guides/${id}/`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Token ${token}`
@@ -109,7 +109,7 @@ export const api = {
     },
 
     likeGuide: async (id, userId) => {
-        const response = await fetch(`${API_URL}/guides/${id}/like/`, {
+        const response = await fetch(`${API_URL}/api/guides/${id}/like/`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ user_id: userId })
@@ -120,20 +120,20 @@ export const api = {
 
     // Battle Reports
     getBattleReports: async () => {
-        const response = await fetch(`${API_URL}/battle-reports/`);
+        const response = await fetch(`${API_URL}/api/battle-reports/`);
         if (!response.ok) throw new Error('Failed to fetch battle reports');
         const data = await response.json();
         return data.results || data;
     },
 
     getBattleReport: async (id) => {
-        const response = await fetch(`${API_URL}/battle-reports/${id}/`);
+        const response = await fetch(`${API_URL}/api/battle-reports/${id}/`);
         if (!response.ok) throw new Error('Failed to fetch battle report');
         return response.json();
     },
 
     createBattleReport: async (data, token) => {
-        const response = await fetch(`${API_URL}/battle-reports/`, {
+        const response = await fetch(`${API_URL}/api/battle-reports/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -146,7 +146,7 @@ export const api = {
     },
 
     updateBattleReport: async (id, data, token) => {
-        const response = await fetch(`${API_URL}/battle-reports/${id}/`, {
+        const response = await fetch(`${API_URL}/api/battle-reports/${id}/`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -159,7 +159,7 @@ export const api = {
     },
 
     deleteBattleReport: async (id, token) => {
-        const response = await fetch(`${API_URL}/battle-reports/${id}/`, {
+        const response = await fetch(`${API_URL}/api/battle-reports/${id}/`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Token ${token}`
@@ -170,7 +170,7 @@ export const api = {
     },
 
     likeBattleReport: async (id, userId) => {
-        const response = await fetch(`${API_URL}/battle-reports/${id}/like/`, {
+        const response = await fetch(`${API_URL}/api/battle-reports/${id}/like/`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ user_id: userId })
@@ -180,7 +180,7 @@ export const api = {
     },
 
     login: async (username, password) => {
-        const response = await fetch(`${API_URL}/auth/login/`, {
+        const response = await fetch(`${API_URL}/api/auth/login/`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password })
