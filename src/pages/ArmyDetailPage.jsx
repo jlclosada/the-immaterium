@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { api } from '../services/api';
+import Header from '../components/UI/Header';
+import Footer from '../components/UI/Footer';
 
 const ArmyDetailPage = () => {
     const { id } = useParams();
@@ -59,31 +61,33 @@ const ArmyDetailPage = () => {
         <div style={{
             minHeight: '100vh',
             background: 'var(--color-darker)',
-            padding: '4rem 2rem',
-            color: 'var(--color-light)'
+            display: 'flex',
+            flexDirection: 'column'
         }}>
-            <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                {/* Header */}
-                <motion.div
-                    initial={{ y: -20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    style={{ marginBottom: '2rem' }}
+            <Header />
+            <div style={{
+                flex: 1,
+                padding: '4rem 2rem',
+                color: 'var(--color-light)',
+                maxWidth: '1200px',
+                margin: '0 auto',
+                paddingTop: '6rem',
+                width: '100%'
+            }}>
+                <Link
+                    to="/armies"
+                    style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        color: 'var(--color-primary)',
+                        textDecoration: 'none',
+                        marginBottom: '2rem',
+                        fontSize: '1.1rem'
+                    }}
                 >
-                    <Link 
-                        to="/armies"
-                        style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                            color: 'var(--color-primary)',
-                            textDecoration: 'none',
-                            marginBottom: '2rem',
-                            fontSize: '1.1rem'
-                        }}
-                    >
-                        ← Volver a Ejércitos
-                    </Link>
-                </motion.div>
+                    ← Volver a Ejércitos
+                </Link>
 
                 {/* Main Content */}
                 <motion.div
@@ -109,8 +113,8 @@ const ArmyDetailPage = () => {
                             padding: '2rem'
                         }}>
                             {army.iconUrl ? (
-                                <img 
-                                    src={army.iconUrl} 
+                                <img
+                                    src={army.iconUrl}
                                     alt={army.name}
                                     style={{
                                         maxWidth: '100%',
@@ -133,7 +137,7 @@ const ArmyDetailPage = () => {
                             }}>
                                 {army.name}
                             </h1>
-                            
+
                             {army.planetName && (
                                 <p style={{
                                     color: 'var(--color-secondary)',
@@ -257,6 +261,7 @@ const ArmyDetailPage = () => {
                     </motion.div>
                 )}
             </div>
+            <Footer />
         </div>
     );
 };

@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useStore } from '../../stores/useStore';
 
 export default function Header() {
-  const { currentView, returnToGalaxy, setCurrentView } = useStore();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { currentView, setCurrentView } = useStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
@@ -16,9 +19,15 @@ export default function Header() {
 
   const toggleMenu = () => setMobileMenuOpen(!mobileMenuOpen);
 
-  const handleNav = (action) => {
-    action();
+  const handleNavigation = (view, path) => {
+    setCurrentView(view);
+    navigate(path);
     setMobileMenuOpen(false);
+  };
+
+  const returnToGalaxy = () => {
+    setCurrentView('galaxy');
+    navigate('/galaxy');
   };
 
   return (
@@ -55,10 +64,10 @@ export default function Header() {
             className="nav-button"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={returnToGalaxy}
+            onClick={() => handleNavigation('galaxy', '/galaxy')}
             style={{
-              opacity: currentView === 'galaxy' ? 1 : 0.7,
-              borderColor: currentView === 'galaxy' ? 'var(--color-primary)' : 'var(--glass-border)'
+              opacity: location.pathname === '/galaxy' ? 1 : 0.7,
+              borderColor: location.pathname === '/galaxy' ? 'var(--color-primary)' : 'var(--glass-border)'
             }}
           >
             GALAXIA
@@ -68,7 +77,11 @@ export default function Header() {
             className="nav-button"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => useStore.getState().setCurrentView('armyList')}
+            onClick={() => handleNavigation('armyList', '/armies')}
+            style={{
+              opacity: location.pathname.includes('/armies') ? 1 : 0.7,
+              borderColor: location.pathname.includes('/armies') ? 'var(--color-primary)' : 'var(--glass-border)'
+            }}
           >
             EJÉRCITOS
           </motion.button>
@@ -77,10 +90,10 @@ export default function Header() {
             className="nav-button"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => useStore.getState().setCurrentView('guides')}
+            onClick={() => handleNavigation('guides', '/guides')}
             style={{
-              opacity: currentView === 'guides' || currentView === 'guideDetail' ? 1 : 0.7,
-              borderColor: currentView === 'guides' || currentView === 'guideDetail' ? 'var(--color-primary)' : 'var(--glass-border)'
+              opacity: location.pathname.includes('/guides') ? 1 : 0.7,
+              borderColor: location.pathname.includes('/guides') ? 'var(--color-primary)' : 'var(--glass-border)'
             }}
           >
             GUÍAS
@@ -90,10 +103,10 @@ export default function Header() {
             className="nav-button"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => useStore.getState().setCurrentView('battleReports')}
+            onClick={() => handleNavigation('battleReports', '/battle-reports')}
             style={{
-              opacity: currentView === 'battleReports' || currentView === 'battleReportDetail' ? 1 : 0.7,
-              borderColor: currentView === 'battleReports' || currentView === 'battleReportDetail' ? 'var(--color-primary)' : 'var(--glass-border)'
+              opacity: location.pathname.includes('/battle-reports') ? 1 : 0.7,
+              borderColor: location.pathname.includes('/battle-reports') ? 'var(--color-primary)' : 'var(--glass-border)'
             }}
           >
             BATALLAS
@@ -183,43 +196,43 @@ export default function Header() {
             <h2 style={{ color: '#fff', borderBottom: '1px solid #333', paddingBottom: '1rem' }}>MENÚ</h2>
 
             <button
-              onClick={() => handleNav(returnToGalaxy)}
+              onClick={() => handleNavigation('galaxy', '/galaxy')}
               style={{ background: 'none', border: 'none', color: '#fff', fontSize: '1.2rem', textAlign: 'left', cursor: 'pointer' }}
             >
               🌌 GALAXIA
             </button>
             <button
-              onClick={() => handleNav(() => setCurrentView('armyList'))}
+              onClick={() => handleNavigation('armyList', '/armies')}
               style={{ background: 'none', border: 'none', color: '#fff', fontSize: '1.2rem', textAlign: 'left', cursor: 'pointer' }}
             >
               ⚔️ EJÉRCITOS
             </button>
             <button
-              onClick={() => handleNav(() => setCurrentView('guides'))}
+              onClick={() => handleNavigation('guides', '/guides')}
               style={{ background: 'none', border: 'none', color: '#fff', fontSize: '1.2rem', textAlign: 'left', cursor: 'pointer' }}
             >
               🎨 GUÍAS DE PINTURA
             </button>
             <button
-              onClick={() => handleNav(() => setCurrentView('battleReports'))}
+              onClick={() => handleNavigation('battleReports', '/battle-reports')}
               style={{ background: 'none', border: 'none', color: '#fff', fontSize: '1.2rem', textAlign: 'left', cursor: 'pointer' }}
             >
               ⚔️ INFORMES DE BATALLA
             </button>
             <button
-              onClick={() => handleNav(() => setCurrentView('community'))}
+              onClick={() => handleNavigation('community', '/community')}
               style={{ background: 'none', border: 'none', color: '#fff', fontSize: '1.2rem', textAlign: 'left', cursor: 'pointer' }}
             >
               🌐 COMUNIDAD
             </button>
             <button
-              onClick={() => handleNav(() => setCurrentView('lore'))}
+              onClick={() => handleNavigation('lore', '/lore')}
               style={{ background: 'none', border: 'none', color: '#fff', fontSize: '1.2rem', textAlign: 'left', cursor: 'pointer' }}
             >
               📚 LORE
             </button>
             <button
-              onClick={() => handleNav(() => setCurrentView('about'))}
+              onClick={() => handleNavigation('about', '/about')}
               style={{ background: 'none', border: 'none', color: '#fff', fontSize: '1.2rem', textAlign: 'left', cursor: 'pointer' }}
             >
               ℹ️ ACERCA DE

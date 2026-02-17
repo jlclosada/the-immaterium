@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import Header from '../components/UI/Header';
+import Footer from '../components/UI/Footer';
 
 const BattleReportsPage = () => {
     const navigate = useNavigate();
@@ -28,11 +29,19 @@ const BattleReportsPage = () => {
         <div style={{
             minHeight: '100vh',
             background: 'var(--color-darker)',
-            padding: '4rem 2rem',
-            color: 'var(--color-light)'
+            display: 'flex',
+            flexDirection: 'column'
         }}>
             <Header />
-            <div style={{ maxWidth: '1200px', margin: '0 auto', paddingTop: '6rem' }}>
+            <div style={{
+                flex: 1,
+                padding: '4rem 2rem',
+                color: 'var(--color-light)',
+                maxWidth: '1200px',
+                margin: '0 auto',
+                paddingTop: '6rem',
+                width: '100%'
+            }}>
                 <header style={{
                     display: 'flex',
                     justifyContent: 'center',
@@ -169,7 +178,8 @@ const BattleReportsPage = () => {
                     </div>
                 )}
             </div>
-        </div >
+            <Footer />
+        </div>
     );
 };
 

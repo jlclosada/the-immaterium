@@ -1,0 +1,41 @@
+
+> warhammer-galaxy@0.0.0 build
+> vite build
+
+You are using Node.js 20.12.2. Vite requires Node.js version 20.19+ or 22.12+. Please upgrade your Node.js version.
+[36mvite v7.3.1 [32mbuilding client environment for production...[36m[39m
+transforming...
+[32mÔ£ô[39m 25 modules transformed.
+Ô£ù Build failed in 166ms
+error during build:
+[vite:esbuild] Transform failed with 2 errors:
+C:/Users/jlclo/Escritorio/Code/proyectos/the-immaterium/src/pages/LandingPage.jsx:145:14: ERROR: Unexpected closing "Link" tag does not match opening "div" tag
+C:/Users/jlclo/Escritorio/Code/proyectos/the-immaterium/src/pages/LandingPage.jsx:147:19: ERROR: Unterminated regular expression
+file: C:/Users/jlclo/Escritorio/Code/proyectos/the-immaterium/src/pages/LandingPage.jsx:145:14
+
+Unexpected closing "Link" tag does not match opening "div" tag
+143 |                  </motion.div>
+144 |  
+145 |              </Link>
+    |                ^
+146 |          </div>
+147 |              </div >
+
+Unterminated regular expression
+145 |              </Link>
+146 |          </div>
+147 |              </div >
+    |                     ^
+148 |  
+149 |      {/* Featured Content Section */ }
+
+    at failureErrorWithLog (C:\Users\jlclo\Escritorio\Code\proyectos\the-immaterium\node_modules\esbuild\lib\main.js:1467:15)
+    at C:\Users\jlclo\Escritorio\Code\proyectos\the-immaterium\node_modules\esbuild\lib\main.js:736:50
+    at responseCallbacks.<computed> (C:\Users\jlclo\Escritorio\Code\proyectos\the-immaterium\node_modules\esbuild\lib\main.js:603:9)
+    at handleIncomingPacket (C:\Users\jlclo\Escritorio\Code\proyectos\the-immaterium\node_modules\esbuild\lib\main.js:658:12)
+    at Socket.readFromStdout (C:\Users\jlclo\Escritorio\Code\proyectos\the-immaterium\node_modules\esbuild\lib\main.js:581:7)
+    at Socket.emit (node:events:518:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:190:23)

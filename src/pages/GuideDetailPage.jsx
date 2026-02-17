@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { api } from '../services/api';
 import { useStore } from '../stores/useStore';
 import Header from '../components/UI/Header';
+import Footer from '../components/UI/Footer';
 import ImageModal from '../components/Gallery/ImageModal';
 
 const GuideDetailPage = () => {
@@ -77,8 +78,8 @@ const GuideDetailPage = () => {
         <div style={{
             minHeight: '100vh',
             background: 'var(--color-darker)',
-            padding: '4rem 2rem',
-            color: 'var(--color-light)'
+            display: 'flex',
+            flexDirection: 'column'
         }}>
             <Header />
             {selectedImage && (
@@ -88,8 +89,29 @@ const GuideDetailPage = () => {
                     imageSrc={selectedImage}
                 />
             )}
-            <div style={{ maxWidth: '900px', margin: '0 auto', paddingTop: '6rem' }}>
-
+            <div style={{
+                flex: 1,
+                padding: '4rem 2rem',
+                color: 'var(--color-light)',
+                maxWidth: '900px',
+                margin: '0 auto',
+                paddingTop: '6rem',
+                width: '100%'
+            }}>
+                <Link
+                    to="/guides"
+                    style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        color: 'var(--color-primary)',
+                        textDecoration: 'none',
+                        marginBottom: '2rem',
+                        fontSize: '1.1rem'
+                    }}
+                >
+                    ← Volver a Guías
+                </Link>
 
                 {/* Header */}
                 <motion.div
@@ -172,6 +194,7 @@ const GuideDetailPage = () => {
                         }}
                     >
                         <img
+                            src={guide.coverImage}
                             alt={guide.title}
                             style={{
                                 width: '100%',
@@ -300,6 +323,7 @@ const GuideDetailPage = () => {
 
                 {/* Comments removed */}
             </div>
+            <Footer />
         </div >
     );
 };
