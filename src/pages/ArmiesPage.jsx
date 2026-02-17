@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
+import Header from '../components/UI/Header';
 
 const ArmiesPage = () => {
     const navigate = useNavigate();
@@ -30,32 +31,24 @@ const ArmiesPage = () => {
             padding: '4rem 2rem',
             color: 'var(--color-light)'
         }}>
-            <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+            <Header />
+            <div style={{ maxWidth: '1200px', margin: '0 auto', paddingTop: '6rem' }}>
                 <header style={{
                     display: 'flex',
-                    justifyContent: 'space-between',
+                    justifyContent: 'center',
                     alignItems: 'center',
-                    marginBottom: '3rem'
+                    marginBottom: '3rem',
+                    textAlign: 'center'
                 }}>
-                    <Link to="/" style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        color: 'var(--color-primary)',
-                        textDecoration: 'none',
-                        fontFamily: 'var(--font-display)',
-                        fontSize: '1.2rem'
-                    }}>
-                        ← Back to Home
-                    </Link>
                     <h1 style={{
                         fontFamily: 'var(--font-display)',
-                        fontSize: '2.5rem',
+                        fontSize: '3rem',
                         textTransform: 'uppercase',
                         background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
                         WebkitBackgroundClip: 'text',
                         WebkitTextFillColor: 'transparent',
-                        margin: 0
+                        margin: 0,
+                        letterSpacing: '2px'
                     }}>
                         Armies of 40k
                     </h1>
@@ -112,6 +105,16 @@ const ArmiesPage = () => {
                                     }}>
                                         🪐 {army.planetName}
                                     </p>
+                                )}
+                                {/* Miniature Count */}
+                                {army.images && (
+                                    <div style={{
+                                        color: '#aaa',
+                                        fontSize: '0.85rem',
+                                        marginTop: '0.5rem'
+                                    }}>
+                                        🖼️ {army.images.length} Miniaturas
+                                    </div>
                                 )}
                                 <p style={{
                                     color: 'rgba(255,255,255,0.7)',

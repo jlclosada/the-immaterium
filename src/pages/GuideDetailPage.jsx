@@ -3,6 +3,8 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { api } from '../services/api';
 import { useStore } from '../stores/useStore';
+import Header from '../components/UI/Header';
+import ImageModal from '../components/Gallery/ImageModal';
 
 const GuideDetailPage = () => {
     const { id } = useParams();
@@ -11,6 +13,7 @@ const GuideDetailPage = () => {
     const [guide, setGuide] = useState(null);
     const [loading, setLoading] = useState(true);
     const [commentText, setCommentText] = useState('');
+    const [selectedImage, setSelectedImage] = useState(null);
 
     useEffect(() => {
         const fetchGuide = async () => {
@@ -77,21 +80,16 @@ const GuideDetailPage = () => {
             padding: '4rem 2rem',
             color: 'var(--color-light)'
         }}>
-            <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-                <Link 
-                    to="/guides"
-                    style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        color: 'var(--color-primary)',
-                        textDecoration: 'none',
-                        marginBottom: '2rem',
-                        fontSize: '1.1rem'
-                    }}
-                >
-                    ← Volver a Guías
-                </Link>
+            <Header />
+            {selectedImage && (
+                <ImageModal
+                    isOpen={!!selectedImage}
+                    onClose={() => setSelectedImage(null)}
+                    imageSrc={selectedImage}
+                />
+            )}
+            <div style={{ maxWidth: '900px', margin: '0 auto', paddingTop: '6rem' }}>
+
 
                 {/* Header */}
                 <motion.div
@@ -125,8 +123,8 @@ const GuideDetailPage = () => {
                                 alignItems: 'center',
                                 gap: '0.5rem'
                             }}>
-                                <img 
-                                    src={guide.faction.iconUrl} 
+                                <img
+                                    src={guide.faction.iconUrl}
                                     alt={guide.faction.name}
                                     style={{
                                         width: '20px',
@@ -157,25 +155,7 @@ const GuideDetailPage = () => {
                     </div>
 
                     <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-                        <button
-                            onClick={() => toggleLike(guide.id, 'guide')}
-                            style={{
-                                padding: '0.8rem 1.5rem',
-                                background: isLiked ? 'rgba(255,0,100,0.3)' : 'rgba(255,255,255,0.1)',
-                                border: `1px solid ${isLiked ? '#ff0064' : 'rgba(255,255,255,0.2)'}`,
-                                borderRadius: '8px',
-                                color: '#fff',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem'
-                            }}
-                        >
-                            <span>{isLiked ? '❤️' : '🤍'}</span>
-                            <span>{guide.likes}</span>
-                        </button>
-
-                        <span style={{ color: '#888' }}>👁️ {guide.views} vistas</span>
+                        {/* Stats buttons removed */}
                     </div>
                 </motion.div>
 
@@ -192,9 +172,15 @@ const GuideDetailPage = () => {
                         }}
                     >
                         <img
-                            src={guide.coverImage}
                             alt={guide.title}
-                            style={{ width: '100%', height: 'auto', display: 'block' }}
+                            style={{
+                                width: '100%',
+                                height: '100%',
+                                maxHeight: '400px',
+                                objectFit: 'cover',
+                                display: 'block',
+                                objectPosition: 'center'
+                            }}
                         />
                     </motion.div>
                 )}
@@ -270,21 +256,26 @@ const GuideDetailPage = () => {
                         {step.images && step.images.length > 0 && (
                             <div style={{
                                 display: 'grid',
-                                gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                                gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
                                 gap: '1rem',
                                 marginBottom: '1.5rem'
                             }}>
                                 {step.images.map((img, imgIndex) => (
-                                    <img
-                                        key={imgIndex}
-                                        src={img}
-                                        alt={`Paso ${step.stepNumber} - ${imgIndex + 1}`}
-                                        style={{
-                                            width: '100%',
-                                            borderRadius: '8px',
-                                            boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
-                                        }}
-                                    />
+                                    <div key={imgIndex} style={{ height: '150px', cursor: 'zoom-in' }} onClick={() => setSelectedImage(img)}>
+                                        <img
+                                            src={img}
+                                            alt={`Paso ${step.stepNumber} - ${imgIndex + 1}`}
+                                            style={{
+                                                width: '100%',
+                                                height: '100%',
+                                                objectFit: 'cover',
+                                                borderRadius: '8px',
+                                                boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                                                transition: 'transform 0.2s'
+                                            }}
+                                            className="hover-scale"
+                                        />
+                                    </div>
                                 ))}
                             </div>
                         )}
@@ -307,80 +298,9 @@ const GuideDetailPage = () => {
                     </motion.div>
                 ))}
 
-                {/* Comments Section */}
-                <motion.div
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.5 }}
-                    className="glass-panel"
-                    style={{ padding: '2rem' }}
-                >
-                    <h2 style={{ fontSize: '1.8rem', marginBottom: '1.5rem', color: '#fff' }}>
-                        Comentarios ({guide.comments ? guide.comments.length : 0})
-                    </h2>
-
-                    <div style={{ marginBottom: '2rem' }}>
-                        <textarea
-                            value={commentText}
-                            onChange={(e) => setCommentText(e.target.value)}
-                            placeholder="Añade un comentario..."
-                            style={{
-                                width: '100%',
-                                minHeight: '100px',
-                                padding: '1rem',
-                                borderRadius: '8px',
-                                border: '1px solid rgba(255,255,255,0.2)',
-                                background: 'rgba(0,0,0,0.3)',
-                                color: '#fff',
-                                fontSize: '1rem',
-                                resize: 'vertical',
-                                marginBottom: '1rem'
-                            }}
-                        />
-                        <button
-                            onClick={handleAddComment}
-                            disabled={!commentText.trim()}
-                            style={{
-                                padding: '0.8rem 1.5rem',
-                                background: commentText.trim() ? 'linear-gradient(135deg, #00ced1, #87cefa)' : 'rgba(255,255,255,0.1)',
-                                border: 'none',
-                                borderRadius: '8px',
-                                color: commentText.trim() ? '#000' : '#666',
-                                cursor: commentText.trim() ? 'pointer' : 'not-allowed',
-                                fontWeight: 'bold'
-                            }}
-                        >
-                            Publicar Comentario
-                        </button>
-                    </div>
-
-                    {guide.comments && guide.comments.map((comment) => (
-                        <div
-                            key={comment.id}
-                            style={{
-                                padding: '1rem',
-                                borderBottom: '1px solid rgba(255,255,255,0.1)',
-                                marginBottom: '1rem'
-                            }}
-                        >
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                                <span style={{ fontWeight: 'bold', color: '#00ced1' }}>{comment.author}</span>
-                                <span style={{ color: '#888', fontSize: '0.9rem' }}>
-                                    {new Date(comment.date).toLocaleDateString('es-ES')}
-                                </span>
-                            </div>
-                            <p style={{ color: '#ddd', margin: 0 }}>{comment.text}</p>
-                        </div>
-                    ))}
-
-                    {(!guide.comments || guide.comments.length === 0) && (
-                        <p style={{ color: '#888', textAlign: 'center', padding: '2rem 0' }}>
-                            Sé el primero en comentar esta guía
-                        </p>
-                    )}
-                </motion.div>
+                {/* Comments removed */}
             </div>
-        </div>
+        </div >
     );
 };
 
