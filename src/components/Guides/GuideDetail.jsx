@@ -32,21 +32,10 @@ export default function GuideDetail() {
 
     return (
         <motion.div
-            className="guide-detail"
+            className="guide-detail fullscreen-overlay"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                padding: '6rem 2rem 2rem',
-                overflowY: 'auto',
-                background: 'linear-gradient(180deg, rgba(10,10,20,0.95) 0%, rgba(5,5,15,0.98) 100%)',
-                zIndex: 100
-            }}
         >
             {/* Close Button */}
             <motion.button
@@ -133,8 +122,8 @@ export default function GuideDetail() {
                                 alignItems: 'center',
                                 gap: '0.5rem'
                             }}>
-                                <img 
-                                    src={selectedGuide.faction.iconUrl} 
+                                <img
+                                    src={selectedGuide.faction.iconUrl}
                                     alt={selectedGuide.faction.name}
                                     style={{
                                         width: '20px',
@@ -164,27 +153,7 @@ export default function GuideDetail() {
                         ))}
                     </div>
 
-                    <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-                        <button
-                            onClick={() => toggleLike(selectedGuide.id, 'guide')}
-                            style={{
-                                padding: '0.8rem 1.5rem',
-                                background: isLiked ? 'rgba(255,0,100,0.3)' : 'rgba(255,255,255,0.1)',
-                                border: `1px solid ${isLiked ? '#ff0064' : 'rgba(255,255,255,0.2)'}`,
-                                borderRadius: '8px',
-                                color: '#fff',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem'
-                            }}
-                        >
-                            <span>{isLiked ? '❤️' : '🤍'}</span>
-                            <span>{selectedGuide.likes}</span>
-                        </button>
 
-                        <span style={{ color: '#888' }}>👁️ {selectedGuide.views} vistas</span>
-                    </div>
                 </motion.div>
 
                 {/* Cover Image */}
@@ -310,79 +279,6 @@ export default function GuideDetail() {
                         )}
                     </motion.div>
                 ))}
-
-                {/* Comments Section */}
-                <motion.div
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.5 }}
-                    className="glass-panel"
-                    style={{ padding: '2rem' }}
-                >
-                    <h2 style={{ fontSize: '1.8rem', marginBottom: '1.5rem', color: '#fff' }}>
-                        Comentarios ({selectedGuide.comments.length})
-                    </h2>
-
-                    <div style={{ marginBottom: '2rem' }}>
-                        <textarea
-                            value={commentText}
-                            onChange={(e) => setCommentText(e.target.value)}
-                            placeholder="Añade un comentario..."
-                            style={{
-                                width: '100%',
-                                minHeight: '100px',
-                                padding: '1rem',
-                                borderRadius: '8px',
-                                border: '1px solid rgba(255,255,255,0.2)',
-                                background: 'rgba(0,0,0,0.3)',
-                                color: '#fff',
-                                fontSize: '1rem',
-                                resize: 'vertical',
-                                marginBottom: '1rem'
-                            }}
-                        />
-                        <button
-                            onClick={handleAddComment}
-                            disabled={!commentText.trim()}
-                            style={{
-                                padding: '0.8rem 1.5rem',
-                                background: commentText.trim() ? 'linear-gradient(135deg, #00ced1, #87cefa)' : 'rgba(255,255,255,0.1)',
-                                border: 'none',
-                                borderRadius: '8px',
-                                color: commentText.trim() ? '#000' : '#666',
-                                cursor: commentText.trim() ? 'pointer' : 'not-allowed',
-                                fontWeight: 'bold'
-                            }}
-                        >
-                            Publicar Comentario
-                        </button>
-                    </div>
-
-                    {selectedGuide.comments.map((comment) => (
-                        <div
-                            key={comment.id}
-                            style={{
-                                padding: '1rem',
-                                borderBottom: '1px solid rgba(255,255,255,0.1)',
-                                marginBottom: '1rem'
-                            }}
-                        >
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                                <span style={{ fontWeight: 'bold', color: '#00ced1' }}>{comment.author}</span>
-                                <span style={{ color: '#888', fontSize: '0.9rem' }}>
-                                    {new Date(comment.date).toLocaleDateString('es-ES')}
-                                </span>
-                            </div>
-                            <p style={{ color: '#ddd', margin: 0 }}>{comment.text}</p>
-                        </div>
-                    ))}
-
-                    {selectedGuide.comments.length === 0 && (
-                        <p style={{ color: '#888', textAlign: 'center', padding: '2rem 0' }}>
-                            Sé el primero en comentar esta guía
-                        </p>
-                    )}
-                </motion.div>
             </div>
         </motion.div>
     );

@@ -50,6 +50,7 @@ class ArmyImage(models.Model):
     army = models.ForeignKey(Army, on_delete=models.CASCADE, related_name='images')
     url = models.URLField(max_length=500)
     name = models.CharField(max_length=200)
+    is_favorite = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
@@ -127,6 +128,7 @@ class BattleReport(models.Model):
     points = models.IntegerField()
     date = models.DateField()
     tags = ArrayField(models.CharField(max_length=100), default=list)
+    is_favorite = models.BooleanField(default=False)
     likes = models.IntegerField(default=0)
     views = models.IntegerField(default=0)
     

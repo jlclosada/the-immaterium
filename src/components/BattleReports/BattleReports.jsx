@@ -28,21 +28,10 @@ export default function BattleReports() {
 
     return (
         <motion.div
-            className="battle-reports-container"
+            className="battle-reports-container fullscreen-overlay"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                padding: '6rem 2rem 2rem',
-                overflowY: 'auto',
-                background: 'linear-gradient(180deg, rgba(10,10,20,0.95) 0%, rgba(5,5,15,0.98) 100%)',
-                zIndex: 100
-            }}
         >
             {/* Close Button */}
             <motion.button
@@ -282,19 +271,19 @@ export default function BattleReports() {
                             ))}
                         </div>
 
-                        {/* Social Stats */}
-                        <div style={{
-                            display: 'flex',
-                            gap: '1.5rem',
-                            paddingTop: '1rem',
-                            borderTop: '1px solid rgba(255,255,255,0.1)',
-                            color: '#888',
-                            fontSize: '0.9rem'
-                        }}>
-                            <span>❤️ {report.likes}</span>
-                            <span>👁️ {report.views}</span>
-                            <span>💬 {report.comments.length}</span>
-                        </div>
+                        {/* Social Stats - REMOVED */}
+
+                        {report.isFavorite && (
+                            <div style={{
+                                position: 'absolute',
+                                top: '20px',
+                                right: '20px',
+                                fontSize: '1.5rem',
+                                filter: 'drop-shadow(0 0 10px #ff0064)'
+                            }}>
+                                ❤️
+                            </div>
+                        )}
                     </motion.div>
                 ))}
             </motion.div>
