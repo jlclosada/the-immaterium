@@ -27,6 +27,7 @@ function App() {
 
   useEffect(() => {
     fetchInitialData();
+    console.log("FORCE UPDATE: Frontend v2.2 - Feb 2026");
   }, []);
 
   return (
