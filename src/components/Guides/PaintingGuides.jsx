@@ -23,21 +23,10 @@ export default function PaintingGuides() {
 
     return (
         <motion.div
-            className="guides-container"
+            className="guides-container fullscreen-overlay"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                padding: '6rem 2rem 2rem',
-                overflowY: 'auto',
-                background: 'linear-gradient(180deg, rgba(10,10,20,0.95) 0%, rgba(5,5,15,0.98) 100%)',
-                zIndex: 100
-            }}
         >
             {/* Close Button */}
             <motion.button
@@ -216,10 +205,30 @@ export default function PaintingGuides() {
                                 gap: '1rem',
                                 marginBottom: '1rem',
                                 fontSize: '0.9rem',
-                                color: '#aaa'
+                                color: '#aaa',
+                                alignItems: 'center',
+                                flexWrap: 'wrap'
                             }}>
                                 <span>⏱️ {guide.estimatedTime}</span>
                                 <span>📊 {guide.difficulty}</span>
+                                {guide.faction && (
+                                    <span style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.3rem'
+                                    }}>
+                                        <img
+                                            src={guide.faction.iconUrl}
+                                            alt={guide.faction.name}
+                                            style={{
+                                                width: '16px',
+                                                height: '16px',
+                                                objectFit: 'contain'
+                                            }}
+                                        />
+                                        {guide.faction.name}
+                                    </span>
+                                )}
                             </div>
 
                             <div style={{
@@ -254,10 +263,6 @@ export default function PaintingGuides() {
                                 <span style={{ color: '#888', fontSize: '0.9rem' }}>
                                     por {guide.author}
                                 </span>
-                                <div style={{ display: 'flex', gap: '1rem', color: '#aaa', fontSize: '0.9rem' }}>
-                                    <span>❤️ {guide.likes}</span>
-                                    <span>👁️ {guide.views}</span>
-                                </div>
                             </div>
                         </div>
                     </motion.div>

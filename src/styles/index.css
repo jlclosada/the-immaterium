@@ -8,18 +8,18 @@
   --color-dark: #0a0a1a;
   --color-darker: #050510;
   --color-light: #ffffff;
-  
+
   /* Glassmorphism */
   --glass-bg: rgba(255, 255, 255, 0.05);
   --glass-bg-hover: rgba(255, 255, 255, 0.1);
   --glass-border: rgba(255, 255, 255, 0.1);
   --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
   --glass-blur: blur(20px);
-  
+
   /* Typography */
   --font-display: 'Orbitron', sans-serif;
   --font-body: 'Exo 2', sans-serif;
-  
+
   /* Transitions */
   --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-normal: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -32,13 +32,16 @@
   box-sizing: border-box;
 }
 
-html, body, #root {
+html,
+body,
+#root {
   width: 100%;
-  height: 100%;
-  overflow: hidden;
+  min-height: 100vh;
   background: var(--color-darker);
   font-family: var(--font-body);
   color: var(--color-light);
+  overflow-x: hidden;
+  /* Prevent horizontal scroll but allow vertical */
 }
 
 /* Canvas container */
@@ -82,7 +85,7 @@ html, body, #root {
   pointer-events: none;
 }
 
-.header > * {
+.header>* {
   pointer-events: auto;
 }
 
@@ -221,8 +224,13 @@ html, body, #root {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 .gallery-header {
@@ -444,7 +452,9 @@ html, body, #root {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .loading-text {
@@ -456,8 +466,15 @@ html, body, #root {
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 1; }
+
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+
+  50% {
+    opacity: 1;
+  }
 }
 
 /* Tooltip */
@@ -482,6 +499,7 @@ html, body, #root {
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -595,16 +613,16 @@ html, body, #root {
   .header {
     padding: 15px 20px;
   }
-  
+
   .logo {
     font-size: 1.1rem;
   }
-  
+
   .nav-button {
     padding: 8px 16px;
     font-size: 0.75rem;
   }
-  
+
   .planet-info {
     left: 20px;
     right: 20px;
@@ -612,28 +630,59 @@ html, body, #root {
     max-width: none;
     padding: 20px;
   }
-  
+
   .planet-info h2 {
     font-size: 1.5rem;
   }
-  
+
   .gallery-overlay {
     padding: 80px 20px 20px;
   }
-  
+
   .gallery-title {
     font-size: 1.5rem;
   }
-  
+
   .image-grid {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 15px;
   }
-  
+
   .upload-button {
     width: 60px;
     height: 60px;
     bottom: 20px;
     right: 20px;
+  }
+}
+
+/* Responsive Overrides for new components */
+.fullscreen-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 6rem 2rem 2rem;
+  overflow-y: auto;
+  background: linear-gradient(180deg, rgba(10, 10, 20, 0.95) 0%, rgba(5, 5, 15, 0.98) 100%);
+  z-index: 100;
+}
+
+.army-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+@media (max-width: 768px) {
+  .fullscreen-overlay {
+    padding: 5rem 1rem 1rem !important;
+  }
+
+  .army-grid {
+    grid-template-columns: 1fr;
+    /* Single column on mobile */
+    gap: 1.5rem;
   }
 }

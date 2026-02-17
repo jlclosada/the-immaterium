@@ -71,7 +71,7 @@ export default function PlanetInfo() {
                 borderRadius: '0 8px 8px 0'
               }}
             >
-              <h4 style={{ margin: '0 0 0.5rem 0', color: '#fff' }}>Misión</h4>
+              <h4 style={{ margin: '0 0 0.5rem 0', color: '#fff' }}>Lema</h4>
               <p style={{ margin: 0, fontSize: '1rem', fontStyle: 'italic', color: '#ddd' }}>
                 "{selectedPlanet.description}"
               </p>

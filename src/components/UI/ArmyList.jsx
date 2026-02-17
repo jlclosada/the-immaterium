@@ -27,17 +27,16 @@ export default function ArmyList() {
                     padding: '2rem'
                 }}
             >
-                <div style={{
-                    width: '100%',
-                    maxWidth: '1200px',
-                    height: '80%',
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                    gap: '2rem',
-                    overflowY: 'auto',
-                    padding: '1rem',
-                    marginTop: '2rem' // Add margin for header space if needed
-                }}>
+                <div
+                    className="army-grid"
+                    style={{
+                        width: '100%',
+                        maxWidth: '1200px',
+                        height: '80%',
+                        overflowY: 'auto',
+                        padding: '1rem',
+                        marginTop: '2rem'
+                    }}>
                     {armies.map((army, index) => (
                         <motion.div
                             key={army.id}
@@ -105,6 +104,14 @@ export default function ArmyList() {
                                 letterSpacing: '1px'
                             }}>
                                 Ver Planeta
+                            </div>
+
+                            <div style={{
+                                marginTop: '0.5rem',
+                                fontSize: '0.8rem',
+                                color: '#aaa'
+                            }}>
+                                🖼️ {army.images?.length || 0} Miniaturas
                             </div>
                         </motion.div>
                     ))}

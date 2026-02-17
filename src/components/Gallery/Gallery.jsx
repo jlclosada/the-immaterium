@@ -7,8 +7,13 @@ import UploadModal from './UploadModal';
 export default function Gallery() {
   const { selectedPlanet, returnToGalaxy, selectImage, selectedImage, clearSelectedImage } = useStore();
   const [showUpload, setShowUpload] = useState(false);
+  const [showFavorites, setShowFavorites] = useState(false);
 
   if (!selectedPlanet) return null;
+
+  const filteredImages = showFavorites
+    ? selectedPlanet.images.filter(img => img.isFavorite)
+    : selectedPlanet.images;
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -62,15 +67,42 @@ export default function Gallery() {
         </motion.button>
       </div>
 
-      {selectedPlanet.images.length === 0 ? (
+      {/* Favorites Toggle */}
+      <motion.button
+        onClick={() => setShowFavorites(!showFavorites)}
+        style={{
+          position: 'absolute',
+          top: '20px',
+          right: '100px', // Left of back button (if back button is top right, but back is top left in original code? No, back is `x: 50` initial. Let's place it nicely.)
+          zIndex: 10,
+          background: showFavorites ? '#ff0064' : 'rgba(255,255,255,0.1)',
+          border: 'none',
+          borderRadius: '20px',
+          padding: '0.5rem 1rem',
+          color: 'white',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem'
+        }}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+      >
+        <span>{showFavorites ? '❤️' : '🤍'}</span>
+        <span>Favoritos</span>
+      </motion.button>
+
+      {filteredImages.length === 0 ? (
         <motion.div
           className="empty-state"
           initial={{ x: 50, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
         >
-          <div className="empty-state-icon">🎨</div>
+          <div className="empty-state-icon">{showFavorites ? '💔' : '🎨'}</div>
           <p className="empty-state-text">
-            No hay miniaturas aún. ¡Sube tu primera imagen!
+            {showFavorites
+              ? "No hay miniaturas favoritas en este ejército."
+              : "No hay miniaturas aún. ¡Sube tu primera imagen!"}
           </p>
         </motion.div>
       ) : (
@@ -80,7 +112,7 @@ export default function Gallery() {
           initial="hidden"
           animate="visible"
         >
-          {selectedPlanet.images.map((image, index) => (
+          {filteredImages.map((image, index) => (
             <motion.div
               key={image.id}
               className="image-card"
@@ -96,6 +128,14 @@ export default function Gallery() {
               <img src={image.url} alt={image.name || 'Miniatura'} />
               <div className="image-card-overlay">
                 <span className="image-card-title">{image.name || `Miniatura ${index + 1}`}</span>
+                {image.isFavorite && (
+                  <span style={{
+                    position: 'absolute',
+                    top: '10px',
+                    right: '10px',
+                    fontSize: '1.2rem'
+                  }}>❤️</span>
+                )}
               </div>
             </motion.div>
           ))}

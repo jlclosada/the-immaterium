@@ -65,4 +65,46 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
+  button {
+    background-color: #f9f9f9;
+  }
+}
+
+/* responsive overrides */
+.fullscreen-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 6rem 2rem 2rem;
+  overflow-y: auto;
+  background: linear-gradient(180deg, rgba(10,10,20,0.95) 0%, rgba(5,5,15,0.98) 100%);
+  z-index: 100;
+}
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+}
+
+@media (max-width: 768px) {
+  .fullscreen-overlay {
+    padding: 5rem 1rem 1rem !important; /* !important to verify override if inline persists */
+  }
+  
+  h1 {
+    font-size: 2rem !important;
+  }
+  
+  .gallery-title {
+    font-size: 2rem !important;
+  }
+
+  .image-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
+    gap: 1rem !important;
+  }
 }
