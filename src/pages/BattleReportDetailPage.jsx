@@ -224,178 +224,176 @@ const BattleReportDetailPage = () => {
 
                     {/* Social buttons removed */}
                     {report.isFavorite && <span style={{ fontSize: '1.5rem' }}>❤️ Favorito del Admin</span>}
-            </div>
-        </motion.div>
+                </motion.div>
 
-                {/* Army Lists */ }
-    {
-        report.armies && (
-            <motion.div
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.2 }}
-                className="glass-panel"
-                style={{ padding: '2rem', marginBottom: '2rem' }}
-            >
-                <h2 style={{ fontSize: '1.8rem', marginBottom: '1.5rem', color: '#fff', textAlign: 'center' }}>
-                    Listas de Ejército
-                </h2>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-                    {/* Player 1 */}
-                    <div>
-                        <h3 style={{
-                            fontSize: '1.3rem',
-                            marginBottom: '1rem',
-                            color: getFactionColor(report.factions?.[0])
-                        }}>
-                            {report.armies.player1?.name}
-                        </h3>
-                        <ul style={{ listStyle: 'none', padding: 0 }}>
-                            {report.armies.player1?.list?.map((unit, index) => (
-                                <li
-                                    key={index}
-                                    style={{
-                                        padding: '0.6rem 0',
-                                        borderBottom: index < (report.armies.player1?.list?.length || 0) - 1 ? '1px solid rgba(255,255,255,0.1)' : 'none',
-                                        color: '#ddd'
-                                    }}
-                                >
-                                    • {unit}
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    {/* Player 2 */}
-                    <div>
-                        <h3 style={{
-                            fontSize: '1.3rem',
-                            marginBottom: '1rem',
-                            color: getFactionColor(report.factions?.[1])
-                        }}>
-                            {report.armies.player2?.name}
-                        </h3>
-                        <ul style={{ listStyle: 'none', padding: 0 }}>
-                            {report.armies.player2?.list?.map((unit, index) => (
-                                <li
-                                    key={index}
-                                    style={{
-                                        padding: '0.6rem 0',
-                                        borderBottom: index < (report.armies.player2?.list?.length || 0) - 1 ? '1px solid rgba(255,255,255,0.1)' : 'none',
-                                        color: '#ddd'
-                                    }}
-                                >
-                                    • {unit}
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                </div>
-            </motion.div>
-        )
-    }
-
-    {/* Battle Narrative */ }
-    {
-        report.narrative && report.narrative.length > 0 && (
-            <motion.div
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.3 }}
-                className="glass-panel"
-                style={{ padding: '2rem', marginBottom: '2rem' }}
-            >
-                <h2 style={{ fontSize: '1.8rem', marginBottom: '1.5rem', color: '#fff' }}>
-                    Narrativa de Batalla
-                </h2>
-
-                {report.narrative.map((entry, index) => (
-                    <div
-                        key={index}
-                        style={{
-                            marginBottom: '2rem',
-                            paddingBottom: '2rem',
-                            borderBottom: index < report.narrative.length - 1 ? '2px solid rgba(255,255,255,0.1)' : 'none'
-                        }}
-                    >
-                        <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '1rem',
-                            marginBottom: '1rem'
-                        }}>
-                            <div style={{
-                                padding: '0.5rem 1rem',
-                                background: 'linear-gradient(135deg, #ff0064, #ff6600)',
-                                borderRadius: '8px',
-                                fontWeight: 'bold',
-                                color: '#fff'
-                            }}>
-                                Turno {entry.turn} - {entry.phase}
-                            </div>
-                        </div>
-                        <p style={{ color: '#ddd', lineHeight: '1.8', fontSize: '1.05rem' }}>
-                            {entry.text}
-                        </p>
-                    </div>
-                ))}
-            </motion.div>
-        )
-    }
-
-    {/* Key Moments */ }
-    {
-        report.keyMoments && report.keyMoments.length > 0 && (
-            <motion.div
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.4 }}
-                className="glass-panel"
-                style={{ padding: '2rem', marginBottom: '2rem' }}
-            >
-                <h2 style={{ fontSize: '1.8rem', marginBottom: '1rem', color: '#fff' }}>
-                    Momentos Clave
-                </h2>
-                <ul style={{ listStyle: 'none', padding: 0 }}>
-                    {report.keyMoments.map((moment, index) => (
-                        <li
-                            key={index}
-                            style={{
-                                padding: '1rem',
-                                marginBottom: '0.5rem',
-                                background: 'rgba(255,100,100,0.1)',
-                                borderLeft: '4px solid #ff6464',
-                                borderRadius: '4px',
-                                color: '#ddd'
-                            }}
+                {/* Army Lists */}
+                {
+                    report.armies && (
+                        <motion.div
+                            initial={{ y: 20, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ delay: 0.2 }}
+                            className="glass-panel"
+                            style={{ padding: '2rem', marginBottom: '2rem' }}
                         >
-                            ⚡ {moment}
-                        </li>
-                    ))}
-                </ul>
+                            <h2 style={{ fontSize: '1.8rem', marginBottom: '1.5rem', color: '#fff', textAlign: 'center' }}>
+                                Listas de Ejército
+                            </h2>
 
-                {report.mvp && (
-                    <div style={{
-                        marginTop: '1.5rem',
-                        padding: '1rem',
-                        background: 'rgba(255,215,0,0.1)',
-                        borderRadius: '8px',
-                        border: '1px solid rgba(255,215,0,0.3)'
-                    }}>
-                        <h3 style={{ color: '#ffd700', marginBottom: '0.5rem' }}>🏆 MVP de la Batalla</h3>
-                        <p style={{ color: '#ddd', fontSize: '1.1rem', margin: 0 }}>{report.mvp}</p>
-                    </div>
-                )}
-            </motion.div>
-        )
-    }
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                                {/* Player 1 */}
+                                <div>
+                                    <h3 style={{
+                                        fontSize: '1.3rem',
+                                        marginBottom: '1rem',
+                                        color: getFactionColor(report.factions?.[0])
+                                    }}>
+                                        {report.armies.player1?.name}
+                                    </h3>
+                                    <ul style={{ listStyle: 'none', padding: 0 }}>
+                                        {report.armies.player1?.list?.map((unit, index) => (
+                                            <li
+                                                key={index}
+                                                style={{
+                                                    padding: '0.6rem 0',
+                                                    borderBottom: index < (report.armies.player1?.list?.length || 0) - 1 ? '1px solid rgba(255,255,255,0.1)' : 'none',
+                                                    color: '#ddd'
+                                                }}
+                                            >
+                                                • {unit}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
 
-    {/* Stats Removed */ }
-        </div >
+                                {/* Player 2 */}
+                                <div>
+                                    <h3 style={{
+                                        fontSize: '1.3rem',
+                                        marginBottom: '1rem',
+                                        color: getFactionColor(report.factions?.[1])
+                                    }}>
+                                        {report.armies.player2?.name}
+                                    </h3>
+                                    <ul style={{ listStyle: 'none', padding: 0 }}>
+                                        {report.armies.player2?.list?.map((unit, index) => (
+                                            <li
+                                                key={index}
+                                                style={{
+                                                    padding: '0.6rem 0',
+                                                    borderBottom: index < (report.armies.player2?.list?.length || 0) - 1 ? '1px solid rgba(255,255,255,0.1)' : 'none',
+                                                    color: '#ddd'
+                                                }}
+                                            >
+                                                • {unit}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            </div>
+                        </motion.div>
+                    )
+                }
+
+                {/* Battle Narrative */}
+                {
+                    report.narrative && report.narrative.length > 0 && (
+                        <motion.div
+                            initial={{ y: 20, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ delay: 0.3 }}
+                            className="glass-panel"
+                            style={{ padding: '2rem', marginBottom: '2rem' }}
+                        >
+                            <h2 style={{ fontSize: '1.8rem', marginBottom: '1.5rem', color: '#fff' }}>
+                                Narrativa de Batalla
+                            </h2>
+
+                            {report.narrative.map((entry, index) => (
+                                <div
+                                    key={index}
+                                    style={{
+                                        marginBottom: '2rem',
+                                        paddingBottom: '2rem',
+                                        borderBottom: index < report.narrative.length - 1 ? '2px solid rgba(255,255,255,0.1)' : 'none'
+                                    }}
+                                >
+                                    <div style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '1rem',
+                                        marginBottom: '1rem'
+                                    }}>
+                                        <div style={{
+                                            padding: '0.5rem 1rem',
+                                            background: 'linear-gradient(135deg, #ff0064, #ff6600)',
+                                            borderRadius: '8px',
+                                            fontWeight: 'bold',
+                                            color: '#fff'
+                                        }}>
+                                            Turno {entry.turn} - {entry.phase}
+                                        </div>
+                                    </div>
+                                    <p style={{ color: '#ddd', lineHeight: '1.8', fontSize: '1.05rem' }}>
+                                        {entry.text}
+                                    </p>
+                                </div>
+                            ))}
+                        </motion.div>
+                    )
+                }
+
+                {/* Key Moments */}
+                {
+                    report.keyMoments && report.keyMoments.length > 0 && (
+                        <motion.div
+                            initial={{ y: 20, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ delay: 0.4 }}
+                            className="glass-panel"
+                            style={{ padding: '2rem', marginBottom: '2rem' }}
+                        >
+                            <h2 style={{ fontSize: '1.8rem', marginBottom: '1rem', color: '#fff' }}>
+                                Momentos Clave
+                            </h2>
+                            <ul style={{ listStyle: 'none', padding: 0 }}>
+                                {report.keyMoments.map((moment, index) => (
+                                    <li
+                                        key={index}
+                                        style={{
+                                            padding: '1rem',
+                                            marginBottom: '0.5rem',
+                                            background: 'rgba(255,100,100,0.1)',
+                                            borderLeft: '4px solid #ff6464',
+                                            borderRadius: '4px',
+                                            color: '#ddd'
+                                        }}
+                                    >
+                                        ⚡ {moment}
+                                    </li>
+                                ))}
+                            </ul>
+
+                            {report.mvp && (
+                                <div style={{
+                                    marginTop: '1.5rem',
+                                    padding: '1rem',
+                                    background: 'rgba(255,215,0,0.1)',
+                                    borderRadius: '8px',
+                                    border: '1px solid rgba(255,215,0,0.3)'
+                                }}>
+                                    <h3 style={{ color: '#ffd700', marginBottom: '0.5rem' }}>🏆 MVP de la Batalla</h3>
+                                    <p style={{ color: '#ddd', fontSize: '1.1rem', margin: 0 }}>{report.mvp}</p>
+                                </div>
+                            )}
+                        </motion.div>
+                    )
+                }
+
+                {/* Stats Removed */}
+            </div >
         </div >
     );
 };
 
 export default BattleReportDetailPage;
-
