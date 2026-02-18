@@ -75,17 +75,26 @@ const LandingPage = () => {
                     initial={{ opacity: 0, y: -50 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 1 }}
-                    style={{ zIndex: 1, marginBottom: '4rem' }}
+                    style={{
+                        zIndex: 1,
+                        marginBottom: '4rem',
+                        width: '100%',
+                        padding: '0 1.5rem'
+                    }}
                 >
                     <h1 style={{
                         fontFamily: 'Orbitron',
-                        fontSize: 'clamp(3rem, 8vw, 6rem)',
+                        fontSize: 'clamp(1.8rem, 8vw, 6rem)',
                         marginBottom: '1rem',
                         textShadow: '0 0 30px rgba(0, 212, 255, 0.5)',
-                        letterSpacing: '0.5rem',
+                        letterSpacing: 'clamp(0.05rem, 1.5vw, 0.5rem)',
                         background: 'linear-gradient(180deg, #fff 0%, #888 100%)',
                         WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent'
+                        WebkitTextFillColor: 'transparent',
+                        wordBreak: 'keep-all',
+                        textAlign: 'center',
+                        lineHeight: '1.2',
+                        overflow: 'visible'
                     }}>
                         THE IMMATERIUM
                     </h1>
