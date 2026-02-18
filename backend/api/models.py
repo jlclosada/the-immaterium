@@ -223,3 +223,45 @@ class UserFavorite(models.Model):
     
     def __str__(self):
         return f"{self.user_id} favorited {self.content_id}"
+
+
+class LoreEntry(models.Model):
+    """Lore fragments and stories from the Warhammer 40k universe"""
+    CATEGORY_CHOICES = [
+        ('historia', 'Historia'),
+        ('faccion', 'Facción'),
+        ('evento', 'Evento'),
+        ('personaje', 'Personaje'),
+        ('lugar', 'Lugar'),
+        ('tecnologia', 'Tecnología'),
+        ('otro', 'Otro'),
+    ]
+
+    id = models.CharField(max_length=100, primary_key=True)
+    title = models.CharField(max_length=300)
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='historia')
+    content = models.TextField()
+    excerpt = models.CharField(max_length=500, blank=True)
+    related_faction = models.ForeignKey(Army, on_delete=models.SET_NULL, null=True, blank=True, related_name='lore_entries')
+    tags = ArrayField(models.CharField(max_length=100), default=list)
+    author = models.CharField(max_length=200, default='Administratum')
+    date_created = models.DateTimeField(auto_now_add=True)
+    is_featured = models.BooleanField(default=False)
+    views = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-date_created']
+        verbose_name = 'Lore Entry'
+        verbose_name_plural = 'Lore Entries'
+
+    def __str__(self):
+        return self.title
+
+    def save(self, *args, **kwargs):
+        if not self.excerpt and self.content:
+            self.excerpt = self.content[:497] + '...' if len(self.content) > 500 else self.content
+        super().save(*args, **kwargs)
+

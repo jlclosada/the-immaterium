@@ -187,5 +187,56 @@ export const api = {
         });
         if (!response.ok) throw new Error('Login failed');
         return response.json();
+    },
+
+    // Lore Entries
+    getLoreEntries: async () => {
+        const response = await fetch(`${API_URL}/api/lore/`);
+        if (!response.ok) throw new Error('Failed to fetch lore entries');
+        const data = await response.json();
+        return data.results || data;
+    },
+
+    getLoreEntry: async (id) => {
+        const response = await fetch(`${API_URL}/api/lore/${id}/`);
+        if (!response.ok) throw new Error('Failed to fetch lore entry');
+        return response.json();
+    },
+
+    createLoreEntry: async (data, token) => {
+        const response = await fetch(`${API_URL}/api/lore/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Token ${token}`
+            },
+            body: JSON.stringify(data)
+        });
+        if (!response.ok) throw new Error('Failed to create lore entry');
+        return response.json();
+    },
+
+    updateLoreEntry: async (id, data, token) => {
+        const response = await fetch(`${API_URL}/api/lore/${id}/`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Token ${token}`
+            },
+            body: JSON.stringify(data)
+        });
+        if (!response.ok) throw new Error('Failed to update lore entry');
+        return response.json();
+    },
+
+    deleteLoreEntry: async (id, token) => {
+        const response = await fetch(`${API_URL}/api/lore/${id}/`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Token ${token}`
+            }
+        });
+        if (!response.ok) throw new Error('Failed to delete lore entry');
+        return true;
     }
 };

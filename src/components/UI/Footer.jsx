@@ -55,6 +55,7 @@ const Footer = () => {
                         <li><FooterLink to="/armies">Ejércitos</FooterLink></li>
                         <li><FooterLink to="/guides">Guías de Pintura</FooterLink></li>
                         <li><FooterLink to="/battle-reports">Informes de Batalla</FooterLink></li>
+                        <li><FooterLink to="/lore">Biblioteca de Lore</FooterLink></li>
                         <li><FooterLink to="/">Inicio</FooterLink></li>
                     </ul>
                 </div>

@@ -10,6 +10,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import ArmyManager from './components/Admin/ArmyManager';
 import GuideManager from './components/Admin/GuideManager';
 import ReportManager from './components/Admin/ReportManager';
+import LoreManager from './components/Admin/LoreManager';
 
 import ArmiesPage from './pages/ArmiesPage';
 import ArmyDetailPage from './pages/ArmyDetailPage';
@@ -17,6 +18,7 @@ import GuidesPage from './pages/GuidesPage';
 import GuideDetailPage from './pages/GuideDetailPage';
 import BattleReportsPage from './pages/BattleReportsPage';
 import BattleReportDetailPage from './pages/BattleReportDetailPage';
+import LorePage from './pages/LorePage';
 
 import './styles/index.css';
 
@@ -41,6 +43,7 @@ function App() {
         <Route path="/guides" element={<GuidesPage />} />
         <Route path="/guides/:id" element={<GuideDetailPage />} />
         <Route path="/battle-reports" element={<BattleReportsPage />} />
+        <Route path="/lore" element={<LorePage />} />
         <Route path="/battle-reports/:id" element={<BattleReportDetailPage />} />
 
         {/* Admin Routes */}
@@ -48,6 +51,7 @@ function App() {
           <Route index element={<AdminDashboard />} />
           <Route path="armies" element={<ArmyManager />} />
           <Route path="guides" element={<GuideManager />} />
+          <Route path="lore" element={<LoreManager />} />
           <Route path="reports" element={<ReportManager />} />
         </Route>
 

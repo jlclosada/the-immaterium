@@ -173,7 +173,12 @@ const GuidesPage = () => {
                                                 <img
                                                     src={guide.faction.iconUrl}
                                                     alt={guide.faction.name}
-                                                    style={{ width: '14px', height: '14px', objectFit: 'contain' }}
+                                                    style={{
+                                                        width: '18px',
+                                                        height: '18px',
+                                                        objectFit: 'contain',
+                                                        filter: 'brightness(1.2)'
+                                                    }}
                                                 />
                                                 {guide.faction.name}
                                             </span>

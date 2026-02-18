@@ -8,11 +8,11 @@ from django.db.models import F
 from .models import (
     Army, ArmyImage, PaintingGuide, GuideMaterial, GuideStep,
     BattleReport, BattleNarrative, Comment,
-    UserLike, UserFavorite
+    UserLike, UserFavorite, LoreEntry
 )
 from .serializers import (
     ArmySerializer, PaintingGuideSerializer, BattleReportSerializer,
-    CommentSerializer, UserLikeSerializer, UserFavoriteSerializer
+    CommentSerializer, UserLikeSerializer, UserFavoriteSerializer, LoreEntrySerializer
 )
 
 @api_view(['POST'])
@@ -344,3 +344,56 @@ class BattleReportViewSet(viewsets.ModelViewSet):
             )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class LoreEntryViewSet(viewsets.ModelViewSet):
+    queryset = LoreEntry.objects.all()
+    serializer_class = LoreEntrySerializer
+    lookup_field = 'id'
+
+    def create(self, request, *args, **kwargs):
+        data = request.data.copy()
+
+        # Convert camelCase to snake_case
+        if 'dateCreated' in data:
+            data['date_created'] = data.pop('dateCreated')
+        if 'isFeatured' in data:
+            data['is_featured'] = data.pop('isFeatured')
+        if 'relatedFaction' in data and data['relatedFaction']:
+            data['related_faction_id'] = data.pop('relatedFaction')
+
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        data = request.data.copy()
+
+        # Convert camelCase to snake_case
+        if 'dateCreated' in data:
+            data['date_created'] = data.pop('dateCreated')
+        if 'isFeatured' in data:
+            data['is_featured'] = data.pop('isFeatured')
+        if 'relatedFaction' in data:
+            if data['relatedFaction']:
+                data['related_faction_id'] = data.pop('relatedFaction')
+            else:
+                data['related_faction_id'] = None
+                data.pop('relatedFaction', None)
+
+        serializer = self.get_serializer(instance, data=data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['post'])
+    def increment_views(self, request, id=None):
+        lore = self.get_object()
+        LoreEntry.objects.filter(id=lore.id).update(views=F('views') + 1)
+        lore.refresh_from_db()
+        return Response({'views': lore.views})

@@ -1,12 +1,14 @@
 from django.contrib import admin
 from .models import (
     Army, ArmyImage, PaintingGuide, GuideMaterial, GuideStep,
-    BattleReport, BattleNarrative, Comment
+    BattleReport, BattleNarrative, Comment, LoreEntry
 )
 
 class ArmyImageInline(admin.TabularInline):
     model = ArmyImage
     extra = 1
+    fields = ('url', 'name', 'is_favorite')
+    list_editable = ('is_favorite',)
 
 @admin.register(Army)
 class ArmyAdmin(admin.ModelAdmin):
@@ -45,3 +47,12 @@ class CommentAdmin(admin.ModelAdmin):
     list_display = ('author', 'content_type', 'date', 'created_at')
     list_filter = ('content_type', 'date')
     search_fields = ('text', 'author')
+
+
+@admin.register(LoreEntry)
+class LoreEntryAdmin(admin.ModelAdmin):
+    list_display = ('title', 'category', 'related_faction', 'author', 'is_featured', 'views', 'date_created')
+    list_filter = ('category', 'is_featured', 'related_faction')
+    search_fields = ('title', 'content', 'tags')
+    list_editable = ('is_featured',)
+    readonly_fields = ('date_created', 'created_at', 'updated_at')

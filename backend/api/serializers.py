@@ -1,13 +1,15 @@
 from rest_framework import serializers
 from .models import (
     Army, ArmyImage, PaintingGuide, GuideMaterial, GuideStep,
-    BattleReport, BattleNarrative, Comment, UserLike, UserFavorite
+    BattleReport, BattleNarrative, Comment, UserLike, UserFavorite, LoreEntry
 )
 
 class ArmyImageSerializer(serializers.ModelSerializer):
+    isFavorite = serializers.BooleanField(source='is_favorite')
+
     class Meta:
         model = ArmyImage
-        fields = ['id', 'url', 'name']
+        fields = ['id', 'url', 'name', 'isFavorite']
 
 class ArmySerializer(serializers.ModelSerializer):
     images = ArmyImageSerializer(many=True, read_only=True)
@@ -119,4 +121,27 @@ class UserLikeSerializer(serializers.ModelSerializer):
 class UserFavoriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserFavorite
+
+class LoreEntrySerializer(serializers.ModelSerializer):
+    dateCreated = serializers.DateTimeField(source='date_created', read_only=True)
+    isFeatured = serializers.BooleanField(source='is_featured')
+    relatedFaction = serializers.SerializerMethodField()
+
+    class Meta:
+        model = LoreEntry
+        fields = [
+            'id', 'title', 'category', 'content', 'excerpt',
+            'tags', 'author', 'dateCreated', 'isFeatured', 'views',
+            'relatedFaction'
+        ]
+
+    def get_relatedFaction(self, obj):
+        if obj.related_faction:
+            return {
+                'id': obj.related_faction.id,
+                'name': obj.related_faction.name,
+                'iconUrl': obj.related_faction.icon_url
+            }
+        return None
+
         fields = '__all__'

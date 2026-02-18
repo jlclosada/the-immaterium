@@ -167,6 +167,22 @@ const AdminLayout = () => {
                                 Reports
                             </Link>
                         </li>
+                        <li>
+                            <Link to="/admin/lore" style={{
+                                display: 'block',
+                                padding: '10px 15px',
+                                color: 'var(--color-light)',
+                                textDecoration: 'none',
+                                borderRadius: '8px',
+                                transition: 'all 0.3s ease',
+                                background: 'transparent'
+                            }}
+                                onMouseEnter={(e) => e.target.style.background = 'var(--glass-bg-hover)'}
+                                onMouseLeave={(e) => e.target.style.background = 'transparent'}
+                            >
+                                📖 Lore
+                            </Link>
+                        </li>
                     </ul>
                 </nav>
             </aside>
