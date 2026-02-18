@@ -124,7 +124,7 @@ class UserFavoriteSerializer(serializers.ModelSerializer):
 
 class LoreEntrySerializer(serializers.ModelSerializer):
     dateCreated = serializers.DateTimeField(source='date_created', read_only=True)
-    isFeatured = serializers.BooleanField(source='is_featured')
+    isFeatured = serializers.BooleanField(source='is_featured', required=False, default=False)
     relatedFaction = serializers.SerializerMethodField()
 
     class Meta:

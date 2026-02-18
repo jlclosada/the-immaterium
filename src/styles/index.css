@@ -709,6 +709,59 @@ body,
     min-height: 44px;
     min-width: 44px;
   }
+
+  /* Prevent double-tap zoom */
+  * {
+    touch-action: manipulation;
+  }
+
+  /* Better tap feedback */
+  button:active,
+  a:active {
+    opacity: 0.7;
+    transform: scale(0.98);
+  }
+}
+
+/* Tablet optimization */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .glass-panel {
+    padding: 2rem !important;
+  }
+
+  .nav-button {
+    padding: 10px 18px;
+    font-size: 0.8rem;
+  }
+}
+
+/* Landscape mobile */
+@media (max-height: 500px) and (orientation: landscape) {
+  .header {
+    padding: 10px 20px;
+  }
+
+  .logo {
+    font-size: 0.9rem;
+  }
+
+  .nav-button {
+    padding: 6px 12px;
+    font-size: 0.7rem;
+  }
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Better focus states for accessibility */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 /* CRT / Scanline Effects */

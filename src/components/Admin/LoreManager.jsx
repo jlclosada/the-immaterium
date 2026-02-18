@@ -49,7 +49,8 @@ const LoreManager = () => {
             const dataToSend = {
                 ...formData,
                 id: formData.id || `lore-${Date.now()}`,
-                relatedFaction: formData.relatedFaction || null
+                relatedFaction: formData.relatedFaction || null,
+                isFeatured: formData.isFeatured || false
             };
 
             if (editingLore) {
@@ -64,7 +65,7 @@ const LoreManager = () => {
             fetchLoreEntries();
         } catch (error) {
             console.error('Error saving lore:', error);
-            alert('Error al guardar la entrada de lore');
+            alert('Error al guardar la entrada de lore: ' + (error.response?.data ? JSON.stringify(error.response.data) : error.message));
         }
     };
 

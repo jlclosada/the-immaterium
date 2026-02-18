@@ -1,259 +1,323 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useStore } from '../../stores/useStore';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 
 export default function Header() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { currentView, setCurrentView } = useStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [scrolled, setScrolled] = useState(false);
 
-  // Handle resize
+  // Handle scroll for header background
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    const handleScroll = () => setScrolled(window.scrollY > 50);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const toggleMenu = () => setMobileMenuOpen(!mobileMenuOpen);
-
-  const handleNavigation = (view, path) => {
-    setCurrentView(view);
-    navigate(path);
+  // Close menu on route change
+  useEffect(() => {
     setMobileMenuOpen(false);
-  };
+  }, [location]);
 
-  const returnToGalaxy = () => {
-    setCurrentView('galaxy');
-    navigate('/galaxy');
-  };
+  const menuItems = [
+    { path: '/armies', label: 'Ejércitos', icon: '⚔️' },
+    { path: '/guides', label: 'Guías', icon: '🎨' },
+    { path: '/battle-reports', label: 'Batallas', icon: '📜' },
+    { path: '/lore', label: 'Lore', icon: '📖' },
+  ];
 
   return (
-    <motion.header
-      className="header"
-      initial={{ y: -100, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ delay: 0.5, type: 'spring', stiffness: 100 }}
-      style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '1.5rem 2rem',
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        zIndex: 50
-      }}
-    >
-      <motion.div
-        className="logo"
-        whileHover={{ scale: 1.05 }}
-        style={{ cursor: 'pointer', fontFamily: 'Orbitron', fontWeight: 'bold', fontSize: '1.2rem', letterSpacing: '2px' }}
-        onClick={returnToGalaxy}
+    <>
+      <motion.header
+        initial={{ y: -100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.3, type: 'spring', stiffness: 120 }}
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 100,
+          padding: 'clamp(0.75rem, 2vw, 1.5rem) clamp(1rem, 4vw, 3rem)',
+          background: scrolled
+            ? 'rgba(10, 10, 26, 0.95)'
+            : 'linear-gradient(180deg, rgba(10, 10, 26, 0.8) 0%, transparent 100%)',
+          backdropFilter: scrolled ? 'blur(20px)' : 'blur(10px)',
+          borderBottom: scrolled ? '1px solid rgba(0, 212, 255, 0.1)' : 'none',
+          transition: 'all 0.3s ease',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}
       >
-        THE <span style={{ color: '#00ced1', textShadow: '0 0 10px rgba(0,206,209,0.5)' }}>INMATERIUM</span>
-      </motion.div>
-
-      {/* Desktop Navigation */}
-      {!isMobile && (
-        <nav className="nav-menu glass-panel" style={{ display: 'flex', gap: '1rem' }}>
-          <motion.button
-            className="nav-button"
+        {/* Logo - Clickeable para volver al inicio */}
+        <Link to="/" style={{ textDecoration: 'none' }}>
+          <motion.div
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => handleNavigation('galaxy', '/galaxy')}
             style={{
-              opacity: location.pathname === '/galaxy' ? 1 : 0.7,
-              borderColor: location.pathname === '/galaxy' ? 'var(--color-primary)' : 'var(--glass-border)'
+              cursor: 'pointer',
+              fontFamily: 'Orbitron',
+              fontWeight: 'bold',
+              fontSize: 'clamp(1rem, 3vw, 1.4rem)',
+              letterSpacing: 'clamp(1px, 0.5vw, 3px)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
             }}
           >
-            GALAXIA
-          </motion.button>
+            <span style={{ color: '#fff' }}>THE</span>
+            <span style={{
+              color: 'var(--color-primary)',
+              textShadow: '0 0 20px rgba(0, 212, 255, 0.5)',
+              background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent'
+            }}>
+              IMMATERIUM
+            </span>
+          </motion.div>
+        </Link>
 
+        {/* Desktop Navigation */}
+        <nav style={{
+          display: 'flex',
+          gap: 'clamp(0.5rem, 1.5vw, 1rem)',
+          alignItems: 'center'
+        }}>
+          {/* Desktop Menu Items */}
+          <div style={{
+            display: window.innerWidth < 768 ? 'none' : 'flex',
+            gap: 'clamp(0.5rem, 1.5vw, 1rem)'
+          }}>
+            {menuItems.map((item) => (
+              <motion.button
+                key={item.path}
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => navigate(item.path)}
+                style={{
+                  background: location.pathname.includes(item.path)
+                    ? 'rgba(0, 212, 255, 0.15)'
+                    : 'rgba(255, 255, 255, 0.05)',
+                  border: `1px solid ${location.pathname.includes(item.path) ? 'var(--color-primary)' : 'rgba(255, 255, 255, 0.1)'}`,
+                  borderRadius: '12px',
+                  padding: 'clamp(0.5rem, 1.5vw, 0.75rem) clamp(0.75rem, 2vw, 1.25rem)',
+                  color: location.pathname.includes(item.path) ? 'var(--color-primary)' : '#fff',
+                  fontFamily: 'var(--font-display)',
+                  fontSize: 'clamp(0.7rem, 1.5vw, 0.85rem)',
+                  letterSpacing: '1px',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  fontWeight: location.pathname.includes(item.path) ? 'bold' : 'normal',
+                  boxShadow: location.pathname.includes(item.path)
+                    ? '0 0 15px rgba(0, 212, 255, 0.3)'
+                    : 'none',
+                  textTransform: 'uppercase'
+                }}
+              >
+                {item.label}
+              </motion.button>
+            ))}
+          </div>
+
+          {/* Mobile Hamburger */}
           <motion.button
-            className="nav-button"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => handleNavigation('armyList', '/armies')}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             style={{
-              opacity: location.pathname.includes('/armies') ? 1 : 0.7,
-              borderColor: location.pathname.includes('/armies') ? 'var(--color-primary)' : 'var(--glass-border)'
+              display: window.innerWidth >= 768 ? 'none' : 'flex',
+              flexDirection: 'column',
+              gap: '5px',
+              background: 'rgba(255, 255, 255, 0.1)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              borderRadius: '10px',
+              padding: '12px',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease'
             }}
           >
-            EJÉRCITOS
-          </motion.button>
-
-          <motion.button
-            className="nav-button"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => handleNavigation('guides', '/guides')}
-            style={{
-              opacity: location.pathname.includes('/guides') ? 1 : 0.7,
-              borderColor: location.pathname.includes('/guides') ? 'var(--color-primary)' : 'var(--glass-border)'
-            }}
-          >
-            GUÍAS
-          </motion.button>
-
-          <motion.button
-            className="nav-button"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => handleNavigation('battleReports', '/battle-reports')}
-            style={{
-              opacity: location.pathname.includes('/battle-reports') ? 1 : 0.7,
-              borderColor: location.pathname.includes('/battle-reports') ? 'var(--color-primary)' : 'var(--glass-border)'
-            }}
-          >
-            BATALLAS
-          </motion.button>
-
-          <motion.button
-            className="nav-button"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => useStore.getState().setCurrentView('community')}
-            style={{
-              opacity: currentView === 'community' ? 1 : 0.7,
-              borderColor: currentView === 'community' ? 'var(--color-primary)' : 'var(--glass-border)'
-            }}
-          >
-            COMUNIDAD
-          </motion.button>
-
-          <motion.button
-            className="nav-button"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => useStore.getState().setCurrentView('lore')}
-            style={{
-              opacity: currentView === 'lore' ? 1 : 0.7,
-              borderColor: currentView === 'lore' ? 'var(--color-primary)' : 'var(--glass-border)'
-            }}
-          >
-            LORE
-          </motion.button>
-
-          <motion.button
-            className="nav-button"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => useStore.getState().setCurrentView('about')}
-          >
-            ACERCA DE
+            <motion.div
+              animate={{ rotate: mobileMenuOpen ? 45 : 0, y: mobileMenuOpen ? 8 : 0 }}
+              style={{ width: '24px', height: '2px', background: 'var(--color-primary)', borderRadius: '2px' }}
+            />
+            <motion.div
+              animate={{ opacity: mobileMenuOpen ? 0 : 1 }}
+              style={{ width: '24px', height: '2px', background: '#fff', borderRadius: '2px' }}
+            />
+            <motion.div
+              animate={{ rotate: mobileMenuOpen ? -45 : 0, y: mobileMenuOpen ? -8 : 0 }}
+              style={{ width: '24px', height: '2px', background: 'var(--color-primary)', borderRadius: '2px' }}
+            />
           </motion.button>
         </nav>
-      )}
-
-      {/* Mobile Hamburger Button */}
-      {isMobile && (
-        <button
-          onClick={toggleMenu}
-          style={{
-            background: 'rgba(255,255,255,0.1)',
-            border: '1px solid rgba(255,255,255,0.2)',
-            padding: '10px 15px',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            zIndex: 300
-          }}
-        >
-          <div style={{ width: '25px', height: '2px', background: 'white', marginBottom: '6px' }} />
-          <div style={{ width: '25px', height: '2px', background: 'white', marginBottom: '6px' }} />
-          <div style={{ width: '25px', height: '2px', background: 'white' }} />
-        </button>
-      )}
+      </motion.header>
 
       {/* Mobile Menu Overlay */}
       <AnimatePresence>
-        {isMobile && mobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, x: '100%' }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: '100%' }}
-            transition={{ type: 'spring', damping: 20 }}
-            style={{
-              position: 'fixed',
-              top: 0,
-              right: 0,
-              width: '70%',
-              height: '100vh',
-              background: 'rgba(10, 10, 20, 0.95)',
-              backdropFilter: 'blur(20px)',
-              zIndex: 250,
-              display: 'flex',
-              flexDirection: 'column',
-              padding: '5rem 2rem',
-              gap: '2rem',
-              boxShadow: '-10px 0 30px rgba(0,0,0,0.5)',
-              borderLeft: '1px solid rgba(255,255,255,0.1)'
-            }}
-          >
-            <h2 style={{ color: '#fff', borderBottom: '1px solid #333', paddingBottom: '1rem' }}>MENÚ</h2>
-
-            <button
-              onClick={() => handleNavigation('galaxy', '/galaxy')}
-              style={{ background: 'none', border: 'none', color: '#fff', fontSize: '1.2rem', textAlign: 'left', cursor: 'pointer' }}
-            >
-              🌌 GALAXIA
-            </button>
-            <button
-              onClick={() => handleNavigation('armyList', '/armies')}
-              style={{ background: 'none', border: 'none', color: '#fff', fontSize: '1.2rem', textAlign: 'left', cursor: 'pointer' }}
-            >
-              ⚔️ EJÉRCITOS
-            </button>
-            <button
-              onClick={() => handleNavigation('guides', '/guides')}
-              style={{ background: 'none', border: 'none', color: '#fff', fontSize: '1.2rem', textAlign: 'left', cursor: 'pointer' }}
-            >
-              🎨 GUÍAS DE PINTURA
-            </button>
-            <button
-              onClick={() => handleNavigation('battleReports', '/battle-reports')}
-              style={{ background: 'none', border: 'none', color: '#fff', fontSize: '1.2rem', textAlign: 'left', cursor: 'pointer' }}
-            >
-              ⚔️ INFORMES DE BATALLA
-            </button>
-            <button
-              onClick={() => handleNavigation('community', '/community')}
-              style={{ background: 'none', border: 'none', color: '#fff', fontSize: '1.2rem', textAlign: 'left', cursor: 'pointer' }}
-            >
-              🌐 COMUNIDAD
-            </button>
-            <button
-              onClick={() => handleNavigation('lore', '/lore')}
-              style={{ background: 'none', border: 'none', color: '#fff', fontSize: '1.2rem', textAlign: 'left', cursor: 'pointer' }}
-            >
-              📚 LORE
-            </button>
-            <button
-              onClick={() => handleNavigation('about', '/about')}
-              style={{ background: 'none', border: 'none', color: '#fff', fontSize: '1.2rem', textAlign: 'left', cursor: 'pointer' }}
-            >
-              ℹ️ ACERCA DE
-            </button>
-
-            <button
+        {mobileMenuOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               onClick={() => setMobileMenuOpen(false)}
               style={{
-                marginTop: 'auto',
-                padding: '1rem',
-                border: '1px solid #555',
-                borderRadius: '8px',
-                background: 'rgba(255,255,255,0.05)',
-                color: '#aaa'
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: 'rgba(0, 0, 0, 0.7)',
+                backdropFilter: 'blur(5px)',
+                zIndex: 150
+              }}
+            />
+
+            {/* Menu Panel */}
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              style={{
+                position: 'fixed',
+                top: 0,
+                right: 0,
+                bottom: 0,
+                width: 'min(85vw, 350px)',
+                background: 'linear-gradient(135deg, rgba(10, 10, 26, 0.98) 0%, rgba(20, 5, 30, 0.98) 100%)',
+                backdropFilter: 'blur(20px)',
+                borderLeft: '1px solid rgba(0, 212, 255, 0.2)',
+                boxShadow: '-10px 0 50px rgba(0, 0, 0, 0.5)',
+                zIndex: 200,
+                display: 'flex',
+                flexDirection: 'column',
+                padding: '2rem',
+                overflowY: 'auto'
               }}
             >
-              CERRAR
-            </button>
-          </motion.div>
+              {/* Menu Header */}
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '2.5rem',
+                paddingBottom: '1.5rem',
+                borderBottom: '1px solid rgba(0, 212, 255, 0.2)'
+              }}>
+                <h2 style={{
+                  fontFamily: 'var(--font-display)',
+                  fontSize: '1.3rem',
+                  color: 'var(--color-primary)',
+                  letterSpacing: '2px',
+                  margin: 0
+                }}>
+                  NAVEGACIÓN
+                </h2>
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => setMobileMenuOpen(false)}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    border: 'none',
+                    color: '#fff',
+                    fontSize: '1.5rem',
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '50%',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  ✕
+                </motion.button>
+              </div>
+
+              {/* Menu Items */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', flex: 1 }}>
+                {/* Home */}
+                <motion.button
+                  whileHover={{ x: 10 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => navigate('/')}
+                  style={{
+                    background: location.pathname === '/'
+                      ? 'rgba(0, 212, 255, 0.15)'
+                      : 'rgba(255, 255, 255, 0.05)',
+                    border: `1px solid ${location.pathname === '/' ? 'var(--color-primary)' : 'rgba(255, 255, 255, 0.1)'}`,
+                    borderRadius: '12px',
+                    padding: '1rem 1.25rem',
+                    color: '#fff',
+                    fontSize: '1.1rem',
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1rem',
+                    fontFamily: 'var(--font-display)',
+                    letterSpacing: '1px'
+                  }}
+                >
+                  <span style={{ fontSize: '1.3rem' }}>🏠</span>
+                  <span>INICIO</span>
+                </motion.button>
+
+                {menuItems.map((item) => (
+                  <motion.button
+                    key={item.path}
+                    whileHover={{ x: 10 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => navigate(item.path)}
+                    style={{
+                      background: location.pathname.includes(item.path)
+                        ? 'rgba(0, 212, 255, 0.15)'
+                        : 'rgba(255, 255, 255, 0.05)',
+                      border: `1px solid ${location.pathname.includes(item.path) ? 'var(--color-primary)' : 'rgba(255, 255, 255, 0.1)'}`,
+                      borderRadius: '12px',
+                      padding: '1rem 1.25rem',
+                      color: location.pathname.includes(item.path) ? 'var(--color-primary)' : '#fff',
+                      fontSize: '1.1rem',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '1rem',
+                      fontFamily: 'var(--font-display)',
+                      letterSpacing: '1px',
+                      fontWeight: location.pathname.includes(item.path) ? 'bold' : 'normal'
+                    }}
+                  >
+                    <span style={{ fontSize: '1.3rem' }}>{item.icon}</span>
+                    <span>{item.label.toUpperCase()}</span>
+                  </motion.button>
+                ))}
+              </div>
+
+              {/* Footer del menú */}
+              <div style={{
+                marginTop: 'auto',
+                paddingTop: '2rem',
+                borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+                fontSize: '0.8rem',
+                color: '#888',
+                textAlign: 'center'
+              }}>
+                <p style={{ margin: '0.5rem 0' }}>The Immaterium</p>
+                <p style={{ margin: '0.5rem 0', fontSize: '0.7rem' }}>
+                  © 2026 Fan Project
+                </p>
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
-    </motion.header>
+    </>
   );
 }
