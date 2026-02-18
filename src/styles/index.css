@@ -615,18 +615,25 @@ body,
   }
 
   .logo {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+  }
+
+  .nav-menu {
+    gap: 5px;
+    padding: 5px;
   }
 
   .nav-button {
     padding: 8px 16px;
     font-size: 0.75rem;
+    letter-spacing: 1px;
   }
 
   .planet-info {
+    bottom: 20px;
     left: 20px;
     right: 20px;
-    bottom: 20px;
     max-width: none;
     padding: 20px;
   }
@@ -635,12 +642,27 @@ body,
     font-size: 1.5rem;
   }
 
+  .planet-info p {
+    font-size: 0.9rem;
+  }
+
+  .planet-info .enter-button {
+    padding: 12px 30px;
+    font-size: 0.9rem;
+    width: 100%;
+  }
+
   .gallery-overlay {
     padding: 80px 20px 20px;
   }
 
   .gallery-title {
-    font-size: 1.5rem;
+    font-size: 1.8rem;
+  }
+
+  .back-button {
+    padding: 10px 20px;
+    font-size: 0.8rem;
   }
 
   .image-grid {
@@ -648,42 +670,44 @@ body,
     gap: 15px;
   }
 
-  .upload-button {
-    width: 60px;
-    height: 60px;
-    bottom: 20px;
-    right: 20px;
+  /* Better glass panels on mobile */
+  .glass-panel {
+    border-radius: 15px;
+    padding: 1.5rem !important;
   }
 }
 
-/* Responsive Overrides for new components */
-.fullscreen-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  padding: 6rem 2rem 2rem;
-  overflow-y: auto;
-  background: linear-gradient(180deg, rgba(10, 10, 20, 0.95) 0%, rgba(5, 5, 15, 0.98) 100%);
-  z-index: 100;
-}
-
-.army-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-}
-
-@media (max-width: 768px) {
-  .fullscreen-overlay {
-    padding: 5rem 1rem 1rem !important;
+@media (max-width: 480px) {
+  .logo {
+    font-size: 1rem;
   }
 
-  .army-grid {
-    grid-template-columns: 1fr;
-    /* Single column on mobile */
-    gap: 1.5rem;
+  .nav-button {
+    padding: 6px 12px;
+    font-size: 0.7rem;
+  }
+
+  .image-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px;
+  }
+}
+
+/* Ensure all grids are responsive */
+@media (max-width: 640px) {
+  [style*="gridTemplateColumns"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Better touch targets for mobile */
+@media (hover: none) and (pointer: coarse) {
+  button,
+  a,
+  .nav-button,
+  .back-button {
+    min-height: 44px;
+    min-width: 44px;
   }
 }
 

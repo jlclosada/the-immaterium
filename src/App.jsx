@@ -3,7 +3,6 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 import { useStore } from './stores/useStore';
 import { AnimatePresence } from 'framer-motion';
 
-import GalaxyPage from './pages/GalaxyPage';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import AdminLayout from './layouts/AdminLayout';
@@ -35,7 +34,6 @@ function App() {
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/galaxy" element={<GalaxyPage />} />
 
         {/* Public Content Routes */}
         <Route path="/armies" element={<ArmiesPage />} />

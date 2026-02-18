@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
 
 const Footer = () => {
     const currentYear = new Date().getFullYear();
@@ -50,17 +49,17 @@ const Footer = () => {
                         fontFamily: 'var(--font-display)',
                         letterSpacing: '1px'
                     }}>
-                        SECTORES
+                        NAVEGACIÓN
                     </h4>
                     <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-                        <li><FooterLink to="/galaxy">Galaxia</FooterLink></li>
                         <li><FooterLink to="/armies">Ejércitos</FooterLink></li>
                         <li><FooterLink to="/guides">Guías de Pintura</FooterLink></li>
                         <li><FooterLink to="/battle-reports">Informes de Batalla</FooterLink></li>
+                        <li><FooterLink to="/">Inicio</FooterLink></li>
                     </ul>
                 </div>
 
-                {/* Community */}
+                {/* Resources */}
                 <div>
                     <h4 style={{
                         color: '#fff',
@@ -68,15 +67,29 @@ const Footer = () => {
                         fontFamily: 'var(--font-display)',
                         letterSpacing: '1px'
                     }}>
-                        COMUNIDAD
+                        RECURSOS
                     </h4>
                     <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-                        <li><FooterLink to="/community">Foro</FooterLink></li>
-                        <li><FooterLink to="/lore">Biblioteca de Lore</FooterLink></li>
-                        <li><FooterLink to="/about">Acerca del Proyecto</FooterLink></li>
+                        <li><FooterLink to="/login">Acceso Admin</FooterLink></li>
                         <li>
-                            <a href="#" style={{ color: '#aaa', textDecoration: 'none', transition: 'color 0.2s' }} className="hover:text-white">
-                                Discord (Próximamente)
+                            <a
+                                href="https://www.warhammer-community.com"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{
+                                    color: '#aaa',
+                                    textDecoration: 'none',
+                                    transition: 'color 0.2s',
+                                    fontSize: '0.95rem'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.target.style.color = 'var(--color-primary)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.target.style.color = '#aaa';
+                                }}
+                            >
+                                Warhammer Community
                             </a>
                         </li>
                     </ul>

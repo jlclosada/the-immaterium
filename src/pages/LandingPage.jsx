@@ -1,15 +1,43 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useStore } from '../stores/useStore';
+import { api } from '../services/api';
 import Footer from '../components/UI/Footer';
 
 const LandingPage = () => {
     const { fetchInitialData } = useStore();
+    const [featuredArmy, setFeaturedArmy] = useState(null);
+    const [featuredGuide, setFeaturedGuide] = useState(null);
+    const [featuredReport, setFeaturedReport] = useState(null);
 
     useEffect(() => {
         fetchInitialData();
+        loadFeaturedContent();
     }, []);
+
+    const loadFeaturedContent = async () => {
+        try {
+            const [armies, guides, reports] = await Promise.all([
+                api.getArmies(),
+                api.getPaintingGuides(),
+                api.getBattleReports()
+            ]);
+
+            // Get random or most recent items
+            if (armies && armies.length > 0) {
+                setFeaturedArmy(armies[0]);
+            }
+            if (guides && guides.length > 0) {
+                setFeaturedGuide(guides[0]);
+            }
+            if (reports && reports.length > 0) {
+                setFeaturedReport(reports[0]);
+            }
+        } catch (error) {
+            console.error('Error loading featured content:', error);
+        }
+    };
 
     return (
         <div className="landing-page crt-flicker" style={{
@@ -93,7 +121,7 @@ const LandingPage = () => {
                     transition={{ delay: 0.8, duration: 0.5 }}
                     style={{
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
                         gap: '2rem',
                         width: '100%',
                         maxWidth: '1200px',
@@ -103,8 +131,8 @@ const LandingPage = () => {
                 >
                     <SectionCard
                         to="/armies"
-                        title="ARMIES"
-                        subtitle="Factions & Lore"
+                        title="EJÉRCITOS"
+                        subtitle="Facciones & Lore"
                         icon={
                             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
@@ -113,8 +141,8 @@ const LandingPage = () => {
                     />
                     <SectionCard
                         to="/guides"
-                        title="PAINTING"
-                        subtitle="Guides & Techniques"
+                        title="PINTURA"
+                        subtitle="Guías & Técnicas"
                         icon={
                             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M12 19l7-7 3 3-7 7-3-3z" />
@@ -126,8 +154,8 @@ const LandingPage = () => {
                     />
                     <SectionCard
                         to="/battle-reports"
-                        title="BATTLES"
-                        subtitle="Reports & Logs"
+                        title="BATALLAS"
+                        subtitle="Reportes & Logs"
                         icon={
                             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
                                 <polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5" />
@@ -171,86 +199,98 @@ const LandingPage = () => {
             }}>
                 <h3 style={{
                     fontFamily: 'var(--font-display)',
-                    fontSize: '2rem',
+                    fontSize: 'clamp(1.5rem, 4vw, 2rem)',
                     color: 'var(--color-accent)',
                     marginBottom: '2rem',
                     textAlign: 'center',
                     textTransform: 'uppercase',
                     letterSpacing: '3px'
                 }}>
-                    Featured Intel
+                    Contenido Destacado
                 </h3>
 
                 <div style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
                     gap: '2rem'
                 }}>
                     {/* Featured Faction */}
-                    <div className="glass-panel" style={{ padding: '2rem', textAlign: 'left', border: '1px solid var(--color-primary)' }}>
-                        <span style={{
-                            background: 'var(--color-primary)',
-                            color: '#000',
-                            padding: '2px 8px',
-                            fontSize: '0.7rem',
-                            fontWeight: 'bold',
-                            borderRadius: '4px',
-                            textTransform: 'uppercase'
-                        }}>
-                            Faction Focus
-                        </span>
-                        <h4 style={{ margin: '1rem 0 0.5rem', fontSize: '1.5rem', color: '#fff' }}>Ultramarines</h4>
-                        <p style={{ color: '#aaa', fontSize: '0.9rem', lineHeight: '1.6' }}>
-                            The paragons of the Astartes. Learn about their disciplined warfare and the returning Primarch Roboute Guilliman.
-                        </p>
-                        <Link to="/armies" style={{ display: 'inline-block', marginTop: '1rem', color: 'var(--color-primary)', textDecoration: 'none' }}>
-                            View Faction →
-                        </Link>
-                    </div>
+                    {featuredArmy && (
+                        <div className="glass-panel" style={{ padding: '2rem', textAlign: 'left', border: '1px solid var(--color-primary)' }}>
+                            <span style={{
+                                background: 'var(--color-primary)',
+                                color: '#000',
+                                padding: '4px 12px',
+                                fontSize: '0.7rem',
+                                fontWeight: 'bold',
+                                borderRadius: '4px',
+                                textTransform: 'uppercase'
+                            }}>
+                                Facción Destacada
+                            </span>
+                            <h4 style={{ margin: '1rem 0 0.5rem', fontSize: 'clamp(1.2rem, 3vw, 1.5rem)', color: '#fff' }}>
+                                {featuredArmy.name}
+                            </h4>
+                            <p style={{ color: '#aaa', fontSize: '0.9rem', lineHeight: '1.6' }}>
+                                {featuredArmy.description?.substring(0, 120)}...
+                            </p>
+                            <Link to={`/armies/${featuredArmy.id}`} style={{ display: 'inline-block', marginTop: '1rem', color: 'var(--color-primary)', textDecoration: 'none' }}>
+                                Ver Facción →
+                            </Link>
+                        </div>
+                    )}
 
                     {/* Latest Report */}
-                    <div className="glass-panel" style={{ padding: '2rem', textAlign: 'left', border: '1px solid #ff4d4d' }}>
-                        <span style={{
-                            background: '#ff4d4d',
-                            color: '#fff',
-                            padding: '2px 8px',
-                            fontSize: '0.7rem',
-                            fontWeight: 'bold',
-                            borderRadius: '4px',
-                            textTransform: 'uppercase'
-                        }}>
-                            Battle Report
-                        </span>
-                        <h4 style={{ margin: '1rem 0 0.5rem', fontSize: '1.5rem', color: '#fff' }}>Siege of Baal</h4>
-                        <p style={{ color: '#aaa', fontSize: '0.9rem', lineHeight: '1.6' }}>
-                            Blood Angels vs Tyranids. A desperate defense against Hive Fleet Leviathan. 2000pts Matched Play.
-                        </p>
-                        <Link to="/battle-reports" style={{ display: 'inline-block', marginTop: '1rem', color: '#ff4d4d', textDecoration: 'none' }}>
-                            Read Report →
-                        </Link>
-                    </div>
+                    {featuredReport && (
+                        <div className="glass-panel" style={{ padding: '2rem', textAlign: 'left', border: '1px solid #ff4d4d' }}>
+                            <span style={{
+                                background: '#ff4d4d',
+                                color: '#fff',
+                                padding: '4px 12px',
+                                fontSize: '0.7rem',
+                                fontWeight: 'bold',
+                                borderRadius: '4px',
+                                textTransform: 'uppercase'
+                            }}>
+                                Reporte de Batalla
+                            </span>
+                            <h4 style={{ margin: '1rem 0 0.5rem', fontSize: 'clamp(1.2rem, 3vw, 1.5rem)', color: '#fff' }}>
+                                {featuredReport.title}
+                            </h4>
+                            <p style={{ color: '#aaa', fontSize: '0.9rem', lineHeight: '1.6' }}>
+                                {featuredReport.summary?.substring(0, 120) || featuredReport.description?.substring(0, 120)}...
+                            </p>
+                            <Link to={`/battle-reports/${featuredReport.id}`} style={{ display: 'inline-block', marginTop: '1rem', color: '#ff4d4d', textDecoration: 'none' }}>
+                                Leer Reporte →
+                            </Link>
+                        </div>
+                    )}
 
                     {/* Painting Tip */}
-                    <div className="glass-panel" style={{ padding: '2rem', textAlign: 'left', border: '1px solid var(--color-secondary)' }}>
-                        <span style={{
-                            background: 'var(--color-secondary)',
-                            color: '#fff',
-                            padding: '2px 8px',
-                            fontSize: '0.7rem',
-                            fontWeight: 'bold',
-                            borderRadius: '4px',
-                            textTransform: 'uppercase'
-                        }}>
-                            Painting Technique
-                        </span>
-                        <h4 style={{ margin: '1rem 0 0.5rem', fontSize: '1.5rem', color: '#fff' }}>OSL Effects</h4>
-                        <p style={{ color: '#aaa', fontSize: '0.9rem', lineHeight: '1.6' }}>
-                            Master Object Source Lighting for glowing plasma coils and power swords.
-                        </p>
-                        <Link to="/guides" style={{ display: 'inline-block', marginTop: '1rem', color: 'var(--color-secondary)', textDecoration: 'none' }}>
-                            Learn Technique →
-                        </Link>
-                    </div>
+                    {featuredGuide && (
+                        <div className="glass-panel" style={{ padding: '2rem', textAlign: 'left', border: '1px solid var(--color-secondary)' }}>
+                            <span style={{
+                                background: 'var(--color-secondary)',
+                                color: '#fff',
+                                padding: '4px 12px',
+                                fontSize: '0.7rem',
+                                fontWeight: 'bold',
+                                borderRadius: '4px',
+                                textTransform: 'uppercase'
+                            }}>
+                                Técnica de Pintura
+                            </span>
+                            <h4 style={{ margin: '1rem 0 0.5rem', fontSize: 'clamp(1.2rem, 3vw, 1.5rem)', color: '#fff' }}>
+                                {featuredGuide.title}
+                            </h4>
+                            <p style={{ color: '#aaa', fontSize: '0.9rem', lineHeight: '1.6' }}>
+                                {featuredGuide.description?.substring(0, 120)}...
+                            </p>
+                            <Link to={`/guides/${featuredGuide.id}`} style={{ display: 'inline-block', marginTop: '1rem', color: 'var(--color-secondary)', textDecoration: 'none' }}>
+                                Ver Técnica →
+                            </Link>
+                        </div>
+                    )}
                 </div>
             </div>
 
