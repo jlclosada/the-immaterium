@@ -6,10 +6,18 @@ from .models import (
 
 class ArmyImageSerializer(serializers.ModelSerializer):
     isFavorite = serializers.BooleanField(source='is_favorite', required=False, default=False)
+    # Allow the client to omit the primary‑key; generate a UUID if missing.
+    id = serializers.CharField(required=False)
 
     class Meta:
         model = ArmyImage
         fields = ['id', 'url', 'name', 'isFavorite']
+
+    def create(self, validated_data):
+        if 'id' not in validated_data:
+            import uuid
+            validated_data['id'] = str(uuid.uuid4())
+        return super().create(validated_data)
 
 class ArmySerializer(serializers.ModelSerializer):
     images = ArmyImageSerializer(many=True, read_only=False, required=False)
@@ -45,13 +53,13 @@ class ArmySerializer(serializers.ModelSerializer):
             setattr(instance, attr, value)
         instance.save()
 
-        # Update images if provided
+        # Update images if provided – append new images instead of wiping all
         if images_data is not None:
-            # Delete existing images
-            instance.images.all().delete()
-
-            # Create new images
             for image_data in images_data:
+                # If an ID is supplied and already exists, skip to avoid duplicate‑key error
+                img_id = image_data.get('id')
+                if img_id and instance.images.filter(id=img_id).exists():
+                    continue
                 ArmyImage.objects.create(army=instance, **image_data)
 
         return instance
@@ -74,6 +82,13 @@ class CommentSerializer(serializers.ModelSerializer):
         fields = ['id', 'author', 'date', 'text']
 
 class PaintingGuideSerializer(serializers.ModelSerializer):
+    # Allow empty tags list (frontend may send []). Use ListField with allow_empty=True.
+    tags = serializers.ListField(child=serializers.CharField(), allow_empty=True, required=False)
+    # Existing fields mapping camelCase ↔ snake_case
+    estimatedTime = serializers.CharField(source='estimated_time')
+    dateCreated = serializers.DateField(source='date_created')
+    coverImage = serializers.URLField(source='cover_image')
+    faction = serializers.SerializerMethodField()
     materials = serializers.SerializerMethodField()
     steps = GuideStepSerializer(many=True, read_only=True)
     comments = CommentSerializer(many=True, read_only=True)
