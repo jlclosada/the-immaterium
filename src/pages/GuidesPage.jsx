@@ -137,13 +137,9 @@ const GuidesPage = () => {
                                 whileHover={{ y: -5, boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}
                             >
                                 <div style={{
-                                    height: '220px',
+                                    height: '180px',
                                     position: 'relative',
-                                    overflow: 'hidden',
-                                    background: 'rgba(0,0,0,0.3)',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
+                                    overflow: 'hidden'
                                 }}>
                                     <img
                                         src={guide.coverImage || 'https://via.placeholder.com/400x200?text=No+Image'}
@@ -151,9 +147,8 @@ const GuidesPage = () => {
                                         style={{
                                             width: '100%',
                                             height: '100%',
-                                            objectFit: 'contain',
-                                            transition: 'transform 0.3s ease',
-                                            padding: '0.5rem'
+                                            objectFit: 'cover',
+                                            transition: 'transform 0.5s ease'
                                         }}
                                         className="hover-scale"
                                     />

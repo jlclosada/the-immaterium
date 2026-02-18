@@ -19,6 +19,7 @@ import GuideDetailPage from './pages/GuideDetailPage';
 import BattleReportsPage from './pages/BattleReportsPage';
 import BattleReportDetailPage from './pages/BattleReportDetailPage';
 import LorePage from './pages/LorePage';
+import LoreDetailPage from './pages/LoreDetailPage';
 
 import './styles/index.css';
 
@@ -42,8 +43,9 @@ function App() {
         <Route path="/armies/:id" element={<ArmyDetailPage />} />
         <Route path="/guides" element={<GuidesPage />} />
         <Route path="/guides/:id" element={<GuideDetailPage />} />
-        <Route path="/battle-reports" element={<BattleReportsPage />} />
         <Route path="/lore" element={<LorePage />} />
+        <Route path="/lore" element={<LorePage />} />
+        <Route path="/lore/:id" element={<LoreDetailPage />} />
         <Route path="/battle-reports/:id" element={<BattleReportDetailPage />} />
 
         {/* Admin Routes */}

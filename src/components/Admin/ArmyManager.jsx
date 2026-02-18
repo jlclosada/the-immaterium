@@ -50,7 +50,8 @@ const ArmyManager = () => {
                     position: formData.position,
                     size: formData.size,
                     color: formData.color,
-                    emissive: formData.emissive
+                    emissive: formData.emissive,
+                    images: images  // ← AGREGADO: Incluir imágenes
                 };
                 
                 // Always include iconUrl - use form value or current value
@@ -73,7 +74,8 @@ const ArmyManager = () => {
                     position: formData.position,
                     size: formData.size,
                     color: formData.color,
-                    emissive: formData.emissive
+                    emissive: formData.emissive,
+                    images: images  // ← AGREGADO: Incluir imágenes
                 };
                 
                 if (formData.planetType) dataToSend.planetType = formData.planetType;

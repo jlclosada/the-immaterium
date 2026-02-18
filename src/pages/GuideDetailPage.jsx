@@ -190,7 +190,12 @@ const GuideDetailPage = () => {
                             marginBottom: '2rem',
                             borderRadius: '12px',
                             overflow: 'hidden',
-                            boxShadow: '0 10px 40px rgba(0,0,0,0.5)'
+                            boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
+                            background: 'rgba(0,0,0,0.3)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            maxHeight: 'clamp(300px, 40vw, 500px)'
                         }}
                     >
                         <img
@@ -198,11 +203,11 @@ const GuideDetailPage = () => {
                             alt={guide.title}
                             style={{
                                 width: '100%',
-                                height: '100%',
-                                maxHeight: '400px',
-                                objectFit: 'cover',
+                                height: 'auto',
+                                maxHeight: 'clamp(300px, 40vw, 500px)',
+                                objectFit: 'contain',
                                 display: 'block',
-                                objectPosition: 'center'
+                                padding: '1rem'
                             }}
                         />
                     </motion.div>
@@ -279,21 +284,33 @@ const GuideDetailPage = () => {
                         {step.images && step.images.length > 0 && (
                             <div style={{
                                 display: 'grid',
-                                gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+                                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
                                 gap: '1rem',
                                 marginBottom: '1.5rem'
                             }}>
                                 {step.images.map((img, imgIndex) => (
-                                    <div key={imgIndex} style={{ height: '150px', cursor: 'zoom-in' }} onClick={() => setSelectedImage(img)}>
+                                    <div
+                                        key={imgIndex}
+                                        style={{
+                                            height: '200px',
+                                            cursor: 'zoom-in',
+                                            background: 'rgba(0,0,0,0.3)',
+                                            borderRadius: '8px',
+                                            overflow: 'hidden',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center'
+                                        }}
+                                        onClick={() => setSelectedImage(img)}
+                                    >
                                         <img
                                             src={img}
                                             alt={`Paso ${step.stepNumber} - ${imgIndex + 1}`}
                                             style={{
                                                 width: '100%',
                                                 height: '100%',
-                                                objectFit: 'cover',
-                                                borderRadius: '8px',
-                                                boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                                                objectFit: 'contain',
+                                                padding: '0.5rem',
                                                 transition: 'transform 0.2s'
                                             }}
                                             className="hover-scale"

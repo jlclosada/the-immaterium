@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { api } from '../services/api';
 import Header from '../components/UI/Header';
 import Footer from '../components/UI/Footer';
@@ -172,19 +173,25 @@ const LorePage = () => {
                         gap: '1.5rem'
                     }}>
                         {filteredEntries.map((entry, index) => (
-                            <motion.div
+                            <Link
                                 key={entry.id}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.1 * index }}
-                                className="glass-panel"
-                                style={{
-                                    padding: 'clamp(1.5rem, 3vw, 2rem)',
-                                    cursor: 'pointer',
-                                    position: 'relative',
-                                    borderLeft: entry.isFeatured ? '4px solid var(--color-accent)' : 'none'
-                                }}
+                                to={`/lore/${entry.id}`}
+                                style={{ textDecoration: 'none', color: 'inherit' }}
                             >
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.1 * index }}
+                                    className="glass-panel"
+                                    style={{
+                                        padding: 'clamp(1.5rem, 3vw, 2rem)',
+                                        cursor: 'pointer',
+                                        position: 'relative',
+                                        borderLeft: entry.isFeatured ? '4px solid var(--color-accent)' : 'none',
+                                        transition: 'all 0.3s ease'
+                                    }}
+                                    whileHover={{ y: -5, boxShadow: '0 10px 30px rgba(0, 212, 255, 0.3)' }}
+                                >
                                 {entry.isFeatured && (
                                     <div style={{
                                         position: 'absolute',
@@ -274,6 +281,7 @@ const LorePage = () => {
                                     <span>👁️ {entry.views} vistas</span>
                                 </div>
                             </motion.div>
+                            </Link>
                         ))}
                     </div>
                 ) : (

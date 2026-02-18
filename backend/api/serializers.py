@@ -5,14 +5,14 @@ from .models import (
 )
 
 class ArmyImageSerializer(serializers.ModelSerializer):
-    isFavorite = serializers.BooleanField(source='is_favorite')
+    isFavorite = serializers.BooleanField(source='is_favorite', required=False, default=False)
 
     class Meta:
         model = ArmyImage
         fields = ['id', 'url', 'name', 'isFavorite']
 
 class ArmySerializer(serializers.ModelSerializer):
-    images = ArmyImageSerializer(many=True, read_only=True)
+    images = ArmyImageSerializer(many=True, read_only=False, required=False)
     iconUrl = serializers.URLField(source='icon_url', required=False, allow_blank=True)
     planetType = serializers.CharField(source='planet_type', required=False, allow_blank=True)
     planetName = serializers.CharField(source='planet_name', required=False, allow_blank=True)
@@ -26,6 +26,35 @@ class ArmySerializer(serializers.ModelSerializer):
             'position', 'size', 'color', 'emissive',
             'planetType', 'planetName'
         ]
+
+    def create(self, validated_data):
+        images_data = validated_data.pop('images', [])
+        army = Army.objects.create(**validated_data)
+
+        # Create images for the army
+        for image_data in images_data:
+            ArmyImage.objects.create(army=army, **image_data)
+
+        return army
+
+    def update(self, instance, validated_data):
+        images_data = validated_data.pop('images', None)
+
+        # Update army fields
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        # Update images if provided
+        if images_data is not None:
+            # Delete existing images
+            instance.images.all().delete()
+
+            # Create new images
+            for image_data in images_data:
+                ArmyImage.objects.create(army=instance, **image_data)
+
+        return instance
 
 class GuideMaterialSerializer(serializers.ModelSerializer):
     class Meta:
