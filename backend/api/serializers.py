@@ -85,24 +85,23 @@ class PaintingGuideSerializer(serializers.ModelSerializer):
     # Allow empty tags list (frontend may send []). Use ListField with allow_empty=True.
     tags = serializers.ListField(child=serializers.CharField(), allow_empty=True, required=False)
     # Existing fields mapping camelCase ↔ snake_case
-    estimatedTime = serializers.CharField(source='estimated_time')
-    dateCreated = serializers.DateField(source='date_created')
-    coverImage = serializers.URLField(source='cover_image')
+    estimatedTime = serializers.CharField(source='estimated_time', read_only=True)
+    dateCreated = serializers.DateField(source='date_created', read_only=True)
+    coverImage = serializers.URLField(source='cover_image', read_only=True)
     faction = serializers.SerializerMethodField()
     materials = serializers.SerializerMethodField()
     steps = GuideStepSerializer(many=True, read_only=True)
     comments = CommentSerializer(many=True, read_only=True)
-    estimatedTime = serializers.CharField(source='estimated_time')
-    dateCreated = serializers.DateField(source='date_created')
-    coverImage = serializers.URLField(source='cover_image')
-    faction = serializers.SerializerMethodField()
+    # duplicate field definitions removed
     
     class Meta:
         model = PaintingGuide
         fields = [
-            'id', 'title', 'difficulty', 'estimatedTime', 'author',
-            'dateCreated', 'coverImage', 'tags', 'likes', 'views',
-            'materials', 'steps', 'comments', 'faction'
+            'id', 'title', 'difficulty', 'estimated_time', 'author',
+            'date_created', 'cover_image', 'tags', 'likes', 'views',
+            'materials', 'steps', 'comments', 'faction',
+            # camelCase read‑only aliases
+            'estimatedTime', 'dateCreated', 'coverImage'
         ]
         
     def get_materials(self, obj):
