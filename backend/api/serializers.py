@@ -24,9 +24,10 @@ class ArmySerializer(serializers.ModelSerializer):
     iconUrl = serializers.URLField(source='icon_url', required=False, allow_blank=True)
     planetType = serializers.CharField(source='planet_type', required=False, allow_blank=True)
     planetName = serializers.CharField(source='planet_name', required=False, allow_blank=True)
-    nameEs = serializers.CharField(source='name_es', required=False, allow_blank=True, allow_null=True)
-    descriptionEs = serializers.CharField(source='description_es', required=False, allow_blank=True, allow_null=True)
-    historyEs = serializers.CharField(source='history_es', required=False, allow_blank=True, allow_null=True)
+    # Campos de traducción - solo si existen en el modelo
+    nameEs = serializers.SerializerMethodField()
+    descriptionEs = serializers.SerializerMethodField()
+    historyEs = serializers.SerializerMethodField()
 
     class Meta:
         model = Army
@@ -38,6 +39,15 @@ class ArmySerializer(serializers.ModelSerializer):
             'position', 'size', 'color', 'emissive',
             'planetType', 'planetName'
         ]
+
+    def get_nameEs(self, obj):
+        return getattr(obj, 'name_es', None)
+
+    def get_descriptionEs(self, obj):
+        return getattr(obj, 'description_es', None)
+
+    def get_historyEs(self, obj):
+        return getattr(obj, 'history_es', None)
 
     def create(self, validated_data):
         images_data = validated_data.pop('images', [])
