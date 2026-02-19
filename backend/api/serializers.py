@@ -24,12 +24,16 @@ class ArmySerializer(serializers.ModelSerializer):
     iconUrl = serializers.URLField(source='icon_url', required=False, allow_blank=True)
     planetType = serializers.CharField(source='planet_type', required=False, allow_blank=True)
     planetName = serializers.CharField(source='planet_name', required=False, allow_blank=True)
-    
+    nameEs = serializers.CharField(source='name_es', required=False, allow_blank=True, allow_null=True)
+    descriptionEs = serializers.CharField(source='description_es', required=False, allow_blank=True, allow_null=True)
+    historyEs = serializers.CharField(source='history_es', required=False, allow_blank=True, allow_null=True)
+
     class Meta:
         model = Army
         fields = [
-            'id', 'name', 
-            'description', 'history', 
+            'id', 'name', 'nameEs',
+            'description', 'descriptionEs',
+            'history', 'historyEs',
             'iconUrl', 'images',
             'position', 'size', 'color', 'emissive',
             'planetType', 'planetName'

@@ -11,6 +11,7 @@ export const translations = {
     theImmaterium: 'THE IMMATERIUM',
     tagline: 'Archivos del 41º Milenio',
     description: 'Explora las facciones, tácticas de batalla y secretos del universo de Warhammer 40,000',
+    exploreGalaxy: 'Explorar la Galaxia',
     armiesTitle: 'EJÉRCITOS',
     armiesSubtitle: 'Facciones & Lore',
     paintingTitle: 'PINTURA',
@@ -28,6 +29,12 @@ export const translations = {
     viewGuide: 'Ver Guía',
     viewReport: 'Ver Reporte',
     viewLore: 'Ver Lore',
+
+    // Sections Titles
+    armiesOf40k: 'Ejércitos del 41º Milenio',
+    paintingGuides: 'Guías de Pintura',
+    battleReportsSection: 'Informes de Batalla',
+    loreLibrary: 'Biblioteca de Lore',
 
     // Footer
     navigation: 'NAVEGACIÓN',
@@ -147,6 +154,7 @@ export const translations = {
     theImmaterium: 'THE IMMATERIUM',
     tagline: 'Archives of the 41st Millennium',
     description: 'Explore the factions, battle tactics, and secrets of the Warhammer 40,000 universe',
+    exploreGalaxy: 'Explore the Galaxy',
     armiesTitle: 'ARMIES',
     armiesSubtitle: 'Factions & Lore',
     paintingTitle: 'PAINTING',
@@ -164,6 +172,12 @@ export const translations = {
     viewGuide: 'View Guide',
     viewReport: 'View Report',
     viewLore: 'View Lore',
+
+    // Sections Titles
+    armiesOf40k: 'Armies of the 41st Millennium',
+    paintingGuides: 'Painting Guides',
+    battleReportsSection: 'Battle Reports',
+    loreLibrary: 'Lore Library',
 
     // Footer
     navigation: 'NAVIGATION',

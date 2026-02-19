@@ -2,11 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useStore } from '../stores/useStore';
+import { useTranslation } from '../i18n/translations';
 import { api } from '../services/api';
 import Footer from '../components/UI/Footer';
+import LanguageToggle from '../components/UI/LanguageToggle';
 
 const LandingPage = () => {
-    const { fetchInitialData } = useStore();
+    const { fetchInitialData, language } = useStore();
+    const t = useTranslation(language);
     const [featuredArmy, setFeaturedArmy] = useState(null);
     const [featuredGuide, setFeaturedGuide] = useState(null);
     const [featuredReport, setFeaturedReport] = useState(null);
@@ -46,9 +49,20 @@ const LandingPage = () => {
             minHeight: '100vh',
             display: 'flex',
             flexDirection: 'column',
-            overflowX: 'hidden'
+            overflowX: 'hidden',
+            position: 'relative'
         }}>
             <div className="scanline-overlay" />
+
+            {/* Language Toggle - Fixed position */}
+            <div style={{
+                position: 'fixed',
+                top: 'clamp(1rem, 3vw, 2rem)',
+                right: 'clamp(1rem, 3vw, 2rem)',
+                zIndex: 1000
+            }}>
+                <LanguageToggle />
+            </div>
 
             <div style={{
                 display: 'flex',
@@ -115,12 +129,12 @@ const LandingPage = () => {
                         maxWidth: '700px',
                         marginBottom: '5rem',
                         color: '#aaa',
+                        zIndex: 1,
                         lineHeight: '1.8',
-                        letterSpacing: '1px',
-                        zIndex: 1
-                    }}
-                >
-                    ARCHIVOS DEL 41º MILENIO. EXPLORA MIS EJÉRCITOS, DOMINA LAS ARTES DE LA GUERRA, Y RECUERDA A LOS CAÍDOS.
+                        letterSpacing: '0.5px',
+                        textAlign: 'center'
+                    }}>
+                    {t('description')}
                 </motion.p>
 
                 <motion.div
@@ -140,8 +154,8 @@ const LandingPage = () => {
                 >
                     <SectionCard
                         to="/armies"
-                        title="EJÉRCITOS"
-                        subtitle="Facciones & Lore"
+                        title={t('armiesTitle')}
+                        subtitle={t('armiesSubtitle')}
                         icon={
                             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
@@ -150,8 +164,8 @@ const LandingPage = () => {
                     />
                     <SectionCard
                         to="/guides"
-                        title="PINTURA"
-                        subtitle="Guías & Técnicas"
+                        title={t('paintingTitle')}
+                        subtitle={t('paintingSubtitle')}
                         icon={
                             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M12 19l7-7 3 3-7 7-3-3z" />
@@ -163,8 +177,8 @@ const LandingPage = () => {
                     />
                     <SectionCard
                         to="/battle-reports"
-                        title="BATALLAS"
-                        subtitle="Reportes & Logs"
+                        title={t('battlesTitle')}
+                        subtitle={t('battlesSubtitle')}
                         icon={
                             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
                                 <polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5" />
@@ -179,8 +193,8 @@ const LandingPage = () => {
                     />
                     <SectionCard
                         to="/lore"
-                        title="LORE"
-                        subtitle="Biblioteca & Historia"
+                        title={t('loreTitle')}
+                        subtitle={t('loreSubtitle')}
                         icon={
                             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
@@ -206,7 +220,7 @@ const LandingPage = () => {
                         onMouseEnter={e => e.target.style.opacity = 1}
                         onMouseLeave={e => e.target.style.opacity = 0.5}
                     >
-                        Acceso a la administración // Permisos requeridos
+                        {t('adminAccess')}
                     </Link>
                 </div>
             </div>
@@ -229,7 +243,7 @@ const LandingPage = () => {
                     textTransform: 'uppercase',
                     letterSpacing: '3px'
                 }}>
-                    Contenido Destacado
+                    {t('featuredIntel')}
                 </h3>
 
                 <div style={{
@@ -249,16 +263,16 @@ const LandingPage = () => {
                                 borderRadius: '4px',
                                 textTransform: 'uppercase'
                             }}>
-                                Facción Destacada
+                                {language === 'es' ? 'Facción Destacada' : 'Featured Faction'}
                             </span>
                             <h4 style={{ margin: '1rem 0 0.5rem', fontSize: 'clamp(1.2rem, 3vw, 1.5rem)', color: '#fff' }}>
-                                {featuredArmy.name}
+                                {language === 'es' && featuredArmy.nameEs ? featuredArmy.nameEs : featuredArmy.name}
                             </h4>
                             <p style={{ color: '#aaa', fontSize: '0.9rem', lineHeight: '1.6' }}>
-                                {featuredArmy.description?.substring(0, 120)}...
+                                {(language === 'es' && featuredArmy.descriptionEs ? featuredArmy.descriptionEs : featuredArmy.description)?.substring(0, 120)}...
                             </p>
                             <Link to={`/armies/${featuredArmy.id}`} style={{ display: 'inline-block', marginTop: '1rem', color: 'var(--color-primary)', textDecoration: 'none' }}>
-                                Ver Facción →
+                                {t('viewArmy')} →
                             </Link>
                         </div>
                     )}
@@ -275,7 +289,7 @@ const LandingPage = () => {
                                 borderRadius: '4px',
                                 textTransform: 'uppercase'
                             }}>
-                                Reporte de Batalla
+                                {language === 'es' ? 'Reporte de Batalla' : 'Battle Report'}
                             </span>
                             <h4 style={{ margin: '1rem 0 0.5rem', fontSize: 'clamp(1.2rem, 3vw, 1.5rem)', color: '#fff' }}>
                                 {featuredReport.title}
@@ -284,7 +298,7 @@ const LandingPage = () => {
                                 {featuredReport.summary?.substring(0, 120) || featuredReport.description?.substring(0, 120)}...
                             </p>
                             <Link to={`/battle-reports/${featuredReport.id}`} style={{ display: 'inline-block', marginTop: '1rem', color: '#ff4d4d', textDecoration: 'none' }}>
-                                Leer Reporte →
+                                {t('viewReport')} →
                             </Link>
                         </div>
                     )}
@@ -301,7 +315,7 @@ const LandingPage = () => {
                                 borderRadius: '4px',
                                 textTransform: 'uppercase'
                             }}>
-                                Técnica de Pintura
+                                {language === 'es' ? 'Técnica de Pintura' : 'Painting Technique'}
                             </span>
                             <h4 style={{ margin: '1rem 0 0.5rem', fontSize: 'clamp(1.2rem, 3vw, 1.5rem)', color: '#fff' }}>
                                 {featuredGuide.title}
@@ -310,7 +324,7 @@ const LandingPage = () => {
                                 {featuredGuide.description?.substring(0, 120)}...
                             </p>
                             <Link to={`/guides/${featuredGuide.id}`} style={{ display: 'inline-block', marginTop: '1rem', color: 'var(--color-secondary)', textDecoration: 'none' }}>
-                                Ver Técnica →
+                                {t('viewGuide')} →
                             </Link>
                         </div>
                     )}

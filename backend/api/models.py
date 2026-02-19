@@ -20,8 +20,11 @@ class Army(models.Model):
     
     id = models.CharField(max_length=100, primary_key=True)
     name = models.CharField(max_length=200)
+    name_es = models.CharField(max_length=200, blank=True, null=True)  # Traducción español
     description = models.TextField()
+    description_es = models.TextField(blank=True, null=True)  # Traducción español
     history = models.TextField()
+    history_es = models.TextField(blank=True, null=True)  # Traducción español
     icon_url = models.URLField(max_length=500)
     
     # 3D visualization fields
