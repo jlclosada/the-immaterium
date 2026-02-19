@@ -120,7 +120,7 @@ const LandingPage = () => {
                         zIndex: 1
                     }}
                 >
-                    ARCHIVES OF THE 41ST MILLENNIUM. EXPLORE THE ARMIES, MASTER THE ARTS OF WAR, AND REMEMBER THE FALLEN.
+                    ARCHIVOS DEL 41º MILENIO. EXPLORA MIS EJÉRCITOS, DOMINA LAS ARTES DE LA GUERRA, Y RECUERDA A LOS CAÍDOS.
                 </motion.p>
 
                 <motion.div
@@ -206,7 +206,7 @@ const LandingPage = () => {
                         onMouseEnter={e => e.target.style.opacity = 1}
                         onMouseLeave={e => e.target.style.opacity = 0.5}
                     >
-                        Administrative Access // Clearance Required
+                        Acceso a la administración // Permisos requeridos
                     </Link>
                 </div>
             </div>

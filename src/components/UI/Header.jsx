@@ -1,12 +1,17 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useStore } from '../../stores/useStore';
+import { useTranslation } from '../../i18n/translations';
+import LanguageToggle from './LanguageToggle';
 
 export default function Header() {
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const language = useStore(state => state.language);
+  const t = useTranslation(language);
 
   // Handle scroll for header background
   useEffect(() => {
@@ -21,10 +26,10 @@ export default function Header() {
   }, [location]);
 
   const menuItems = [
-    { path: '/armies', label: 'Ejércitos', icon: '⚔️' },
-    { path: '/guides', label: 'Guías', icon: '🎨' },
-    { path: '/battle-reports', label: 'Batallas', icon: '📜' },
-    { path: '/lore', label: 'Lore', icon: '📖' },
+    { path: '/armies', label: t('armies'), icon: '⚔️' },
+    { path: '/guides', label: t('guides'), icon: '🎨' },
+    { path: '/battle-reports', label: t('battles'), icon: '📜' },
+    { path: '/lore', label: t('lore'), icon: '📖' },
   ];
 
   return (
@@ -122,6 +127,9 @@ export default function Header() {
             ))}
           </div>
 
+          {/* Language Toggle */}
+          <LanguageToggle />
+
           {/* Mobile Hamburger */}
           <motion.button
             whileTap={{ scale: 0.9 }}
@@ -215,7 +223,7 @@ export default function Header() {
                   letterSpacing: '2px',
                   margin: 0
                 }}>
-                  NAVEGACIÓN
+                  {t('navigation').toUpperCase()}
                 </h2>
                 <motion.button
                   whileTap={{ scale: 0.9 }}
@@ -265,7 +273,7 @@ export default function Header() {
                   }}
                 >
                   <span style={{ fontSize: '1.3rem' }}>🏠</span>
-                  <span>INICIO</span>
+                  <span>{t('home').toUpperCase()}</span>
                 </motion.button>
 
                 {menuItems.map((item) => (

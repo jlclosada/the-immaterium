@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { api } from '../services/api';
+import { useStore } from '../stores/useStore';
+import { useTranslation } from '../i18n/translations';
 import Header from '../components/UI/Header';
 import Footer from '../components/UI/Footer';
 
@@ -9,6 +11,8 @@ const LoreDetailPage = () => {
     const { id } = useParams();
     const [lore, setLore] = useState(null);
     const [loading, setLoading] = useState(true);
+    const language = useStore(state => state.language);
+    const t = useTranslation(language);
 
     useEffect(() => {
         const fetchLore = async () => {
@@ -37,6 +41,7 @@ const LoreDetailPage = () => {
                 justifyContent: 'center'
             }}>
                 <div className="loading-spinner"></div>
+                <p style={{ marginLeft: '1rem', color: 'var(--color-primary)' }}>{t('loading')}</p>
             </div>
         );
     }
@@ -51,8 +56,8 @@ const LoreDetailPage = () => {
                 textAlign: 'center'
             }}>
                 <Header />
-                <h1>Entrada de Lore no encontrada</h1>
-                <Link to="/lore" style={{ color: 'var(--color-primary)' }}>Volver a Lore</Link>
+                <h1>{t('loreTitle')} {t('notFound')}</h1>
+                <Link to="/lore" style={{ color: 'var(--color-primary)' }}>{t('backToLore')}</Link>
             </div>
         );
     }
@@ -86,7 +91,7 @@ const LoreDetailPage = () => {
                         fontSize: 'clamp(1rem, 2.5vw, 1.1rem)'
                     }}
                 >
-                    ← Volver a Biblioteca de Lore
+                    ← {t('backToLore')}
                 </Link>
 
                 {/* Header */}
@@ -107,7 +112,7 @@ const LoreDetailPage = () => {
                             fontWeight: 'bold',
                             marginBottom: '1rem'
                         }}>
-                            ⭐ DESTACADO
+                            ⭐ {t('featured')}
                         </div>
                     )}
 
@@ -169,8 +174,8 @@ const LoreDetailPage = () => {
                         fontSize: 'clamp(0.85rem, 2vw, 0.95rem)'
                     }}>
                         <span>✍️ {lore.author}</span>
-                        <span>📅 {new Date(lore.dateCreated).toLocaleDateString('es-ES')}</span>
-                        <span>👁️ {lore.views} vistas</span>
+                        <span>📅 {new Date(lore.dateCreated).toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US')}</span>
+                        <span>👁️ {lore.views} {t('views')}</span>
                     </div>
 
                     {lore.tags && lore.tags.length > 0 && (
@@ -253,7 +258,7 @@ const LoreDetailPage = () => {
                                 )}
                                 <div>
                                     <div style={{ color: '#888', fontSize: '0.8rem' }}>
-                                        Relacionado con
+                                        {t('relatedTo')}
                                     </div>
                                     <div style={{
                                         color: 'var(--color-primary)',

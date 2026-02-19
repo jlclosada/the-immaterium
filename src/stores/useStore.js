@@ -18,6 +18,13 @@ export const useStore = create((set, get) => ({
   showUI: true,
   menuOpen: false,
 
+  // Language state
+  language: localStorage.getItem('language') || 'es', // 'es' | 'en'
+  setLanguage: (lang) => {
+    localStorage.setItem('language', lang);
+    set({ language: lang });
+  },
+
   // Auth state
   token: localStorage.getItem('token') || null,
   setToken: (token) => {
