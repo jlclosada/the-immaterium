@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { useStore } from '../stores/useStore';
+import { useStore } from '../../stores/useStore';
 
 const LanguageToggle = () => {
     const { language, setLanguage } = useStore();
