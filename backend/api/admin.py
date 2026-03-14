@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (
     Army, ArmyImage, PaintingGuide, GuideMaterial, GuideStep,
-    BattleReport, BattleNarrative, Comment, LoreEntry
+    BattleReport, BattleNarrative, Comment, LoreEntry, Faction
 )
 
 
@@ -83,6 +83,12 @@ class BattleReportAdmin(admin.ModelAdmin):
         }),
     )
     inlines = [BattleNarrativeInline]
+
+
+@admin.register(Faction)
+class FactionAdmin(admin.ModelAdmin):
+    list_display = ('name', 'id')
+    search_fields = ('name', 'description')
 
 
 @admin.register(Comment)
