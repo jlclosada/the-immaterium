@@ -4,43 +4,86 @@ from .models import (
     BattleReport, BattleNarrative, Comment, LoreEntry
 )
 
+
 class ArmyImageInline(admin.TabularInline):
     model = ArmyImage
     extra = 1
-    fields = ('url', 'name', 'is_favorite')
-    list_editable = ('is_favorite',)
+    fields = ('id', 'url', 'name', 'is_favorite')
+
 
 @admin.register(Army)
 class ArmyAdmin(admin.ModelAdmin):
-    list_display = ('name', 'id')
-    search_fields = ('name', 'description')
+    list_display = ('name', 'id', 'planet_name', 'planet_type')
+    search_fields = ('name', 'description', 'name_es')
+    list_filter = ('planet_type',)
+    fieldsets = (
+        ('Identificación', {
+            'fields': ('id', 'name', 'name_es')
+        }),
+        ('Descripción (EN)', {
+            'fields': ('description', 'history')
+        }),
+        ('Descripción (ES)', {
+            'fields': ('description_es', 'history_es'),
+            'classes': ('collapse',),
+        }),
+        ('Visual', {
+            'fields': ('icon_url', 'color', 'emissive', 'planet_type', 'planet_name')
+        }),
+        ('3D', {
+            'fields': ('position', 'size'),
+            'classes': ('collapse',),
+        }),
+    )
     inlines = [ArmyImageInline]
+
 
 class GuideMaterialInline(admin.TabularInline):
     model = GuideMaterial
     extra = 1
 
+
 class GuideStepInline(admin.StackedInline):
     model = GuideStep
     extra = 1
 
+
 @admin.register(PaintingGuide)
 class PaintingGuideAdmin(admin.ModelAdmin):
-    list_display = ('title', 'faction', 'author', 'difficulty', 'likes')
+    list_display = ('title', 'faction', 'author', 'difficulty', 'likes', 'date_created')
     list_filter = ('faction', 'difficulty')
     search_fields = ('title', 'author')
     inlines = [GuideMaterialInline, GuideStepInline]
 
+
 class BattleNarrativeInline(admin.StackedInline):
     model = BattleNarrative
     extra = 1
+    fields = ('turn', 'phase', 'text', 'order')
+
 
 @admin.register(BattleReport)
 class BattleReportAdmin(admin.ModelAdmin):
-    list_display = ('title', 'date', 'player1_faction', 'player2_faction', 'likes')
-    list_filter = ('date',)
-    search_fields = ('title', 'player1_name', 'player2_name')
+    list_display = ('title', 'date', 'player1_name', 'player1_score', 'player2_name', 'player2_score')
+    list_filter = ('date', 'is_favorite')
+    search_fields = ('title', 'player1_name', 'player2_name', 'mission')
+    fieldsets = (
+        ('Información general', {
+            'fields': ('id', 'title', 'mission', 'points', 'date', 'tags', 'factions', 'mvp', 'is_favorite')
+        }),
+        ('Jugador 1', {
+            'fields': ('player1_name', 'player1_faction', 'player1_score', 'player1_list')
+        }),
+        ('Jugador 2', {
+            'fields': ('player2_name', 'player2_faction', 'player2_score', 'player2_list')
+        }),
+        ('Momentos clave', {
+            'fields': ('key_moments',),
+            'classes': ('collapse',),
+        }),
+    )
     inlines = [BattleNarrativeInline]
+
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
@@ -53,6 +96,6 @@ class CommentAdmin(admin.ModelAdmin):
 class LoreEntryAdmin(admin.ModelAdmin):
     list_display = ('title', 'category', 'related_faction', 'author', 'is_featured', 'views', 'date_created')
     list_filter = ('category', 'is_featured', 'related_faction')
-    search_fields = ('title', 'content', 'tags')
+    search_fields = ('title', 'content', 'author')
     list_editable = ('is_featured',)
     readonly_fields = ('date_created', 'created_at', 'updated_at')

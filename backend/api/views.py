@@ -233,13 +233,12 @@ class BattleReportViewSet(viewsets.ModelViewSet):
             data['player2_name'] = armies_data.get('player2', {}).get('name', '')
             data['player2_faction'] = armies_data.get('player2', {}).get('faction', '')
             data['player2_list'] = armies_data.get('player2', {}).get('list', [])
-        if 'keyMoments' in data:
-            data['key_moments'] = data.pop('keyMoments')
-        
+        # keyMoments is now handled by the serializer (source='key_moments')
+
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         report = serializer.save()
-        
+
         # Create narrative entries
         for i, narrative_entry in enumerate(narrative_data):
             BattleNarrative.objects.create(
@@ -279,8 +278,7 @@ class BattleReportViewSet(viewsets.ModelViewSet):
                 data['player2_name'] = armies_data['player2'].get('name', instance.player2_name)
                 data['player2_faction'] = armies_data['player2'].get('faction', instance.player2_faction)
                 data['player2_list'] = armies_data['player2'].get('list', instance.player2_list)
-        if 'keyMoments' in data:
-            data['key_moments'] = data.pop('keyMoments')
+        # keyMoments is now handled by the serializer (source='key_moments')
         
         serializer = self.get_serializer(instance, data=data, partial=True)
         serializer.is_valid(raise_exception=True)

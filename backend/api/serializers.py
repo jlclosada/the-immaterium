@@ -50,7 +50,11 @@ class ArmySerializer(serializers.ModelSerializer):
         return getattr(obj, 'history_es', None)
 
     def create(self, validated_data):
+        import uuid
         images_data = validated_data.pop('images', [])
+        # Auto-generate ID if not provided
+        if not validated_data.get('id'):
+            validated_data['id'] = str(uuid.uuid4())
         army = Army.objects.create(**validated_data)
 
         # Create images for the army
@@ -138,36 +142,61 @@ class BattleNarrativeSerializer(serializers.ModelSerializer):
 class BattleReportSerializer(serializers.ModelSerializer):
     narrative = BattleNarrativeSerializer(many=True, read_only=True)
     comments = CommentSerializer(many=True, read_only=True)
+    # Read-only computed fields for the API response
     armies = serializers.SerializerMethodField()
     finalScore = serializers.SerializerMethodField()
-    keyMoments = serializers.ListField(source='key_moments', read_only=True)
-    
+    # keyMoments maps to key_moments for both read and write
+    keyMoments = serializers.ListField(
+        child=serializers.CharField(), source='key_moments',
+        required=False, default=list
+    )
+    # Writable player fields (accepted on POST/PUT/PATCH)
+    player1_name = serializers.CharField(required=False, allow_blank=True, default='')
+    player1_faction = serializers.CharField(required=False, allow_blank=True, default='')
+    player1_score = serializers.IntegerField(required=False, default=0)
+    player1_list = serializers.ListField(
+        child=serializers.CharField(), required=False, default=list
+    )
+    player2_name = serializers.CharField(required=False, allow_blank=True, default='')
+    player2_faction = serializers.CharField(required=False, allow_blank=True, default='')
+    player2_score = serializers.IntegerField(required=False, default=0)
+    player2_list = serializers.ListField(
+        child=serializers.CharField(), required=False, default=list
+    )
+
     class Meta:
         model = BattleReport
         fields = [
             'id', 'title', 'factions', 'mission', 'points', 'date',
-            'tags', 'likes', 'views', 'finalScore', 'armies',
-            'narrative', 'keyMoments', 'mvp', 'comments'
+            'tags', 'likes', 'views', 'mvp',
+            # Writable player fields
+            'player1_name', 'player1_faction', 'player1_score', 'player1_list',
+            'player2_name', 'player2_faction', 'player2_score', 'player2_list',
+            'keyMoments',
+            # Read-only computed fields
+            'finalScore', 'armies',
+            # Related
+            'narrative', 'comments',
         ]
-        
+
     def get_armies(self, obj):
         return {
             'player1': {
                 'name': obj.player1_name,
                 'faction': obj.player1_faction,
-                'list': obj.player1_list
+                'list': obj.player1_list,
             },
             'player2': {
                 'name': obj.player2_name,
                 'faction': obj.player2_faction,
-                'list': obj.player2_list
-            }
+                'list': obj.player2_list,
+            },
         }
-    
+
     def get_finalScore(self, obj):
         return {
             'player1': obj.player1_score,
-            'player2': obj.player2_score
+            'player2': obj.player2_score,
         }
 
 class UserLikeSerializer(serializers.ModelSerializer):
