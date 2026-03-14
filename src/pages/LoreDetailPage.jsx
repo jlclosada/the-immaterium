@@ -7,276 +7,257 @@ import { useTranslation } from '../i18n/translations';
 import Header from '../components/UI/Header';
 import Footer from '../components/UI/Footer';
 
+const CATEGORY_COLORS = {
+  historia: '#a78bfa',
+  faccion: 'var(--color-primary)',
+  evento: '#ff6464',
+  personaje: '#ffb432',
+  lugar: '#50c878',
+  tecnologia: 'var(--color-secondary)',
+  otro: 'rgba(255,255,255,0.5)',
+};
+
+const getCategoryColor = (value) => CATEGORY_COLORS[value] || 'var(--color-primary)';
+
 const LoreDetailPage = () => {
-    const { id } = useParams();
-    const [lore, setLore] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const language = useStore(state => state.language);
-    const t = useTranslation(language);
+  const { id } = useParams();
+  const [lore, setLore] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const language = useStore(state => state.language);
+  const t = useTranslation(language);
 
-    useEffect(() => {
-        const fetchLore = async () => {
-            try {
-                const data = await api.getLoreEntry(id);
-                setLore(data);
-            } catch (error) {
-                console.error('Failed to fetch lore entry:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
+  useEffect(() => {
+    const fetchLore = async () => {
+      try {
+        const data = await api.getLoreEntry(id);
+        setLore(data);
+      } catch (error) {
+        console.error('Failed to fetch lore entry:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (id) fetchLore();
+  }, [id]);
 
-        if (id) {
-            fetchLore();
-        }
-    }, [id]);
+  if (loading) {
+    return (
+      <div style={{ minHeight: '100vh', background: 'var(--color-darker)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="loading-spinner" />
+      </div>
+    );
+  }
 
-    if (loading) {
-        return (
-            <div style={{
-                minHeight: '100vh',
-                background: 'var(--color-darker)',
+  if (!lore) {
+    return (
+      <div style={{ minHeight: '100vh', background: 'var(--color-darker)', padding: '4rem 2rem', color: 'var(--color-light)', textAlign: 'center' }}>
+        <Header />
+        <h1 style={{ marginTop: '6rem', color: 'rgba(255,255,255,0.5)' }}>Entrada no encontrada</h1>
+        <Link to="/lore" style={{ color: 'var(--color-primary)', textDecoration: 'none' }}>← {t('backToLore')}</Link>
+      </div>
+    );
+  }
+
+  const categoryColor = getCategoryColor(lore.category);
+
+  return (
+    <div style={{ minHeight: '100vh', background: 'var(--color-darker)', display: 'flex', flexDirection: 'column' }}>
+      <Header />
+
+      <div style={{
+        flex: 1,
+        maxWidth: '900px',
+        margin: '0 auto',
+        padding: 'clamp(5rem, 10vw, 6.5rem) clamp(1rem, 4vw, 2rem) clamp(2rem, 4vw, 3rem)',
+        width: '100%',
+      }}>
+        {/* Back */}
+        <Link to="/lore" style={{
+          display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+          color: 'rgba(255,255,255,0.4)', textDecoration: 'none',
+          fontSize: '0.85rem', letterSpacing: '1px', marginBottom: '2rem',
+          transition: 'color 0.2s',
+        }}
+          onMouseEnter={e => e.currentTarget.style.color = 'var(--color-primary)'}
+          onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}
+        >
+          ← {t('backToLore')}
+        </Link>
+
+        {/* Header card */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          style={{
+            background: 'rgba(255,255,255,0.025)',
+            border: '1px solid rgba(255,255,255,0.07)',
+            borderLeft: `3px solid ${categoryColor}`,
+            borderRadius: 'var(--radius-xl)',
+            padding: 'clamp(1.5rem, 4vw, 2.5rem)',
+            marginBottom: '1.5rem',
+          }}
+        >
+          {/* Badges */}
+          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', flexWrap: 'wrap', alignItems: 'center' }}>
+            {lore.isFeatured && (
+              <span style={{
+                background: 'var(--color-accent)',
+                color: '#000',
+                padding: '3px 10px',
+                borderRadius: 'var(--radius-full)',
+                fontSize: '0.7rem',
+                fontWeight: 700,
+              }}>
+                ⭐ {t('featured')}
+              </span>
+            )}
+            <span style={{
+              padding: '3px 10px',
+              borderRadius: 'var(--radius-full)',
+              background: `${categoryColor}18`,
+              border: `1px solid ${categoryColor}35`,
+              color: categoryColor,
+              fontSize: '0.7rem',
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+            }}>
+              {lore.category}
+            </span>
+            {lore.relatedFaction && (
+              <span style={{
+                padding: '3px 10px',
+                borderRadius: 'var(--radius-full)',
+                background: 'rgba(255,215,0,0.1)',
+                border: '1px solid rgba(255,215,0,0.2)',
+                color: 'var(--color-accent)',
+                fontSize: '0.7rem',
+                display: 'flex', alignItems: 'center', gap: '0.3rem',
+              }}>
+                {lore.relatedFaction.iconUrl && (
+                  <img src={lore.relatedFaction.iconUrl} alt="" style={{ width: '13px', height: '13px', objectFit: 'contain' }} />
+                )}
+                {lore.relatedFaction.name}
+              </span>
+            )}
+          </div>
+
+          <h1 style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 'clamp(1.75rem, 5vw, 3rem)',
+            color: '#fff',
+            lineHeight: 1.2,
+            letterSpacing: '1px',
+            marginBottom: '1rem',
+          }}>
+            {lore.title}
+          </h1>
+
+          <div style={{
+            display: 'flex', gap: '1.25rem', flexWrap: 'wrap',
+            color: 'rgba(255,255,255,0.4)',
+            fontSize: '0.82rem',
+          }}>
+            <span>✍️ {lore.author}</span>
+            <span>📅 {new Date(lore.dateCreated).toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US')}</span>
+            <span>👁️ {lore.views} {t('views')}</span>
+          </div>
+
+          {/* Tags */}
+          {lore.tags?.length > 0 && (
+            <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginTop: '1rem' }}>
+              {lore.tags.map(tag => (
+                <span key={tag} style={{
+                  padding: '3px 10px',
+                  background: 'rgba(0,206,209,0.1)',
+                  border: '1px solid rgba(0,206,209,0.2)',
+                  borderRadius: 'var(--radius-full)',
+                  fontSize: '0.75rem',
+                  color: '#00ced1',
+                }}>
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          )}
+        </motion.div>
+
+        {/* Content */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          style={{
+            background: 'rgba(255,255,255,0.02)',
+            border: '1px solid rgba(255,255,255,0.06)',
+            borderRadius: 'var(--radius-xl)',
+            padding: 'clamp(1.5rem, 4vw, 2.5rem)',
+            marginBottom: '1.5rem',
+          }}
+        >
+          <div style={{
+            color: 'rgba(255,255,255,0.75)',
+            lineHeight: 2,
+            fontSize: 'clamp(0.95rem, 2.5vw, 1.05rem)',
+            whiteSpace: 'pre-wrap',
+            fontFamily: 'var(--font-body)',
+          }}>
+            {lore.content}
+          </div>
+        </motion.div>
+
+        {/* Related faction */}
+        {lore.relatedFaction && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+          >
+            <Link to={`/armies/${lore.relatedFaction.id}`} style={{ textDecoration: 'none' }}>
+              <div style={{
+                background: 'rgba(255,255,255,0.025)',
+                border: '1px solid rgba(255,255,255,0.07)',
+                borderRadius: 'var(--radius-xl)',
+                padding: 'clamp(1rem, 3vw, 1.5rem)',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center'
-            }}>
-                <div className="loading-spinner"></div>
-                <p style={{ marginLeft: '1rem', color: 'var(--color-primary)' }}>{t('loading')}</p>
-            </div>
-        );
-    }
-
-    if (!lore) {
-        return (
-            <div style={{
-                minHeight: '100vh',
-                background: 'var(--color-darker)',
-                padding: '4rem 2rem',
-                color: 'var(--color-light)',
-                textAlign: 'center'
-            }}>
-                <Header />
-                <h1>{t('loreTitle')} {t('notFound')}</h1>
-                <Link to="/lore" style={{ color: 'var(--color-primary)' }}>{t('backToLore')}</Link>
-            </div>
-        );
-    }
-
-    return (
-        <div style={{
-            minHeight: '100vh',
-            background: 'var(--color-darker)',
-            display: 'flex',
-            flexDirection: 'column'
-        }}>
-            <Header />
-            <div style={{
-                flex: 1,
-                padding: 'clamp(2rem, 4vw, 4rem) clamp(1rem, 4vw, 2rem)',
-                color: 'var(--color-light)',
-                maxWidth: '900px',
-                margin: '0 auto',
-                paddingTop: 'clamp(5rem, 10vw, 6rem)',
-                width: '100%'
-            }}>
-                <Link
-                    to="/lore"
-                    style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        color: 'var(--color-primary)',
-                        textDecoration: 'none',
-                        marginBottom: '2rem',
-                        fontSize: 'clamp(1rem, 2.5vw, 1.1rem)'
-                    }}
-                >
-                    ← {t('backToLore')}
-                </Link>
-
-                {/* Header */}
-                <motion.div
-                    initial={{ y: -20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    className="glass-panel"
-                    style={{ padding: 'clamp(1.5rem, 3vw, 2rem)', marginBottom: '2rem' }}
-                >
-                    {lore.isFeatured && (
-                        <div style={{
-                            display: 'inline-block',
-                            background: 'var(--color-accent)',
-                            color: '#000',
-                            padding: '0.4rem 1rem',
-                            borderRadius: '12px',
-                            fontSize: '0.8rem',
-                            fontWeight: 'bold',
-                            marginBottom: '1rem'
-                        }}>
-                            ⭐ {t('featured')}
-                        </div>
-                    )}
-
-                    <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
-                        <span style={{
-                            background: 'rgba(0, 212, 255, 0.2)',
-                            color: 'var(--color-primary)',
-                            padding: '0.3rem 0.75rem',
-                            borderRadius: '12px',
-                            fontSize: '0.75rem',
-                            fontWeight: 'bold',
-                            textTransform: 'uppercase'
-                        }}>
-                            {lore.category}
-                        </span>
-                        {lore.relatedFaction && (
-                            <span style={{
-                                background: 'rgba(255, 215, 0, 0.2)',
-                                color: 'var(--color-accent)',
-                                padding: '0.3rem 0.75rem',
-                                borderRadius: '12px',
-                                fontSize: '0.75rem',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.25rem'
-                            }}>
-                                {lore.relatedFaction.iconUrl && (
-                                    <img
-                                        src={lore.relatedFaction.iconUrl}
-                                        alt=""
-                                        style={{
-                                            width: '14px',
-                                            height: '14px',
-                                            objectFit: 'contain'
-                                        }}
-                                    />
-                                )}
-                                {lore.relatedFaction.name}
-                            </span>
-                        )}
-                    </div>
-
-                    <h1 style={{
-                        fontSize: 'clamp(1.8rem, 5vw, 3rem)',
-                        marginBottom: '1rem',
-                        color: '#fff',
-                        fontFamily: 'var(--font-display)',
-                        lineHeight: '1.2'
-                    }}>
-                        {lore.title}
-                    </h1>
-
-                    <div style={{
-                        display: 'flex',
-                        gap: 'clamp(1rem, 3vw, 2rem)',
-                        marginBottom: '1.5rem',
-                        flexWrap: 'wrap',
-                        color: '#aaa',
-                        fontSize: 'clamp(0.85rem, 2vw, 0.95rem)'
-                    }}>
-                        <span>✍️ {lore.author}</span>
-                        <span>📅 {new Date(lore.dateCreated).toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US')}</span>
-                        <span>👁️ {lore.views} {t('views')}</span>
-                    </div>
-
-                    {lore.tags && lore.tags.length > 0 && (
-                        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                            {lore.tags.map(tag => (
-                                <span
-                                    key={tag}
-                                    style={{
-                                        padding: '0.4rem 1rem',
-                                        background: 'rgba(0,206,209,0.2)',
-                                        borderRadius: '12px',
-                                        fontSize: 'clamp(0.8rem, 2vw, 0.9rem)',
-                                        color: '#00ced1'
-                                    }}
-                                >
-                                    #{tag}
-                                </span>
-                            ))}
-                        </div>
-                    )}
-                </motion.div>
-
-                {/* Content */}
-                <motion.div
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.2 }}
-                    className="glass-panel"
-                    style={{ padding: 'clamp(1.5rem, 3vw, 2rem)' }}
-                >
-                    <div style={{
-                        color: '#ddd',
-                        lineHeight: '1.8',
-                        fontSize: 'clamp(0.95rem, 2.5vw, 1.1rem)',
-                        whiteSpace: 'pre-wrap',
-                        fontFamily: 'var(--font-body)'
-                    }}>
-                        {lore.content}
-                    </div>
-                </motion.div>
-
-                {/* Related Faction Section */}
-                {lore.relatedFaction && (
-                    <motion.div
-                        initial={{ y: 20, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        transition={{ delay: 0.3 }}
-                        style={{ marginTop: '2rem' }}
-                    >
-                        <Link
-                            to={`/armies/${lore.relatedFaction.id}`}
-                            style={{ textDecoration: 'none' }}
-                        >
-                            <div className="glass-panel" style={{
-                                padding: 'clamp(1rem, 2.5vw, 1.5rem)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '1rem',
-                                transition: 'all 0.3s ease',
-                                cursor: 'pointer'
-                            }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.borderColor = 'var(--color-primary)';
-                                e.currentTarget.style.transform = 'translateY(-2px)';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
-                                e.currentTarget.style.transform = 'translateY(0)';
-                            }}>
-                                {lore.relatedFaction.iconUrl && (
-                                    <img
-                                        src={lore.relatedFaction.iconUrl}
-                                        alt={lore.relatedFaction.name}
-                                        style={{
-                                            width: '40px',
-                                            height: '40px',
-                                            objectFit: 'contain'
-                                        }}
-                                    />
-                                )}
-                                <div>
-                                    <div style={{ color: '#888', fontSize: '0.8rem' }}>
-                                        {t('relatedTo')}
-                                    </div>
-                                    <div style={{
-                                        color: 'var(--color-primary)',
-                                        fontSize: 'clamp(1rem, 2.5vw, 1.2rem)',
-                                        fontWeight: 'bold'
-                                    }}>
-                                        {lore.relatedFaction.name}
-                                    </div>
-                                </div>
-                            </div>
-                        </Link>
-                    </motion.div>
+                gap: '1rem',
+                transition: 'border-color 0.2s, transform 0.2s',
+              }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.borderColor = 'rgba(0,212,255,0.3)';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+              >
+                {lore.relatedFaction.iconUrl && (
+                  <img
+                    src={lore.relatedFaction.iconUrl}
+                    alt={lore.relatedFaction.name}
+                    style={{ width: '44px', height: '44px', objectFit: 'contain', filter: 'drop-shadow(0 0 10px rgba(0,212,255,0.2))' }}
+                  />
                 )}
-            </div>
-            <Footer />
-        </div>
-    );
+                <div>
+                  <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.72rem', letterSpacing: '1px', marginBottom: '0.2rem' }}>
+                    {t('relatedTo')}
+                  </div>
+                  <div style={{ color: 'var(--color-primary)', fontSize: '1.05rem', fontWeight: 600, fontFamily: 'var(--font-display)' }}>
+                    {lore.relatedFaction.name}
+                  </div>
+                </div>
+                <div style={{ marginLeft: 'auto', color: 'var(--color-primary)', opacity: 0.6, fontSize: '1.2rem' }}>→</div>
+              </div>
+            </Link>
+          </motion.div>
+        )}
+      </div>
+
+      <Footer />
+    </div>
+  );
 };
 
 export default LoreDetailPage;
-

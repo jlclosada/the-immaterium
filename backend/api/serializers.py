@@ -67,13 +67,13 @@ class ArmySerializer(serializers.ModelSerializer):
             setattr(instance, attr, value)
         instance.save()
 
-        # Update images if provided – append new images instead of wiping all
+        # Replace images: delete all existing and recreate from payload
         if images_data is not None:
+            instance.images.all().delete()
             for image_data in images_data:
-                # If an ID is supplied and already exists, skip to avoid duplicate‑key error
-                img_id = image_data.get('id')
-                if img_id and instance.images.filter(id=img_id).exists():
-                    continue
+                import uuid
+                if not image_data.get('id'):
+                    image_data['id'] = str(uuid.uuid4())
                 ArmyImage.objects.create(army=instance, **image_data)
 
         return instance
@@ -178,6 +178,7 @@ class UserLikeSerializer(serializers.ModelSerializer):
 class UserFavoriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserFavorite
+        fields = '__all__'
 
 class LoreEntrySerializer(serializers.ModelSerializer):
     dateCreated = serializers.DateTimeField(source='date_created', read_only=True)
@@ -200,5 +201,3 @@ class LoreEntrySerializer(serializers.ModelSerializer):
                 'iconUrl': obj.related_faction.icon_url
             }
         return None
-
-        fields = '__all__'

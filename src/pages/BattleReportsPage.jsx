@@ -1,186 +1,257 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import Header from '../components/UI/Header';
 import Footer from '../components/UI/Footer';
 
 const BattleReportsPage = () => {
-    const navigate = useNavigate();
-    const [reports, setReports] = useState([]);
-    const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const [reports, setReports] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
 
-    useEffect(() => {
-        const fetchReports = async () => {
-            try {
-                const data = await api.getBattleReports();
-                setReports(Array.isArray(data) ? data : []);
-            } catch (error) {
-                console.error('Failed to fetch reports:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
+  useEffect(() => {
+    const fetchReports = async () => {
+      try {
+        const data = await api.getBattleReports();
+        setReports(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error('Failed to fetch reports:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchReports();
+  }, []);
 
-        fetchReports();
-    }, []);
-
+  const filteredReports = reports.filter(r => {
+    const term = searchTerm.toLowerCase();
     return (
-        <div style={{
-            minHeight: '100vh',
-            background: 'var(--color-darker)',
-            display: 'flex',
-            flexDirection: 'column'
-        }}>
-            <Header />
-            <div style={{
-                flex: 1,
-                padding: '4rem 2rem',
-                color: 'var(--color-light)',
-                maxWidth: '1200px',
-                margin: '0 auto',
-                paddingTop: '6rem',
-                width: '100%'
-            }}>
-                <header style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    marginBottom: '3rem',
-                    textAlign: 'center'
-                }}>
-                    <h1 style={{
-                        fontFamily: 'var(--font-display)',
-                        fontSize: '3rem',
-                        textTransform: 'uppercase',
-                        background: 'linear-gradient(135deg, #ff4d4d, #f9cb28)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        margin: 0,
-                        letterSpacing: '2px'
-                    }}>
-                        Battle Reports
-                    </h1>
-                </header>
-
-                {loading ? (
-                    <div className="loading-spinner" style={{ margin: '5rem auto' }}></div>
-                ) : (
-                    <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                        gap: '2rem'
-                    }}>
-                        {reports.length > 0 ? reports.map((report, index) => (
-                            <motion.div
-                                key={report.id}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: index * 0.1 }}
-                                className="glass-panel"
-                                style={{ padding: '2rem', cursor: 'pointer' }}
-                                onClick={() => navigate(`/battle-reports/${report.id}`)}
-                                whileHover={{ scale: 1.02 }}
-                            >
-                                <h2 style={{
-                                    fontFamily: 'var(--font-display)',
-                                    marginBottom: '0.5rem',
-                                    color: '#f9cb28'
-                                }}>
-                                    {report.title}
-                                </h2>
-                                <div style={{
-                                    display: 'flex',
-                                    gap: '1rem',
-                                    marginBottom: '1rem',
-                                    fontSize: '0.9rem',
-                                    color: '#aaa',
-                                    flexWrap: 'wrap'
-                                }}>
-                                    <span>📅 {new Date(report.date).toLocaleDateString('es-ES')}</span>
-                                    <span>🎯 {report.mission}</span>
-                                    <span>⚔️ {report.points} pts</span>
-                                </div>
-                                {report.armies && (
-                                    <div style={{
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center',
-                                        background: 'rgba(0,0,0,0.3)',
-                                        padding: '0.75rem',
-                                        borderRadius: '8px',
-                                        marginBottom: '1rem'
-                                    }}>
-                                        <span style={{ fontWeight: 'bold' }}>{report.armies.player1?.faction || report.armies.player1?.name || 'Player 1'}</span>
-                                        <span style={{ fontWeight: 'bold', color: '#f9cb28' }}>VS</span>
-                                        <span style={{ fontWeight: 'bold' }}>{report.armies.player2?.faction || report.armies.player2?.name || 'Player 2'}</span>
-                                    </div>
-                                )}
-                                {report.finalScore && (
-                                    <div style={{
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        background: 'rgba(255,215,0,0.1)',
-                                        padding: '0.5rem',
-                                        borderRadius: '8px',
-                                        marginBottom: '1rem',
-                                        fontSize: '0.9rem'
-                                    }}>
-                                        <span>{report.finalScore.player1}</span>
-                                        <span style={{ fontWeight: 'bold' }}>-</span>
-                                        <span>{report.finalScore.player2}</span>
-                                    </div>
-                                )}
-                                {report.tags && report.tags.length > 0 && (
-                                    <div style={{
-                                        display: 'flex',
-                                        gap: '0.5rem',
-                                        flexWrap: 'wrap',
-                                        marginBottom: '1rem'
-                                    }}>
-                                        {report.tags.slice(0, 3).map(tag => (
-                                            <span
-                                                key={tag}
-                                                style={{
-                                                    padding: '0.2rem 0.6rem',
-                                                    background: 'rgba(255,100,100,0.2)',
-                                                    borderRadius: '12px',
-                                                    fontSize: '0.75rem',
-                                                    color: '#ff6464'
-                                                }}
-                                            >
-                                                #{tag}
-                                            </span>
-                                        ))}
-                                    </div>
-                                )}
-                                {/* Stats removed */}
-                                {
-                                    report.isFavorite && (
-                                        <div style={{
-                                            position: 'absolute',
-                                            top: '1rem',
-                                            right: '1rem',
-                                            fontSize: '1.2rem',
-                                            zIndex: 10
-                                        }}>
-                                            ❤️
-                                        </div>
-                                    )
-                                }
-                            </motion.div>
-                        )) : (
-                            <div className="empty-state" style={{ gridColumn: '1/-1' }}>
-                                <div className="empty-state-icon">⚔️</div>
-                                <div className="empty-state-text">No battle reports logged yet. The galaxy is quiet... properly.</div>
-                            </div>
-                        )}
-                    </div>
-                )}
-            </div>
-            <Footer />
-        </div>
+      (r.title || '').toLowerCase().includes(term) ||
+      (r.mission || '').toLowerCase().includes(term) ||
+      (r.armies?.player1?.name || '').toLowerCase().includes(term) ||
+      (r.armies?.player2?.name || '').toLowerCase().includes(term)
     );
+  });
+
+  return (
+    <div style={{ minHeight: '100vh', background: 'var(--color-darker)', display: 'flex', flexDirection: 'column' }}>
+      <Header />
+
+      <div style={{
+        flex: 1,
+        maxWidth: '1200px',
+        margin: '0 auto',
+        padding: 'clamp(5rem, 10vw, 6.5rem) clamp(1rem, 4vw, 2rem) clamp(2rem, 4vw, 3rem)',
+        width: '100%',
+      }}>
+        {/* Page header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          style={{ textAlign: 'center', marginBottom: 'clamp(2rem, 5vw, 3.5rem)' }}
+        >
+          <p style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: '0.65rem',
+            letterSpacing: '4px',
+            color: '#ff6464',
+            textTransform: 'uppercase',
+            opacity: 0.7,
+            marginBottom: '0.75rem',
+          }}>
+            Crónicas de combate
+          </p>
+          <h1 style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 'clamp(2rem, 6vw, 3.5rem)',
+            textTransform: 'uppercase',
+            background: 'linear-gradient(135deg, #ff6464, #f9cb28)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            letterSpacing: '3px',
+            marginBottom: '1rem',
+          }}>
+            Battle Reports
+          </h1>
+          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem', letterSpacing: '1px' }}>
+            {reports.length > 0 ? `${reports.length} batallas registradas` : ''}
+          </p>
+        </motion.div>
+
+        {/* Search */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          style={{ maxWidth: '500px', margin: '0 auto clamp(2rem, 5vw, 3rem)' }}
+        >
+          <div style={{ position: 'relative' }}>
+            <span style={{
+              position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)',
+              color: 'rgba(255,255,255,0.3)', pointerEvents: 'none',
+            }}>🔍</span>
+            <input
+              type="text"
+              placeholder="Buscar batalla o misión..."
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              className="search-bar"
+              style={{ paddingLeft: '2.5rem' }}
+            />
+          </div>
+        </motion.div>
+
+        {loading ? (
+          <div className="loading-spinner" style={{ margin: '5rem auto' }} />
+        ) : filteredReports.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '5rem 2rem', color: 'rgba(255,255,255,0.3)' }}>
+            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⚔️</div>
+            <p>{searchTerm ? `Sin resultados para "${searchTerm}"` : 'No hay informes de batalla aún. La galaxia está en paz... por ahora.'}</p>
+          </div>
+        ) : (
+          <div className="cards-grid">
+            {filteredReports.map((report, index) => (
+              <ReportCard key={report.id} report={report} index={index} onClick={() => navigate(`/battle-reports/${report.id}`)} />
+            ))}
+          </div>
+        )}
+      </div>
+
+      <Footer />
+    </div>
+  );
+};
+
+const ReportCard = ({ report, index, onClick }) => {
+  const p1 = report.armies?.player1;
+  const p2 = report.armies?.player2;
+  const s1 = report.finalScore?.player1;
+  const s2 = report.finalScore?.player2;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.07, duration: 0.4 }}
+      onClick={onClick}
+      whileHover={{ y: -6 }}
+      style={{
+        background: 'rgba(255,255,255,0.025)',
+        border: '1px solid rgba(255,255,255,0.07)',
+        borderRadius: 'var(--radius-xl)',
+        padding: 'clamp(1.25rem, 3vw, 1.75rem)',
+        cursor: 'pointer',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1rem',
+        position: 'relative',
+        overflow: 'hidden',
+        transition: 'box-shadow 0.3s, border-color 0.3s',
+        backdropFilter: 'blur(8px)',
+      }}
+    >
+      {/* Top accent */}
+      <div style={{
+        position: 'absolute', top: 0, left: 0, right: 0, height: '2px',
+        background: 'linear-gradient(90deg, #ff6464, #f9cb28)',
+        opacity: 0.5,
+      }} />
+
+      {/* Title + date */}
+      <div>
+        <h2 style={{
+          fontFamily: 'var(--font-display)',
+          fontSize: 'clamp(1.05rem, 2.5vw, 1.3rem)',
+          color: '#f9cb28',
+          lineHeight: 1.25,
+          letterSpacing: '0.5px',
+          marginBottom: '0.4rem',
+        }}>
+          {report.title}
+        </h2>
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', fontSize: '0.78rem', color: 'rgba(255,255,255,0.35)' }}>
+          {report.date && <span>📅 {new Date(report.date).toLocaleDateString('es-ES')}</span>}
+          {report.mission && <span>🎯 {report.mission}</span>}
+          {report.points && <span>⚔️ {report.points} pts</span>}
+        </div>
+      </div>
+
+      {/* VS section */}
+      {(p1 || p2) && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.75rem',
+          background: 'rgba(0,0,0,0.25)',
+          borderRadius: 'var(--radius-lg)',
+          padding: '0.75rem',
+        }}>
+          <div style={{ flex: 1, textAlign: 'center' }}>
+            <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.55)', fontWeight: 600 }}>
+              {p1?.faction || p1?.name || 'Jugador 1'}
+            </div>
+            {s1 !== undefined && (
+              <div style={{ fontSize: '1.4rem', fontWeight: 700, color: '#fff', fontFamily: 'var(--font-display)' }}>
+                {s1}
+              </div>
+            )}
+          </div>
+          <div style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: '0.9rem',
+            fontWeight: 700,
+            color: '#ff6464',
+            letterSpacing: '1px',
+            flexShrink: 0,
+          }}>
+            VS
+          </div>
+          <div style={{ flex: 1, textAlign: 'center' }}>
+            <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.55)', fontWeight: 600 }}>
+              {p2?.faction || p2?.name || 'Jugador 2'}
+            </div>
+            {s2 !== undefined && (
+              <div style={{ fontSize: '1.4rem', fontWeight: 700, color: '#fff', fontFamily: 'var(--font-display)' }}>
+                {s2}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Tags */}
+      {report.tags?.length > 0 && (
+        <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+          {report.tags.slice(0, 3).map(tag => (
+            <span key={tag} style={{
+              padding: '2px 8px',
+              background: 'rgba(255,100,100,0.1)',
+              border: '1px solid rgba(255,100,100,0.2)',
+              borderRadius: 'var(--radius-full)',
+              fontSize: '0.7rem',
+              color: '#ff8080',
+            }}>
+              #{tag}
+            </span>
+          ))}
+        </div>
+      )}
+
+      <div style={{
+        fontSize: '0.78rem',
+        color: '#f9cb28',
+        letterSpacing: '1px',
+        fontFamily: 'var(--font-display)',
+        opacity: 0.7,
+        marginTop: 'auto',
+      }}>
+        Ver informe →
+      </div>
+    </motion.div>
+  );
 };
 
 export default BattleReportsPage;

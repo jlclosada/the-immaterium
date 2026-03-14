@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { api } from '../../services/api';
 import { useStore } from '../../stores/useStore';
+import { useToast } from './Toast';
 
 const GuideManager = () => {
     const [guides, setGuides] = useState([]);
     const [armies, setArmies] = useState([]);
     const [editingGuide, setEditingGuide] = useState(null);
     const token = useStore(state => state.token);
+    const toast = useToast();
     const [formData, setFormData] = useState({
         id: '',
         title: '',
@@ -72,16 +74,16 @@ const GuideManager = () => {
 
             if (editingGuide) {
                 await api.updateGuide(editingGuide.id, dataToSend, token);
-                alert('Guía actualizada correctamente');
+                toast('Guía actualizada correctamente', 'success');
             } else {
                 await api.createGuide(dataToSend, token);
-                alert('Guía creada correctamente');
+                toast('Guía creada correctamente', 'success');
             }
             loadGuides();
             handleCancel();
         } catch (error) {
             console.error('Error saving guide', error);
-            alert('Error al guardar: ' + error.message);
+            toast('Error al guardar: ' + error.message, 'error');
         }
     };
 
@@ -103,14 +105,13 @@ const GuideManager = () => {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('¿Estás seguro de que quieres eliminar esta guía?')) return;
         try {
             await api.deleteGuide(id, token);
-            alert('Guía eliminada correctamente');
+            toast('Guía eliminada correctamente', 'success');
             loadGuides();
         } catch (error) {
             console.error('Error deleting guide', error);
-            alert('Error al eliminar: ' + error.message);
+            toast('Error al eliminar: ' + error.message, 'error');
         }
     };
 

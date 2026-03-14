@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { api } from '../../services/api';
 import { useStore } from '../../stores/useStore';
+import { useToast } from './Toast';
 
 const ReportManager = () => {
     const [reports, setReports] = useState([]);
     const [armies, setArmies] = useState([]);
     const [editingReport, setEditingReport] = useState(null);
     const token = useStore(state => state.token);
+    const toast = useToast();
     const [formData, setFormData] = useState({
         id: '',
         title: '',
@@ -88,16 +90,16 @@ const ReportManager = () => {
 
             if (editingReport) {
                 await api.updateBattleReport(editingReport.id, dataToSend, token);
-                alert('Informe de batalla actualizado correctamente');
+                toast('Informe de batalla actualizado correctamente', 'success');
             } else {
                 await api.createBattleReport(dataToSend, token);
-                alert('Informe de batalla creado correctamente');
+                toast('Informe de batalla creado correctamente', 'success');
             }
             loadReports();
             handleCancel();
         } catch (error) {
             console.error('Error saving report', error);
-            alert('Error al guardar: ' + error.message);
+            toast('Error al guardar: ' + error.message, 'error');
         }
     };
 
@@ -126,14 +128,13 @@ const ReportManager = () => {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('¿Estás seguro de que quieres eliminar este informe de batalla?')) return;
         try {
             await api.deleteBattleReport(id, token);
-            alert('Informe eliminado correctamente');
+            toast('Informe eliminado correctamente', 'success');
             loadReports();
         } catch (error) {
             console.error('Error deleting report', error);
-            alert('Error al eliminar: ' + error.message);
+            toast('Error al eliminar: ' + error.message, 'error');
         }
     };
 

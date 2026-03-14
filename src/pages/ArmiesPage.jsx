@@ -1,192 +1,279 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
+import { useStore } from '../stores/useStore';
+import { useTranslation } from '../i18n/translations';
 import Header from '../components/UI/Header';
 import Footer from '../components/UI/Footer';
 
 const ArmiesPage = () => {
-    const navigate = useNavigate();
-    const [armies, setArmies] = useState([]);
-    const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const language = useStore(state => state.language);
+  const t = useTranslation(language);
+  const [armies, setArmies] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
 
-    useEffect(() => {
-        const fetchArmies = async () => {
-            try {
-                const data = await api.getArmies();
-                setArmies(Array.isArray(data) ? data : []);
-            } catch (error) {
-                console.error('Failed to fetch armies:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
+  useEffect(() => {
+    const fetchArmies = async () => {
+      try {
+        const data = await api.getArmies();
+        setArmies(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error('Failed to fetch armies:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchArmies();
+  }, []);
 
-        fetchArmies();
-    }, []);
+  const filteredArmies = armies.filter(army => {
+    const term = searchTerm.toLowerCase();
+    const name = (language === 'es' && army.nameEs ? army.nameEs : army.name) || '';
+    const desc = (language === 'es' && army.descriptionEs ? army.descriptionEs : army.description) || '';
+    return name.toLowerCase().includes(term) || desc.toLowerCase().includes(term);
+  });
 
-    return (
-        <div style={{
-            minHeight: '100vh',
-            background: 'var(--color-darker)',
-            display: 'flex',
-            flexDirection: 'column'
-        }}>
-            <Header />
-            <div style={{
-                flex: 1,
-                padding: '4rem 2rem',
-                color: 'var(--color-light)',
-                maxWidth: '1200px',
-                margin: '0 auto',
-                paddingTop: '6rem',
-                width: '100%'
+  return (
+    <div style={{ minHeight: '100vh', background: 'var(--color-darker)', display: 'flex', flexDirection: 'column' }}>
+      <Header />
+
+      <div style={{
+        flex: 1,
+        maxWidth: '1200px',
+        margin: '0 auto',
+        padding: 'clamp(5rem, 10vw, 6.5rem) clamp(1rem, 4vw, 2rem) clamp(2rem, 4vw, 3rem)',
+        width: '100%',
+      }}>
+        {/* Page header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          style={{ textAlign: 'center', marginBottom: 'clamp(2rem, 5vw, 3.5rem)' }}
+        >
+          <p style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: '0.65rem',
+            letterSpacing: '4px',
+            color: 'var(--color-primary)',
+            textTransform: 'uppercase',
+            opacity: 0.7,
+            marginBottom: '0.75rem',
+          }}>
+            Warhammer 40,000
+          </p>
+          <h1 style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 'clamp(2rem, 6vw, 3.5rem)',
+            textTransform: 'uppercase',
+            background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            letterSpacing: '3px',
+            marginBottom: '1rem',
+          }}>
+            {t('armiesTitle')}
+          </h1>
+          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem', letterSpacing: '1px' }}>
+            {armies.length > 0 ? `${armies.length} facciones registradas` : ''}
+          </p>
+        </motion.div>
+
+        {/* Search */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          style={{ maxWidth: '500px', margin: '0 auto clamp(2rem, 5vw, 3rem)' }}
+        >
+          <div style={{ position: 'relative' }}>
+            <span style={{
+              position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)',
+              color: 'rgba(255,255,255,0.3)', fontSize: '1rem', pointerEvents: 'none',
+            }}>🔍</span>
+            <input
+              type="text"
+              placeholder="Buscar facción..."
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              className="search-bar"
+              style={{ paddingLeft: '2.5rem' }}
+            />
+          </div>
+        </motion.div>
+
+        {loading ? (
+          <div className="loading-spinner" style={{ margin: '5rem auto' }} />
+        ) : filteredArmies.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '5rem 2rem', color: 'rgba(255,255,255,0.3)' }}>
+            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🛡️</div>
+            <p style={{ fontSize: '1rem' }}>
+              {searchTerm ? `Sin resultados para "${searchTerm}"` : 'No hay facciones registradas'}
+            </p>
+          </div>
+        ) : (
+          <div className="cards-grid">
+            {filteredArmies.map((army, index) => (
+              <ArmyCard key={army.id} army={army} index={index} language={language} onClick={() => navigate(`/armies/${army.id}`)} />
+            ))}
+          </div>
+        )}
+      </div>
+
+      <Footer />
+    </div>
+  );
+};
+
+const ArmyCard = ({ army, index, language, onClick }) => {
+  const name = language === 'es' && army.nameEs ? army.nameEs : army.name;
+  const description = language === 'es' && army.descriptionEs ? army.descriptionEs : army.description;
+  const previewImages = army.images?.slice(0, 3) || [];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.07, duration: 0.4 }}
+      onClick={onClick}
+      whileHover={{ y: -6 }}
+      style={{
+        background: 'rgba(255,255,255,0.025)',
+        border: '1px solid rgba(255,255,255,0.07)',
+        borderRadius: 'var(--radius-xl)',
+        overflow: 'hidden',
+        cursor: 'pointer',
+        display: 'flex',
+        flexDirection: 'column',
+        transition: 'border-color 0.3s, box-shadow 0.3s',
+        backdropFilter: 'blur(8px)',
+      }}
+      onHoverStart={e => {}}
+    >
+      {/* Icon / Image area */}
+      <div style={{
+        height: '180px',
+        background: 'rgba(0,0,0,0.4)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'relative',
+        overflow: 'hidden',
+        flexShrink: 0,
+      }}>
+        {army.iconUrl ? (
+          <img
+            src={army.iconUrl}
+            alt={name}
+            style={{
+              maxWidth: '75%', maxHeight: '75%',
+              objectFit: 'contain',
+              filter: 'drop-shadow(0 0 20px rgba(0,212,255,0.3))',
+              transition: 'transform 0.4s',
+            }}
+          />
+        ) : (
+          <div style={{ fontSize: '4rem', opacity: 0.3 }}>🛡️</div>
+        )}
+        {/* Image count badge */}
+        {army.images?.length > 0 && (
+          <div style={{
+            position: 'absolute', bottom: '0.75rem', right: '0.75rem',
+            background: 'rgba(0,0,0,0.7)',
+            border: '1px solid rgba(255,255,255,0.15)',
+            borderRadius: 'var(--radius-full)',
+            padding: '2px 8px',
+            fontSize: '0.7rem',
+            color: 'rgba(255,255,255,0.6)',
+            backdropFilter: 'blur(4px)',
+          }}>
+            🖼️ {army.images.length}
+          </div>
+        )}
+      </div>
+
+      {/* Content */}
+      <div style={{ padding: 'clamp(1rem, 3vw, 1.5rem)', flex: 1, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        <div>
+          <h2 style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 'clamp(1.1rem, 2.5vw, 1.4rem)',
+            color: 'var(--color-primary)',
+            letterSpacing: '1px',
+            marginBottom: '0.25rem',
+          }}>
+            {name}
+          </h2>
+          {army.planetName && (
+            <p style={{
+              color: 'var(--color-secondary)',
+              fontSize: '0.8rem',
+              fontStyle: 'italic',
+              opacity: 0.8,
             }}>
-                <header style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    marginBottom: '3rem',
-                    textAlign: 'center'
-                }}>
-                    <h1 style={{
-                        fontFamily: 'var(--font-display)',
-                        fontSize: '3rem',
-                        textTransform: 'uppercase',
-                        background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        margin: 0,
-                        letterSpacing: '2px'
-                    }}>
-                        Armies of 40k
-                    </h1>
-                </header>
-
-                {loading ? (
-                    <div className="loading-spinner" style={{ margin: '5rem auto' }}></div>
-                ) : (
-                    <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                        gap: '2rem'
-                    }}>
-                        {armies.map((army, index) => (
-                            <motion.div
-                                key={army.id}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: index * 0.1 }}
-                                className="glass-panel"
-                                style={{ padding: '2rem', cursor: 'pointer' }}
-                                onClick={() => navigate(`/armies/${army.id}`)}
-                                whileHover={{ scale: 1.02 }}
-                            >
-                                <div style={{
-                                    height: '200px',
-                                    marginBottom: '1.5rem',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    background: 'rgba(0,0,0,0.3)',
-                                    borderRadius: '10px',
-                                    padding: '1rem'
-                                }}>
-                                    {army.iconUrl ? (
-                                        <img src={army.iconUrl} alt={army.name} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
-                                    ) : (
-                                        <div style={{ fontSize: '3rem' }}>🛡️</div>
-                                    )}
-                                </div>
-                                <h2 style={{
-                                    fontFamily: 'var(--font-display)',
-                                    marginBottom: '1rem',
-                                    color: 'var(--color-primary)'
-                                }}>
-                                    {army.name}
-                                </h2>
-                                {army.planetName && (
-                                    <p style={{
-                                        color: 'var(--color-secondary)',
-                                        fontSize: '0.9rem',
-                                        marginBottom: '0.5rem',
-                                        fontStyle: 'italic'
-                                    }}>
-                                        🪐 {army.planetName}
-                                    </p>
-                                )}
-                                {/* Miniature Count */}
-                                {army.images && (
-                                    <div style={{
-                                        color: '#aaa',
-                                        fontSize: '0.85rem',
-                                        marginTop: '0.5rem'
-                                    }}>
-                                        🖼️ {army.images.length} Miniaturas
-                                    </div>
-                                )}
-                                <p style={{
-                                    color: 'rgba(255,255,255,0.7)',
-                                    lineHeight: '1.6',
-                                    marginBottom: '1rem'
-                                }}>
-                                    {army.description}
-                                </p>
-                                {army.history && (
-                                    <details style={{
-                                        marginBottom: '1rem',
-                                        color: 'rgba(255,255,255,0.6)',
-                                        fontSize: '0.9rem'
-                                    }}>
-                                        <summary style={{
-                                            cursor: 'pointer',
-                                            color: 'var(--color-primary)',
-                                            marginBottom: '0.5rem'
-                                        }}>
-                                            Ver Historia
-                                        </summary>
-                                        <p style={{
-                                            padding: '1rem',
-                                            background: 'rgba(0,0,0,0.3)',
-                                            borderRadius: '8px',
-                                            lineHeight: '1.6',
-                                            marginTop: '0.5rem'
-                                        }}>
-                                            {army.history}
-                                        </p>
-                                    </details>
-                                )}
-                                {army.images && army.images.length > 0 && (
-                                    <div style={{
-                                        display: 'grid',
-                                        gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))',
-                                        gap: '0.5rem',
-                                        marginTop: '1rem'
-                                    }}>
-                                        {army.images.slice(0, 4).map((image) => (
-                                            <img
-                                                key={image.id}
-                                                src={image.url}
-                                                alt={image.name}
-                                                style={{
-                                                    width: '100%',
-                                                    aspectRatio: '1',
-                                                    objectFit: 'cover',
-                                                    borderRadius: '8px',
-                                                    border: '1px solid rgba(255,255,255,0.1)'
-                                                }}
-                                            />
-                                        ))}
-                                    </div>
-                                )}
-                            </motion.div>
-                        ))}
-                    </div>
-                )}
-            </div>
-            <Footer />
+              🪐 {army.planetName}
+            </p>
+          )}
         </div>
-    );
+
+        <p style={{
+          color: 'rgba(255,255,255,0.6)',
+          lineHeight: 1.65,
+          fontSize: '0.875rem',
+          flex: 1,
+          display: '-webkit-box',
+          WebkitLineClamp: 3,
+          WebkitBoxOrient: 'vertical',
+          overflow: 'hidden',
+        }}>
+          {description}
+        </p>
+
+        {/* Preview thumbnails */}
+        {previewImages.length > 0 && (
+          <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.25rem' }}>
+            {previewImages.map(img => (
+              <div key={img.id} style={{
+                flex: 1, aspectRatio: '1',
+                borderRadius: 'var(--radius-sm)',
+                overflow: 'hidden',
+                border: '1px solid rgba(255,255,255,0.08)',
+              }}>
+                <img
+                  src={img.url}
+                  alt={img.name}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* CTA */}
+        <div style={{
+          fontSize: '0.8rem',
+          color: 'var(--color-primary)',
+          letterSpacing: '1px',
+          fontFamily: 'var(--font-display)',
+          opacity: 0.8,
+          marginTop: 'auto',
+          paddingTop: '0.5rem',
+        }}>
+          Ver facción →
+        </div>
+      </div>
+
+      {/* Bottom accent */}
+      <div style={{
+        height: '2px',
+        background: 'linear-gradient(90deg, var(--color-primary), var(--color-secondary))',
+        opacity: 0.25,
+      }} />
+    </motion.div>
+  );
 };
 
 export default ArmiesPage;

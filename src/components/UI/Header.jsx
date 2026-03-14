@@ -92,10 +92,7 @@ export default function Header() {
           alignItems: 'center'
         }}>
           {/* Desktop Menu Items */}
-          <div style={{
-            display: window.innerWidth < 768 ? 'none' : 'flex',
-            gap: 'clamp(0.5rem, 1.5vw, 1rem)'
-          }}>
+          <div className="desktop-only" style={{ gap: 'clamp(0.5rem, 1.5vw, 1rem)' }}>
             {menuItems.map((item) => (
               <motion.button
                 key={item.path}
@@ -134,8 +131,8 @@ export default function Header() {
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="mobile-only"
             style={{
-              display: window.innerWidth >= 768 ? 'none' : 'flex',
               flexDirection: 'column',
               gap: '5px',
               background: 'rgba(255, 255, 255, 0.1)',

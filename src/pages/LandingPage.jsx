@@ -7,394 +7,466 @@ import { api } from '../services/api';
 import Footer from '../components/UI/Footer';
 import LanguageToggle from '../components/UI/LanguageToggle';
 
+const NAV_ITEMS = [
+  {
+    to: '/armies',
+    titleKey: 'armiesTitle',
+    subtitleKey: 'armiesSubtitle',
+    color: 'var(--color-primary)',
+    icon: (
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+      </svg>
+    ),
+  },
+  {
+    to: '/guides',
+    titleKey: 'paintingTitle',
+    subtitleKey: 'paintingSubtitle',
+    color: 'var(--color-secondary)',
+    icon: (
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 19l7-7 3 3-7 7-3-3z" />
+        <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" />
+        <circle cx="11" cy="11" r="2" />
+      </svg>
+    ),
+  },
+  {
+    to: '/battle-reports',
+    titleKey: 'battlesTitle',
+    subtitleKey: 'battlesSubtitle',
+    color: '#ff6464',
+    icon: (
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5" />
+        <line x1="13" y1="19" x2="19" y2="13" />
+        <line x1="16" y1="16" x2="20" y2="20" />
+        <line x1="19" y1="21" x2="21" y2="19" />
+        <polyline points="14.5 6.5 18 3 21 3 21 6 17.5 9.5" />
+      </svg>
+    ),
+  },
+  {
+    to: '/lore',
+    titleKey: 'loreTitle',
+    subtitleKey: 'loreSubtitle',
+    color: 'var(--color-accent)',
+    icon: (
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+        <path d="M8 7h8" /><path d="M8 11h8" /><path d="M8 15h6" />
+      </svg>
+    ),
+  },
+];
+
 const LandingPage = () => {
-    const { fetchInitialData, language } = useStore();
-    const t = useTranslation(language);
-    const [featuredArmy, setFeaturedArmy] = useState(null);
-    const [featuredGuide, setFeaturedGuide] = useState(null);
-    const [featuredReport, setFeaturedReport] = useState(null);
+  const { fetchInitialData, language } = useStore();
+  const t = useTranslation(language);
+  const [featuredArmy, setFeaturedArmy] = useState(null);
+  const [featuredGuide, setFeaturedGuide] = useState(null);
+  const [featuredReport, setFeaturedReport] = useState(null);
 
-    useEffect(() => {
-        fetchInitialData();
-        loadFeaturedContent();
-    }, []);
+  useEffect(() => {
+    fetchInitialData();
+    loadFeaturedContent();
+  }, []);
 
-    const loadFeaturedContent = async () => {
-        try {
-            const [armies, guides, reports] = await Promise.all([
-                api.getArmies(),
-                api.getPaintingGuides(),
-                api.getBattleReports()
-            ]);
+  const loadFeaturedContent = async () => {
+    try {
+      const [armies, guides, reports] = await Promise.all([
+        api.getArmies(),
+        api.getPaintingGuides(),
+        api.getBattleReports(),
+      ]);
+      if (armies?.length > 0) setFeaturedArmy(armies[0]);
+      if (guides?.length > 0) setFeaturedGuide(guides[0]);
+      if (reports?.length > 0) setFeaturedReport(reports[0]);
+    } catch (error) {
+      console.error('Error loading featured content:', error);
+    }
+  };
 
-            // Get random or most recent items
-            if (armies && armies.length > 0) {
-                setFeaturedArmy(armies[0]);
-            }
-            if (guides && guides.length > 0) {
-                setFeaturedGuide(guides[0]);
-            }
-            if (reports && reports.length > 0) {
-                setFeaturedReport(reports[0]);
-            }
-        } catch (error) {
-            console.error('Error loading featured content:', error);
-        }
-    };
+  return (
+    <div style={{
+      color: 'white',
+      background: 'radial-gradient(ellipse at 50% 0%, #1a1a2e 0%, #050510 60%)',
+      minHeight: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+      overflowX: 'hidden',
+      position: 'relative',
+    }}>
+      <div className="scanline-overlay" />
 
-    return (
-        <div className="landing-page crt-flicker" style={{
-            color: 'white',
-            background: 'radial-gradient(circle at center, #1a1a2e 0%, #050510 100%)',
-            minHeight: '100vh',
-            display: 'flex',
-            flexDirection: 'column',
-            overflowX: 'hidden',
-            position: 'relative'
+      {/* Language Toggle */}
+      <div style={{ position: 'fixed', top: 'clamp(1rem, 3vw, 1.5rem)', right: 'clamp(1rem, 3vw, 1.5rem)', zIndex: 1000 }}>
+        <LanguageToggle />
+      </div>
+
+      {/* ── HERO ── */}
+      <section style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 'clamp(5rem, 12vw, 10rem) clamp(1.5rem, 5vw, 3rem) clamp(4rem, 8vw, 6rem)',
+        textAlign: 'center',
+        position: 'relative',
+        minHeight: '100vh',
+      }}>
+        {/* Decorative grid pattern */}
+        <div style={{
+          position: 'absolute', inset: 0, zIndex: 0,
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+          pointerEvents: 'none',
+        }} />
+        {/* Center glow */}
+        <div style={{
+          position: 'absolute', top: '50%', left: '50%',
+          transform: 'translate(-50%, -60%)',
+          width: 'min(700px, 100vw)', height: 'min(700px, 100vw)',
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(0,212,255,0.06) 0%, transparent 70%)',
+          pointerEvents: 'none', zIndex: 0,
+        }} />
+
+        {/* Title */}
+        <motion.div
+          initial={{ opacity: 0, y: -40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.9, ease: 'easeOut' }}
+          style={{ zIndex: 1, marginBottom: '2rem' }}
+        >
+          <p style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 'clamp(0.6rem, 1.5vw, 0.75rem)',
+            letterSpacing: '6px',
+            color: 'var(--color-primary)',
+            textTransform: 'uppercase',
+            marginBottom: '1rem',
+            opacity: 0.8,
+          }}>
+            The Immaterium
+          </p>
+          <h1 style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 'clamp(2.2rem, 9vw, 6.5rem)',
+            letterSpacing: 'clamp(0.1rem, 2vw, 0.6rem)',
+            background: 'linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.6) 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            lineHeight: 1.1,
+            marginBottom: '1.5rem',
+            textShadow: 'none',
+          }}>
+            WARHAMMER<br />GALAXY
+          </h1>
+          {/* Divider */}
+          <div style={{
+            width: 'clamp(80px, 15vw, 180px)',
+            height: '2px',
+            background: 'linear-gradient(90deg, transparent, var(--color-primary), transparent)',
+            margin: '0 auto',
+          }} />
+        </motion.div>
+
+        {/* Subtitle */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5, duration: 0.9 }}
+          style={{
+            fontSize: 'clamp(0.95rem, 2vw, 1.15rem)',
+            maxWidth: '640px',
+            marginBottom: 'clamp(3rem, 8vw, 5rem)',
+            color: 'rgba(255,255,255,0.5)',
+            zIndex: 1,
+            lineHeight: 1.8,
+            letterSpacing: '0.3px',
+          }}
+        >
+          {t('description')}
+        </motion.p>
+
+        {/* Nav grid */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.75, duration: 0.6 }}
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+            gap: 'clamp(1rem, 2.5vw, 1.5rem)',
+            width: '100%',
+            maxWidth: '1100px',
+            zIndex: 1,
+          }}
+        >
+          {NAV_ITEMS.map((item) => (
+            <SectionCard key={item.to} item={item} t={t} />
+          ))}
+        </motion.div>
+
+        {/* Admin link */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.1 }}
+          style={{ marginTop: 'clamp(2.5rem, 5vw, 4rem)', zIndex: 1 }}
+        >
+          <Link to="/login" style={{
+            color: 'rgba(255,255,255,0.25)',
+            textDecoration: 'none',
+            fontSize: '0.75rem',
+            letterSpacing: '3px',
+            textTransform: 'uppercase',
+            transition: 'color 0.3s',
+          }}
+            onMouseEnter={e => e.target.style.color = 'var(--color-primary)'}
+            onMouseLeave={e => e.target.style.color = 'rgba(255,255,255,0.25)'}
+          >
+            {t('adminAccess')}
+          </Link>
+        </motion.div>
+      </section>
+
+      {/* ── FEATURED CONTENT ── */}
+      {(featuredArmy || featuredGuide || featuredReport) && (
+        <section style={{
+          maxWidth: '1100px',
+          margin: '0 auto',
+          padding: 'clamp(2rem, 5vw, 4rem) clamp(1.5rem, 4vw, 2rem)',
+          width: '100%',
         }}>
-            <div className="scanline-overlay" />
-
-            {/* Language Toggle - Fixed position */}
-            <div style={{
-                position: 'fixed',
-                top: 'clamp(1rem, 3vw, 2rem)',
-                right: 'clamp(1rem, 3vw, 2rem)',
-                zIndex: 1000
+          {/* Section header */}
+          <div style={{ textAlign: 'center', marginBottom: 'clamp(2rem, 5vw, 3rem)' }}>
+            <p style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: '0.7rem',
+              letterSpacing: '4px',
+              color: 'var(--color-primary)',
+              textTransform: 'uppercase',
+              opacity: 0.7,
+              marginBottom: '0.5rem',
             }}>
-                <LanguageToggle />
-            </div>
-
-            <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '2rem',
-                textAlign: 'center',
-                position: 'relative',
-                minHeight: '90vh'
+              Última actualización
+            </p>
+            <h2 style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: 'clamp(1.4rem, 4vw, 2rem)',
+              color: 'rgba(255,255,255,0.9)',
+              letterSpacing: '3px',
+              textTransform: 'uppercase',
             }}>
-                {/* Background Texture/Effect */}
-                <div style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%239C92AC\' fill-opacity=\'0.05\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
-                    zIndex: 0
-                }} />
+              {t('featuredIntel')}
+            </h2>
+          </div>
 
-                <motion.div
-                    initial={{ opacity: 0, y: -50 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 1 }}
-                    style={{
-                        zIndex: 1,
-                        marginBottom: '4rem',
-                        width: '100%',
-                        padding: '0 1.5rem'
-                    }}
-                >
-                    <h1 style={{
-                        fontFamily: 'Orbitron',
-                        fontSize: 'clamp(1.8rem, 8vw, 6rem)',
-                        marginBottom: '1rem',
-                        textShadow: '0 0 30px rgba(0, 212, 255, 0.5)',
-                        letterSpacing: 'clamp(0.05rem, 1.5vw, 0.5rem)',
-                        background: 'linear-gradient(180deg, #fff 0%, #888 100%)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        wordBreak: 'keep-all',
-                        textAlign: 'center',
-                        lineHeight: '1.2',
-                        overflow: 'visible'
-                    }}>
-                        THE IMMATERIUM
-                    </h1>
-                    <div style={{
-                        width: '150px',
-                        height: '4px',
-                        background: 'linear-gradient(90deg, transparent, var(--color-primary), transparent)',
-                        margin: '0 auto'
-                    }} />
-                </motion.div>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+            gap: 'clamp(1rem, 2.5vw, 1.5rem)',
+          }}>
+            {featuredArmy && (
+              <FeaturedCard
+                to={`/armies/${featuredArmy.id}`}
+                badge={language === 'es' ? 'Facción Destacada' : 'Featured Faction'}
+                badgeColor="var(--color-primary)"
+                title={language === 'es' && featuredArmy.nameEs ? featuredArmy.nameEs : featuredArmy.name}
+                excerpt={(language === 'es' && featuredArmy.descriptionEs ? featuredArmy.descriptionEs : featuredArmy.description)?.substring(0, 110)}
+                linkLabel={t('viewArmy')}
+                linkColor="var(--color-primary)"
+                accentColor="rgba(0,212,255,0.15)"
+                borderColor="rgba(0,212,255,0.2)"
+              />
+            )}
+            {featuredReport && (
+              <FeaturedCard
+                to={`/battle-reports/${featuredReport.id}`}
+                badge={language === 'es' ? 'Reporte de Batalla' : 'Battle Report'}
+                badgeColor="#ff6464"
+                title={featuredReport.title}
+                excerpt={(featuredReport.summary || featuredReport.description)?.substring(0, 110)}
+                linkLabel={t('viewReport')}
+                linkColor="#ff6464"
+                accentColor="rgba(255,100,100,0.1)"
+                borderColor="rgba(255,100,100,0.2)"
+              />
+            )}
+            {featuredGuide && (
+              <FeaturedCard
+                to={`/guides/${featuredGuide.id}`}
+                badge={language === 'es' ? 'Técnica de Pintura' : 'Painting Technique'}
+                badgeColor="var(--color-secondary)"
+                title={featuredGuide.title}
+                excerpt={featuredGuide.description?.substring(0, 110)}
+                linkLabel={t('viewGuide')}
+                linkColor="var(--color-secondary)"
+                accentColor="rgba(135,206,250,0.1)"
+                borderColor="rgba(135,206,250,0.2)"
+              />
+            )}
+          </div>
+        </section>
+      )}
 
-                <motion.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.5, duration: 1 }}
-                    style={{
-                        fontSize: 'clamp(1rem, 2vw, 1.2rem)',
-                        maxWidth: '700px',
-                        marginBottom: '5rem',
-                        color: '#aaa',
-                        zIndex: 1,
-                        lineHeight: '1.8',
-                        letterSpacing: '0.5px',
-                        textAlign: 'center'
-                    }}>
-                    {t('description')}
-                </motion.p>
-
-                <motion.div
-                    className="grid-menu"
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.8, duration: 0.5 }}
-                    style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-                        gap: '2rem',
-                        width: '100%',
-                        maxWidth: '1200px',
-                        zIndex: 1,
-                        padding: '0 1rem'
-                    }}
-                >
-                    <SectionCard
-                        to="/armies"
-                        title={t('armiesTitle')}
-                        subtitle={t('armiesSubtitle')}
-                        icon={
-                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                            </svg>
-                        }
-                    />
-                    <SectionCard
-                        to="/guides"
-                        title={t('paintingTitle')}
-                        subtitle={t('paintingSubtitle')}
-                        icon={
-                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M12 19l7-7 3 3-7 7-3-3z" />
-                                <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" />
-                                <path d="M2 2l7.586 7.586" />
-                                <circle cx="11" cy="11" r="2" />
-                            </svg>
-                        }
-                    />
-                    <SectionCard
-                        to="/battle-reports"
-                        title={t('battlesTitle')}
-                        subtitle={t('battlesSubtitle')}
-                        icon={
-                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-                                <polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5" />
-                                <line x1="13" y1="19" x2="19" y2="13" />
-                                <line x1="16" y1="16" x2="20" y2="20" />
-                                <line x1="19" y1="21" x2="21" y2="19" />
-                                <polyline points="14.5 6.5 18 3 21 3 21 6 17.5 9.5" />
-                                <line x1="16" y1="14" x2="20" y2="10" />
-                                <line x1="16.9" y1="6.1" x2="19.5" y2="3.5" />
-                            </svg>
-                        }
-                    />
-                    <SectionCard
-                        to="/lore"
-                        title={t('loreTitle')}
-                        subtitle={t('loreSubtitle')}
-                        icon={
-                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-                                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-                                <path d="M8 7h8" />
-                                <path d="M8 11h8" />
-                                <path d="M8 15h6" />
-                            </svg>
-                        }
-                    />
-                </motion.div>
-
-                <div style={{ marginTop: '5rem', zIndex: 1 }}>
-                    <Link to="/login" style={{
-                        color: 'var(--color-primary)',
-                        textDecoration: 'none',
-                        fontSize: '0.8rem',
-                        letterSpacing: '2px',
-                        textTransform: 'uppercase',
-                        opacity: 0.5,
-                        transition: 'opacity 0.3s'
-                    }}
-                        onMouseEnter={e => e.target.style.opacity = 1}
-                        onMouseLeave={e => e.target.style.opacity = 0.5}
-                    >
-                        {t('adminAccess')}
-                    </Link>
-                </div>
-            </div>
-
-            {/* Featured Content Section */}
-            <div style={{
-                maxWidth: '1200px',
-                margin: '0 auto',
-                padding: '4rem 2rem',
-                width: '100%',
-                zIndex: 2,
-                position: 'relative'
-            }}>
-                <h3 style={{
-                    fontFamily: 'var(--font-display)',
-                    fontSize: 'clamp(1.5rem, 4vw, 2rem)',
-                    color: 'var(--color-accent)',
-                    marginBottom: '2rem',
-                    textAlign: 'center',
-                    textTransform: 'uppercase',
-                    letterSpacing: '3px'
-                }}>
-                    {t('featuredIntel')}
-                </h3>
-
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                    gap: '2rem'
-                }}>
-                    {/* Featured Faction */}
-                    {featuredArmy && (
-                        <div className="glass-panel" style={{ padding: '2rem', textAlign: 'left', border: '1px solid var(--color-primary)' }}>
-                            <span style={{
-                                background: 'var(--color-primary)',
-                                color: '#000',
-                                padding: '4px 12px',
-                                fontSize: '0.7rem',
-                                fontWeight: 'bold',
-                                borderRadius: '4px',
-                                textTransform: 'uppercase'
-                            }}>
-                                {language === 'es' ? 'Facción Destacada' : 'Featured Faction'}
-                            </span>
-                            <h4 style={{ margin: '1rem 0 0.5rem', fontSize: 'clamp(1.2rem, 3vw, 1.5rem)', color: '#fff' }}>
-                                {language === 'es' && featuredArmy.nameEs ? featuredArmy.nameEs : featuredArmy.name}
-                            </h4>
-                            <p style={{ color: '#aaa', fontSize: '0.9rem', lineHeight: '1.6' }}>
-                                {(language === 'es' && featuredArmy.descriptionEs ? featuredArmy.descriptionEs : featuredArmy.description)?.substring(0, 120)}...
-                            </p>
-                            <Link to={`/armies/${featuredArmy.id}`} style={{ display: 'inline-block', marginTop: '1rem', color: 'var(--color-primary)', textDecoration: 'none' }}>
-                                {t('viewArmy')} →
-                            </Link>
-                        </div>
-                    )}
-
-                    {/* Latest Report */}
-                    {featuredReport && (
-                        <div className="glass-panel" style={{ padding: '2rem', textAlign: 'left', border: '1px solid #ff4d4d' }}>
-                            <span style={{
-                                background: '#ff4d4d',
-                                color: '#fff',
-                                padding: '4px 12px',
-                                fontSize: '0.7rem',
-                                fontWeight: 'bold',
-                                borderRadius: '4px',
-                                textTransform: 'uppercase'
-                            }}>
-                                {language === 'es' ? 'Reporte de Batalla' : 'Battle Report'}
-                            </span>
-                            <h4 style={{ margin: '1rem 0 0.5rem', fontSize: 'clamp(1.2rem, 3vw, 1.5rem)', color: '#fff' }}>
-                                {featuredReport.title}
-                            </h4>
-                            <p style={{ color: '#aaa', fontSize: '0.9rem', lineHeight: '1.6' }}>
-                                {featuredReport.summary?.substring(0, 120) || featuredReport.description?.substring(0, 120)}...
-                            </p>
-                            <Link to={`/battle-reports/${featuredReport.id}`} style={{ display: 'inline-block', marginTop: '1rem', color: '#ff4d4d', textDecoration: 'none' }}>
-                                {t('viewReport')} →
-                            </Link>
-                        </div>
-                    )}
-
-                    {/* Painting Tip */}
-                    {featuredGuide && (
-                        <div className="glass-panel" style={{ padding: '2rem', textAlign: 'left', border: '1px solid var(--color-secondary)' }}>
-                            <span style={{
-                                background: 'var(--color-secondary)',
-                                color: '#fff',
-                                padding: '4px 12px',
-                                fontSize: '0.7rem',
-                                fontWeight: 'bold',
-                                borderRadius: '4px',
-                                textTransform: 'uppercase'
-                            }}>
-                                {language === 'es' ? 'Técnica de Pintura' : 'Painting Technique'}
-                            </span>
-                            <h4 style={{ margin: '1rem 0 0.5rem', fontSize: 'clamp(1.2rem, 3vw, 1.5rem)', color: '#fff' }}>
-                                {featuredGuide.title}
-                            </h4>
-                            <p style={{ color: '#aaa', fontSize: '0.9rem', lineHeight: '1.6' }}>
-                                {featuredGuide.description?.substring(0, 120)}...
-                            </p>
-                            <Link to={`/guides/${featuredGuide.id}`} style={{ display: 'inline-block', marginTop: '1rem', color: 'var(--color-secondary)', textDecoration: 'none' }}>
-                                {t('viewGuide')} →
-                            </Link>
-                        </div>
-                    )}
-                </div>
-            </div>
-
-            <Footer />
-        </div>
-    );
+      <Footer />
+    </div>
+  );
 };
 
-const SectionCard = ({ to, title, subtitle, icon }) => (
-    <Link to={to} style={{ textDecoration: 'none' }}>
-        <motion.div
-            whileHover={{ scale: 1.02, translateY: -5 }}
-            transition={{ duration: 0.2 }}
-            className="glass-panel"
-            style={{
-                padding: '3rem 2rem',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                height: '100%',
-                background: 'rgba(255, 255, 255, 0.03)',
-                border: '1px solid rgba(255, 255, 255, 0.05)',
-                cursor: 'pointer',
-                position: 'relative',
-                overflow: 'hidden'
-            }}
-        >
-            <div style={{
-                color: 'var(--color-primary)',
-                marginBottom: '1.5rem',
-                filter: 'drop-shadow(0 0 10px rgba(0, 212, 255, 0.3))'
-            }}>
-                {icon}
-            </div>
-            <h2 style={{
-                fontFamily: 'Orbitron',
-                fontSize: '1.8rem',
-                margin: '0 0 0.5rem 0',
-                color: 'white',
-                letterSpacing: '2px'
-            }}>
-                {title}
-            </h2>
-            <span style={{
-                color: '#666',
-                fontFamily: 'Exo 2',
-                fontSize: '0.9rem',
-                textTransform: 'uppercase',
-                letterSpacing: '1px'
-            }}>
-                {subtitle}
-            </span>
+const SectionCard = ({ item, t }) => (
+  <Link to={item.to} style={{ textDecoration: 'none' }}>
+    <motion.div
+      whileHover={{ y: -6, scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ duration: 0.2 }}
+      style={{
+        padding: 'clamp(1.75rem, 4vw, 2.5rem) clamp(1.25rem, 3vw, 2rem)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        textAlign: 'center',
+        background: 'rgba(255,255,255,0.03)',
+        border: '1px solid rgba(255,255,255,0.07)',
+        borderRadius: 'var(--radius-xl)',
+        cursor: 'pointer',
+        position: 'relative',
+        overflow: 'hidden',
+        backdropFilter: 'blur(10px)',
+        transition: 'border-color 0.3s, box-shadow 0.3s',
+      }}
+      onHoverStart={e => {}}
+      style2={{
+        '--card-color': item.color,
+      }}
+    >
+      {/* Glow on hover */}
+      <div style={{
+        position: 'absolute', inset: 0, borderRadius: 'var(--radius-xl)',
+        background: `radial-gradient(circle at 50% 0%, ${item.color}18 0%, transparent 60%)`,
+        opacity: 0,
+        transition: 'opacity 0.3s',
+        pointerEvents: 'none',
+      }} className="card-glow" />
 
-            {/* Hover Glint Effect */}
-            <div style={{
-                position: 'absolute',
-                top: 0,
-                left: -100,
-                width: '50px',
-                height: '100%',
-                background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent)',
-                transform: 'skewX(-20deg)',
-                transition: 'left 0.5s'
-            }} />
-        </motion.div>
+      <div style={{
+        color: item.color,
+        marginBottom: '1.25rem',
+        filter: `drop-shadow(0 0 12px ${item.color}55)`,
+        transition: 'transform 0.3s',
+      }}>
+        {item.icon}
+      </div>
+
+      <h2 style={{
+        fontFamily: 'var(--font-display)',
+        fontSize: 'clamp(1rem, 2.5vw, 1.3rem)',
+        color: '#fff',
+        letterSpacing: '2px',
+        marginBottom: '0.5rem',
+        textTransform: 'uppercase',
+      }}>
+        {t(item.titleKey)}
+      </h2>
+
+      <span style={{
+        color: 'rgba(255,255,255,0.35)',
+        fontSize: 'clamp(0.75rem, 1.5vw, 0.82rem)',
+        textTransform: 'uppercase',
+        letterSpacing: '1.5px',
+        fontFamily: 'var(--font-display)',
+      }}>
+        {t(item.subtitleKey)}
+      </span>
+
+      {/* Bottom accent line */}
+      <div style={{
+        position: 'absolute',
+        bottom: 0, left: '20%', right: '20%',
+        height: '2px',
+        background: `linear-gradient(90deg, transparent, ${item.color}, transparent)`,
+        opacity: 0.5,
+      }} />
+    </motion.div>
+  </Link>
+);
+
+const FeaturedCard = ({ to, badge, badgeColor, title, excerpt, linkLabel, linkColor, accentColor, borderColor }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    transition={{ duration: 0.5 }}
+    whileHover={{ y: -4 }}
+    style={{
+      background: accentColor,
+      border: `1px solid ${borderColor}`,
+      borderRadius: 'var(--radius-xl)',
+      padding: 'clamp(1.5rem, 3vw, 2rem)',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '0.75rem',
+      backdropFilter: 'blur(12px)',
+      transition: 'box-shadow 0.3s',
+    }}
+  >
+    <span style={{
+      display: 'inline-block',
+      background: badgeColor,
+      color: badgeColor === 'var(--color-primary)' ? '#000' : '#fff',
+      padding: '3px 10px',
+      fontSize: '0.68rem',
+      fontWeight: 700,
+      borderRadius: 'var(--radius-full)',
+      textTransform: 'uppercase',
+      letterSpacing: '1px',
+      alignSelf: 'flex-start',
+    }}>
+      {badge}
+    </span>
+    <h3 style={{
+      fontFamily: 'var(--font-display)',
+      fontSize: 'clamp(1.1rem, 3vw, 1.4rem)',
+      color: '#fff',
+      lineHeight: 1.3,
+      margin: 0,
+    }}>
+      {title}
+    </h3>
+    {excerpt && (
+      <p style={{
+        color: 'rgba(255,255,255,0.6)',
+        fontSize: '0.9rem',
+        lineHeight: 1.7,
+        margin: 0,
+        flex: 1,
+      }}>
+        {excerpt}…
+      </p>
+    )}
+    <Link to={to} style={{
+      color: linkColor,
+      textDecoration: 'none',
+      fontSize: '0.85rem',
+      fontWeight: 600,
+      letterSpacing: '0.5px',
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: '0.3rem',
+      transition: 'gap 0.2s',
+      alignSelf: 'flex-start',
+    }}
+      onMouseEnter={e => e.currentTarget.style.gap = '0.6rem'}
+      onMouseLeave={e => e.currentTarget.style.gap = '0.3rem'}
+    >
+      {linkLabel} →
     </Link>
+  </motion.div>
 );
 
 export default LandingPage;

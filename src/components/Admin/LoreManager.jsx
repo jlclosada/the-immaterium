@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../services/api';
+import { useStore } from '../../stores/useStore';
+import { useToast } from './Toast';
 
 const LoreManager = () => {
     const [loreEntries, setLoreEntries] = useState([]);
     const [armies, setArmies] = useState([]);
     const [editingLore, setEditingLore] = useState(null);
+    const token = useStore(state => state.token);
+    const toast = useToast();
     const [formData, setFormData] = useState({
         id: '',
         title: '',
@@ -28,7 +32,7 @@ const LoreManager = () => {
             setLoreEntries(Array.isArray(data) ? data : []);
         } catch (error) {
             console.error('Error fetching lore:', error);
-            alert('Error al cargar las entradas de lore');
+            toast('Error al cargar las entradas de lore', 'error');
         }
     };
 
@@ -43,8 +47,6 @@ const LoreManager = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const token = localStorage.getItem('token');
-
         try {
             const dataToSend = {
                 ...formData,
@@ -55,17 +57,17 @@ const LoreManager = () => {
 
             if (editingLore) {
                 await api.updateLoreEntry(editingLore.id, dataToSend, token);
-                alert('Entrada de lore actualizada exitosamente');
+                toast('Entrada de lore actualizada exitosamente', 'success');
             } else {
                 await api.createLoreEntry(dataToSend, token);
-                alert('Entrada de lore creada exitosamente');
+                toast('Entrada de lore creada exitosamente', 'success');
             }
 
             resetForm();
             fetchLoreEntries();
         } catch (error) {
             console.error('Error saving lore:', error);
-            alert('Error al guardar la entrada de lore: ' + (error.response?.data ? JSON.stringify(error.response.data) : error.message));
+            toast('Error al guardar: ' + error.message, 'error');
         }
     };
 
@@ -84,16 +86,13 @@ const LoreManager = () => {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('¿Estás seguro de eliminar esta entrada de lore?')) return;
-
-        const token = localStorage.getItem('token');
         try {
             await api.deleteLoreEntry(id, token);
-            alert('Entrada eliminada exitosamente');
+            toast('Entrada eliminada exitosamente', 'success');
             fetchLoreEntries();
         } catch (error) {
             console.error('Error deleting lore:', error);
-            alert('Error al eliminar la entrada');
+            toast('Error al eliminar la entrada', 'error');
         }
     };
 

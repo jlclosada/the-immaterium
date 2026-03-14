@@ -63,6 +63,14 @@ class ArmyViewSet(viewsets.ModelViewSet):
         
         return Response(serializer.data)
 
+    @action(detail=True, methods=['delete'], url_path='images/(?P<image_id>[^/.]+)')
+    def delete_image(self, request, id=None, image_id=None):
+        """Delete a single image from an army's gallery."""
+        army = self.get_object()
+        image = get_object_or_404(ArmyImage, id=image_id, army=army)
+        image.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 class PaintingGuideViewSet(viewsets.ModelViewSet):
     queryset = PaintingGuide.objects.all()
     serializer_class = PaintingGuideSerializer

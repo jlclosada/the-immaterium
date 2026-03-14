@@ -1,198 +1,194 @@
-import React from 'react';
-import { Navigate, Outlet, Link, useNavigate } from 'react-router-dom';
-import { useStore } from '../stores/useStore';
+import React from 'react'
+import { Navigate, Outlet, NavLink, Link, useNavigate } from 'react-router-dom'
+import { useStore } from '../stores/useStore'
+import { ToastProvider } from '../components/Admin/Toast'
 
 class ErrorBoundary extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = { hasError: false, error: null };
+  constructor(props) {
+    super(props)
+    this.state = { hasError: false, error: null }
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error }
+  }
+  componentDidCatch(error, errorInfo) {
+    console.error('ErrorBoundary caught an error', error, errorInfo)
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ padding: '2rem', color: '#ff4466' }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', marginBottom: '1rem' }}>Algo ha ido mal</h2>
+          <details style={{ whiteSpace: 'pre-wrap', color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem' }}>
+            {this.state.error && this.state.error.toString()}
+          </details>
+        </div>
+      )
     }
-
-    static getDerivedStateFromError(error) {
-        return { hasError: true, error };
-    }
-
-    componentDidCatch(error, errorInfo) {
-        console.error("ErrorBoundary caught an error", error, errorInfo);
-    }
-
-    render() {
-        if (this.state.hasError) {
-            return (
-                <div style={{ padding: '2rem', color: 'red' }}>
-                    <h2>Something went wrong.</h2>
-                    <details style={{ whiteSpace: 'pre-wrap' }}>
-                        {this.state.error && this.state.error.toString()}
-                    </details>
-                </div>
-            );
-        }
-
-        return this.props.children;
-    }
+    return this.props.children
+  }
 }
 
+const navItems = [
+  { to: '/admin', label: 'Dashboard', icon: '📊', end: true },
+  { to: '/admin/armies', label: 'Ejércitos', icon: '🛡️' },
+  { to: '/admin/guides', label: 'Guías', icon: '🎨' },
+  { to: '/admin/reports', label: 'Informes', icon: '⚔️' },
+  { to: '/admin/lore', label: 'Lore', icon: '📖' },
+]
+
 const AdminLayout = () => {
-    const token = useStore((state) => state.token);
-    const logout = useStore((state) => state.logout);
-    const navigate = useNavigate();
+  const token = useStore(state => state.token)
+  const logout = useStore(state => state.logout)
+  const navigate = useNavigate()
 
-    if (!token) {
-        return <Navigate to="/login" replace />;
-    }
+  if (!token) return <Navigate to="/login" replace />
 
-    const handleLogout = () => {
-        logout();
-        navigate('/login');
-    };
+  const handleLogout = () => {
+    logout()
+    navigate('/login')
+  }
 
-    return (
-        <div className="admin-layout" style={{ display: 'flex', minHeight: '100vh', background: 'var(--color-darker)', color: 'var(--color-light)' }}>
-            <aside style={{
-                width: '250px',
-                background: 'var(--glass-bg)',
-                backdropFilter: 'var(--glass-blur)',
-                borderRight: '1px solid var(--glass-border)',
-                padding: '2rem 1rem'
+  return (
+    <ToastProvider>
+      <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--color-darker)', color: 'var(--color-light)' }}>
+        {/* Sidebar */}
+        <aside style={{
+          width: '240px',
+          minHeight: '100vh',
+          background: 'rgba(5,5,20,0.95)',
+          borderRight: '1px solid rgba(0,212,255,0.15)',
+          display: 'flex',
+          flexDirection: 'column',
+          padding: '1.5rem 1rem',
+          gap: '0',
+          flexShrink: 0,
+          position: 'sticky',
+          top: 0,
+          height: '100vh',
+          overflowY: 'auto',
+        }}>
+          {/* Logo */}
+          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+            <div style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: '0.75rem',
+              letterSpacing: '3px',
+              color: 'rgba(255,255,255,0.4)',
+              marginBottom: '0.4rem',
+              textTransform: 'uppercase',
             }}>
-                <div style={{ marginBottom: '2rem' }}>
-                    <h3 style={{
-                        fontFamily: 'var(--font-display)',
-                        color: 'var(--color-primary)',
-                        marginBottom: '1rem',
-                        textAlign: 'center',
-                        letterSpacing: '2px',
-                        fontSize: '1.5rem'
-                    }}>
-                        Admin Panel
-                    </h3>
-                    <Link to="/" style={{
-                        display: 'block',
-                        padding: '0.5rem',
-                        color: 'rgba(255,255,255,0.7)',
-                        textDecoration: 'none',
-                        fontSize: '0.9rem',
-                        textAlign: 'center',
-                        marginBottom: '1rem'
-                    }}>
-                        ← Volver al sitio
-                    </Link>
-                    <button
-                        onClick={handleLogout}
-                        style={{
-                            width: '100%',
-                            padding: '0.8rem',
-                            background: 'rgba(255,0,0,0.2)',
-                            border: '1px solid rgba(255,0,0,0.5)',
-                            borderRadius: '8px',
-                            color: '#ff6464',
-                            cursor: 'pointer',
-                            fontFamily: 'var(--font-display)',
-                            fontSize: '0.9rem',
-                            transition: 'all 0.2s'
-                        }}
-                        onMouseEnter={e => {
-                            e.target.style.background = 'rgba(255,0,0,0.3)';
-                        }}
-                        onMouseLeave={e => {
-                            e.target.style.background = 'rgba(255,0,0,0.2)';
-                        }}
-                    >
-                        🚪 Cerrar Sesión
-                    </button>
-                </div>
-                <nav>
-                    <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        <li>
-                            <Link to="/admin" style={{
-                                display: 'block',
-                                padding: '10px 15px',
-                                color: 'var(--color-light)',
-                                textDecoration: 'none',
-                                borderRadius: '8px',
-                                transition: 'all 0.3s ease',
-                                background: 'transparent'
-                            }}
-                                onMouseEnter={(e) => e.target.style.background = 'var(--glass-bg-hover)'}
-                                onMouseLeave={(e) => e.target.style.background = 'transparent'}
-                            >
-                                Dashboard
-                            </Link>
-                        </li>
-                        <li>
-                            <Link to="/admin/armies" style={{
-                                display: 'block',
-                                padding: '10px 15px',
-                                color: 'var(--color-light)',
-                                textDecoration: 'none',
-                                borderRadius: '8px',
-                                transition: 'all 0.3s ease',
-                                background: 'transparent'
-                            }}
-                                onMouseEnter={(e) => e.target.style.background = 'var(--glass-bg-hover)'}
-                                onMouseLeave={(e) => e.target.style.background = 'transparent'}
-                            >
-                                Armies
-                            </Link>
-                        </li>
-                        <li>
-                            <Link to="/admin/guides" style={{
-                                display: 'block',
-                                padding: '10px 15px',
-                                color: 'var(--color-light)',
-                                textDecoration: 'none',
-                                borderRadius: '8px',
-                                transition: 'all 0.3s ease',
-                                background: 'transparent'
-                            }}
-                                onMouseEnter={(e) => e.target.style.background = 'var(--glass-bg-hover)'}
-                                onMouseLeave={(e) => e.target.style.background = 'transparent'}
-                            >
-                                Guides
-                            </Link>
-                        </li>
-                        <li>
-                            <Link to="/admin/reports" style={{
-                                display: 'block',
-                                padding: '10px 15px',
-                                color: 'var(--color-light)',
-                                textDecoration: 'none',
-                                borderRadius: '8px',
-                                transition: 'all 0.3s ease',
-                                background: 'transparent'
-                            }}
-                                onMouseEnter={(e) => e.target.style.background = 'var(--glass-bg-hover)'}
-                                onMouseLeave={(e) => e.target.style.background = 'transparent'}
-                            >
-                                Reports
-                            </Link>
-                        </li>
-                        <li>
-                            <Link to="/admin/lore" style={{
-                                display: 'block',
-                                padding: '10px 15px',
-                                color: 'var(--color-light)',
-                                textDecoration: 'none',
-                                borderRadius: '8px',
-                                transition: 'all 0.3s ease',
-                                background: 'transparent'
-                            }}
-                                onMouseEnter={(e) => e.target.style.background = 'var(--glass-bg-hover)'}
-                                onMouseLeave={(e) => e.target.style.background = 'transparent'}
-                            >
-                                📖 Lore
-                            </Link>
-                        </li>
-                    </ul>
-                </nav>
-            </aside>
-            <main style={{ flex: 1, padding: '3rem', overflowY: 'auto' }}>
-                <ErrorBoundary>
-                    <Outlet />
-                </ErrorBoundary>
-            </main>
-        </div>
-    );
-};
+              The Immaterium
+            </div>
+            <div style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: '1.1rem',
+              letterSpacing: '2px',
+              background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}>
+              ADMIN PANEL
+            </div>
+          </div>
 
-export default AdminLayout;
+          {/* Navigation */}
+          <nav style={{ flex: 1 }}>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+              {navItems.map(item => (
+                <li key={item.to}>
+                  <NavLink
+                    to={item.to}
+                    end={item.end}
+                    style={({ isActive }) => ({
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.75rem',
+                      padding: '0.7rem 1rem',
+                      borderRadius: '10px',
+                      textDecoration: 'none',
+                      fontSize: '0.9rem',
+                      fontFamily: 'var(--font-body)',
+                      fontWeight: isActive ? '600' : '400',
+                      color: isActive ? 'var(--color-primary)' : 'rgba(255,255,255,0.7)',
+                      background: isActive
+                        ? 'rgba(0,212,255,0.1)'
+                        : 'transparent',
+                      border: isActive
+                        ? '1px solid rgba(0,212,255,0.25)'
+                        : '1px solid transparent',
+                      transition: 'all 0.2s ease',
+                    })}
+                  >
+                    <span style={{ fontSize: '1.1rem', flexShrink: 0 }}>{item.icon}</span>
+                    {item.label}
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          {/* Bottom actions */}
+          <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <Link
+              to="/"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.6rem',
+                padding: '0.6rem 1rem',
+                borderRadius: '8px',
+                color: 'rgba(255,255,255,0.5)',
+                textDecoration: 'none',
+                fontSize: '0.85rem',
+                transition: 'color 0.2s',
+              }}
+              onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.85)'}
+              onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.5)'}
+            >
+              ← Volver al sitio
+            </Link>
+            <button
+              onClick={handleLogout}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.6rem',
+                padding: '0.6rem 1rem',
+                background: 'transparent',
+                border: '1px solid rgba(255,68,102,0.3)',
+                borderRadius: '8px',
+                color: '#ff6464',
+                cursor: 'pointer',
+                fontSize: '0.85rem',
+                fontFamily: 'var(--font-body)',
+                transition: 'all 0.2s',
+                textAlign: 'left',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'rgba(255,68,102,0.12)'
+                e.currentTarget.style.borderColor = 'rgba(255,68,102,0.6)'
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'transparent'
+                e.currentTarget.style.borderColor = 'rgba(255,68,102,0.3)'
+              }}
+            >
+              🚪 Cerrar sesión
+            </button>
+          </div>
+        </aside>
+
+        {/* Main content */}
+        <main style={{ flex: 1, padding: '2.5rem 3rem', overflowY: 'auto', minHeight: '100vh' }}>
+          <ErrorBoundary>
+            <Outlet />
+          </ErrorBoundary>
+        </main>
+      </div>
+    </ToastProvider>
+  )
+}
+
+export default AdminLayout
