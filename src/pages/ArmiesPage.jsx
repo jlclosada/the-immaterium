@@ -132,7 +132,7 @@ const ArmiesPage = () => {
           </p>
         </motion.div>
 
-        {/* Game Tabs */}
+        {/* Game selector — plain text tabs, no boxes */}
         {games.length > 1 && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -141,39 +141,41 @@ const ArmiesPage = () => {
             style={{
               display: 'flex',
               justifyContent: 'center',
-              gap: '0.5rem',
+              alignItems: 'center',
+              gap: '2rem',
               marginBottom: 'clamp(1.5rem, 4vw, 2.5rem)',
               flexWrap: 'wrap',
             }}
           >
-            {games.map(game => {
+            {games.map((game, i) => {
               const isSelected = game.id === selectedGameId;
               const gAccent = game.accentColor || '#00d4ff';
               return (
-                <motion.button
-                  key={game.id}
-                  onClick={() => setSelectedGameId(game.id)}
-                  whileHover={{ scale: 1.04 }}
-                  whileTap={{ scale: 0.97 }}
-                  style={{
-                    padding: '0.6rem 1.5rem',
-                    borderRadius: '40px',
-                    border: isSelected ? `1px solid ${gAccent}` : '1px solid rgba(255,255,255,0.12)',
-                    background: isSelected
-                      ? `linear-gradient(135deg, ${gAccent}22, ${gAccent}11)`
-                      : 'rgba(255,255,255,0.04)',
-                    color: isSelected ? gAccent : 'rgba(255,255,255,0.45)',
-                    fontFamily: 'var(--font-display)',
-                    fontSize: '0.75rem',
-                    letterSpacing: '2px',
-                    textTransform: 'uppercase',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                    boxShadow: isSelected ? `0 0 16px ${gAccent}33` : 'none',
-                  }}
-                >
-                  {game.name}
-                </motion.button>
+                <React.Fragment key={game.id}>
+                  {i > 0 && (
+                    <span style={{ color: 'rgba(255,255,255,0.12)', fontSize: '0.8rem' }}>·</span>
+                  )}
+                  <motion.button
+                    onClick={() => setSelectedGameId(game.id)}
+                    whileHover={{ opacity: 1 }}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      borderBottom: isSelected ? `1px solid ${gAccent}` : '1px solid transparent',
+                      color: isSelected ? gAccent : 'rgba(255,255,255,0.35)',
+                      fontFamily: 'var(--font-display)',
+                      fontSize: '0.72rem',
+                      letterSpacing: '3px',
+                      textTransform: 'uppercase',
+                      cursor: 'pointer',
+                      padding: '0.1rem 0',
+                      transition: 'color 0.3s, border-color 0.3s',
+                      opacity: isSelected ? 1 : 0.7,
+                    }}
+                  >
+                    {game.name}
+                  </motion.button>
+                </React.Fragment>
               );
             })}
           </motion.div>
@@ -271,12 +273,6 @@ const ArmyCard = ({ army, index, language, theme, accentColor, onClick }) => {
         position: 'relative',
       }}
     >
-      {/* Top accent */}
-      <div style={{
-        position: 'absolute', top: 0, left: 0, right: 0, height: '2px',
-        background: theme.topAccent,
-        opacity: 0.5,
-      }} />
 
       {/* Icon area */}
       <div style={{
