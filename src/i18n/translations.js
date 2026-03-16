@@ -20,6 +20,8 @@ export const translations = {
     battlesSubtitle: 'Reportes & Logs',
     loreTitle: 'LORE',
     loreSubtitle: 'Biblioteca & Historia',
+    newsTitle: 'NOTICIAS',
+    newsSubtitle: 'Novedades & Actualizaciones',
     adminAccess: 'Acceso Administrativo // Autorización Requerida',
 
     // Featured Intel
@@ -163,6 +165,8 @@ export const translations = {
     battlesSubtitle: 'Reports & Logs',
     loreTitle: 'LORE',
     loreSubtitle: 'Library & History',
+    newsTitle: 'NEWS',
+    newsSubtitle: 'Updates & Releases',
     adminAccess: 'Administrative Access // Clearance Required',
 
     // Featured Intel

@@ -27,13 +27,16 @@ export const useStore = create((set, get) => ({
 
   // Auth state
   token: localStorage.getItem('token') || null,
-  setToken: (token) => {
+  username: localStorage.getItem('username') || null,
+  setToken: (token, username) => {
     localStorage.setItem('token', token);
-    set({ token });
+    if (username) localStorage.setItem('username', username);
+    set({ token, username: username || get().username });
   },
   logout: () => {
     localStorage.removeItem('token');
-    set({ token: null });
+    localStorage.removeItem('username');
+    set({ token: null, username: null });
   },
 
   // Data state (fetched from API)

@@ -18,7 +18,7 @@ const LoginPage = () => {
     setLoading(true)
     try {
       const data = await api.login(username, password)
-      setToken(data.token)
+      setToken(data.token, username)
       navigate('/admin')
     } catch {
       setError('Credenciales incorrectas. Inténtalo de nuevo.')

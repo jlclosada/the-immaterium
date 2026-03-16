@@ -61,14 +61,13 @@ const NAV_ITEMS = [
   },
   {
     to: '/news',
-    titleKey: 'loreTitle',
-    subtitleKey: 'loreSubtitle',
-    color: 'var(--color-accent)',
+    titleKey: 'newsTitle',
+    subtitleKey: 'newsSubtitle',
+    color: '#f59e0b',
     icon: (
       <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-        <path d="M8 7h8" /><path d="M8 11h8" /><path d="M8 15h6" />
+        <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a4 4 0 0 1-4 4z"/>
+        <path d="M8 6h12"/><path d="M8 10h12"/><path d="M8 14h8"/>
       </svg>
     ),
   },
@@ -87,18 +86,18 @@ const LandingPage = () => {
   }, []);
 
   const loadFeaturedContent = async () => {
-    try {
-      const [armies, guides, reports] = await Promise.all([
-        api.getArmies(),
-        api.getPaintingGuides(),
-        api.getBattleReports(),
-      ]);
-      if (armies?.length > 0) setFeaturedArmy(armies[0]);
-      if (guides?.length > 0) setFeaturedGuide(guides[0]);
-      if (reports?.length > 0) setFeaturedReport(reports[0]);
-    } catch (error) {
-      console.error('Error loading featured content:', error);
-    }
+    const [armiesRes, guidesRes, reportsRes] = await Promise.allSettled([
+      api.getArmies(),
+      api.getPaintingGuides(),
+      api.getBattleReports(),
+    ]);
+    const safe = (res) => (res.status === 'fulfilled' ? (Array.isArray(res.value) ? res.value : []) : []);
+    const armies = safe(armiesRes);
+    const guides = safe(guidesRes);
+    const reports = safe(reportsRes);
+    if (armies.length > 0) setFeaturedArmy(armies[0]);
+    if (guides.length > 0) setFeaturedGuide(guides[0]);
+    if (reports.length > 0) setFeaturedReport(reports[0]);
   };
 
   return (
