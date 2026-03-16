@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from .models import (
     Army, ArmyImage, PaintingGuide, GuideMaterial, GuideStep,
-    BattleReport, BattleNarrative, Comment, UserLike, UserFavorite, LoreEntry
+    BattleReport, BattleNarrative, Comment, UserLike, UserFavorite, LoreEntry,
+    NewsArticle
 )
 
 class ArmyImageSerializer(serializers.ModelSerializer):
@@ -168,7 +169,7 @@ class BattleReportSerializer(serializers.ModelSerializer):
         model = BattleReport
         fields = [
             'id', 'title', 'factions', 'mission', 'points', 'date',
-            'tags', 'likes', 'views', 'mvp',
+            'tags', 'likes', 'views', 'mvp', 'images',
             # Writable player fields
             'player1_name', 'player1_faction', 'player1_score', 'player1_list',
             'player2_name', 'player2_faction', 'player2_score', 'player2_list',
@@ -230,3 +231,17 @@ class LoreEntrySerializer(serializers.ModelSerializer):
                 'iconUrl': obj.related_faction.icon_url
             }
         return None
+
+
+class NewsArticleSerializer(serializers.ModelSerializer):
+    coverImage = serializers.URLField(source='cover_image', required=False, allow_blank=True)
+    isPublished = serializers.BooleanField(source='is_published', required=False, default=True)
+    publishedAt = serializers.DateTimeField(source='published_at', read_only=True)
+
+    class Meta:
+        model = NewsArticle
+        fields = [
+            'id', 'title', 'slug', 'content', 'excerpt',
+            'coverImage', 'images', 'author', 'tags',
+            'isPublished', 'publishedAt'
+        ]

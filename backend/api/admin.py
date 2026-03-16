@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (
     Army, ArmyImage, PaintingGuide, GuideMaterial, GuideStep,
-    BattleReport, BattleNarrative, Comment, LoreEntry, Faction
+    BattleReport, BattleNarrative, Comment, LoreEntry, NewsArticle
 )
 
 
@@ -85,12 +85,6 @@ class BattleReportAdmin(admin.ModelAdmin):
     inlines = [BattleNarrativeInline]
 
 
-@admin.register(Faction)
-class FactionAdmin(admin.ModelAdmin):
-    list_display = ('name', 'id')
-    search_fields = ('name', 'description')
-
-
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
     list_display = ('author', 'content_type', 'date', 'created_at')
@@ -105,3 +99,12 @@ class LoreEntryAdmin(admin.ModelAdmin):
     search_fields = ('title', 'content', 'author')
     list_editable = ('is_featured',)
     readonly_fields = ('date_created', 'created_at', 'updated_at')
+
+
+@admin.register(NewsArticle)
+class NewsArticleAdmin(admin.ModelAdmin):
+    list_display = ('title', 'author', 'is_published', 'published_at')
+    list_filter = ('is_published',)
+    search_fields = ('title', 'content', 'author')
+    list_editable = ('is_published',)
+    readonly_fields = ('published_at', 'created_at', 'updated_at', 'slug')

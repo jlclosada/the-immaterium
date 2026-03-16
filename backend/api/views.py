@@ -8,11 +8,12 @@ from django.db.models import F
 from .models import (
     Army, ArmyImage, PaintingGuide, GuideMaterial, GuideStep,
     BattleReport, BattleNarrative, Comment,
-    UserLike, UserFavorite, LoreEntry
+    UserLike, UserFavorite, LoreEntry, NewsArticle
 )
 from .serializers import (
     ArmySerializer, PaintingGuideSerializer, BattleReportSerializer,
-    CommentSerializer, UserLikeSerializer, UserFavoriteSerializer, LoreEntrySerializer
+    CommentSerializer, UserLikeSerializer, UserFavoriteSerializer,
+    LoreEntrySerializer, NewsArticleSerializer
 )
 
 @api_view(['POST'])
@@ -403,3 +404,43 @@ class LoreEntryViewSet(viewsets.ModelViewSet):
         LoreEntry.objects.filter(id=lore.id).update(views=F('views') + 1)
         lore.refresh_from_db()
         return Response({'views': lore.views})
+
+
+class NewsArticleViewSet(viewsets.ModelViewSet):
+    queryset = NewsArticle.objects.filter(is_published=True)
+    serializer_class = NewsArticleSerializer
+    lookup_field = 'id'
+
+    def get_queryset(self):
+        # Admin can see all; public only sees published
+        token = self.request.META.get('HTTP_AUTHORIZATION', '')
+        if token:
+            return NewsArticle.objects.all()
+        return NewsArticle.objects.filter(is_published=True)
+
+    def create(self, request, *args, **kwargs):
+        import uuid
+        data = request.data.copy()
+        if 'coverImage' in data:
+            data['cover_image'] = data.pop('coverImage')
+        if 'isPublished' in data:
+            data['is_published'] = data.pop('isPublished')
+        if not data.get('id'):
+            data['id'] = str(uuid.uuid4())[:8]
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        data = request.data.copy()
+        if 'coverImage' in data:
+            data['cover_image'] = data.pop('coverImage')
+        if 'isPublished' in data:
+            data['is_published'] = data.pop('isPublished')
+        serializer = self.get_serializer(instance, data=data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)

@@ -17,7 +17,7 @@ class Army(models.Model):
         ('terra', 'Terra'),
         ('standard', 'Standard'),
     ]
-    
+
     id = models.CharField(max_length=100, primary_key=True)
     name = models.CharField(max_length=200)
     name_es = models.CharField(max_length=200, blank=True, null=True)  # Traducción español
@@ -26,7 +26,7 @@ class Army(models.Model):
     history = models.TextField()
     history_es = models.TextField(blank=True, null=True)  # Traducción español
     icon_url = models.URLField(max_length=500)
-    
+
     # 3D visualization fields
     position = ArrayField(models.FloatField(), size=3, default=default_position)
     size = models.FloatField(default=1.0)
@@ -34,15 +34,15 @@ class Army(models.Model):
     emissive = models.CharField(max_length=20, default='#ffffff')
     planet_type = models.CharField(max_length=20, choices=PLANET_TYPE_CHOICES, default='standard')
     planet_name = models.CharField(max_length=200, blank=True)
-    
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
         ordering = ['name']
         verbose_name = 'Army'
         verbose_name_plural = 'Armies'
-    
+
     def __str__(self):
         return self.name
 
@@ -55,10 +55,10 @@ class ArmyImage(models.Model):
     name = models.CharField(max_length=200)
     is_favorite = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         ordering = ['created_at']
-    
+
     def __str__(self):
         return f"{self.name} - {self.army.name}"
 
@@ -70,7 +70,7 @@ class PaintingGuide(models.Model):
         ('intermedio', 'Intermedio'),
         ('avanzado', 'Avanzado'),
     ]
-    
+
     id = models.CharField(max_length=100, primary_key=True)
     title = models.CharField(max_length=300)
     faction = models.ForeignKey(Army, on_delete=models.SET_NULL, null=True, related_name='guides')
@@ -84,10 +84,10 @@ class PaintingGuide(models.Model):
     views = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
         ordering = ['-date_created']
-    
+
     def __str__(self):
         return self.title
 
@@ -97,10 +97,10 @@ class GuideMaterial(models.Model):
     guide = models.ForeignKey(PaintingGuide, on_delete=models.CASCADE, related_name='materials')
     name = models.CharField(max_length=300)
     order = models.IntegerField(default=0)
-    
+
     class Meta:
         ordering = ['order']
-    
+
     def __str__(self):
         return f"{self.name} - {self.guide.title}"
 
@@ -113,11 +113,11 @@ class GuideStep(models.Model):
     description = models.TextField()
     images = ArrayField(models.URLField(max_length=500), default=list)
     tips = ArrayField(models.TextField(), default=list)
-    
+
     class Meta:
         ordering = ['step_number']
         unique_together = ['guide', 'step_number']
-    
+
     def __str__(self):
         return f"Step {self.step_number}: {self.title}"
 
@@ -134,31 +134,34 @@ class BattleReport(models.Model):
     is_favorite = models.BooleanField(default=False)
     likes = models.IntegerField(default=0)
     views = models.IntegerField(default=0)
-    
+
     # Final score
     player1_score = models.IntegerField()
     player2_score = models.IntegerField()
-    
+
     # Player 1 army
     player1_name = models.CharField(max_length=200)
     player1_faction = models.CharField(max_length=100)
     player1_list = ArrayField(models.CharField(max_length=300), default=list)
-    
+
     # Player 2 army
     player2_name = models.CharField(max_length=200)
     player2_faction = models.CharField(max_length=100)
     player2_list = ArrayField(models.CharField(max_length=300), default=list)
-    
+
     # Key moments and MVP
     key_moments = ArrayField(models.TextField(), default=list)
     mvp = models.TextField()
-    
+
+    # Optional battle images (Cloudinary URLs)
+    images = ArrayField(models.URLField(max_length=500), default=list)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
         ordering = ['-date']
-    
+
     def __str__(self):
         return self.title
 
@@ -170,10 +173,10 @@ class BattleNarrative(models.Model):
     phase = models.CharField(max_length=200)
     text = models.TextField()
     order = models.IntegerField(default=0)
-    
+
     class Meta:
         ordering = ['order', 'turn']
-    
+
     def __str__(self):
         return f"Turn {self.turn} - {self.phase}"
 
@@ -184,7 +187,7 @@ class Comment(models.Model):
         ('guide', 'Painting Guide'),
         ('report', 'Battle Report'),
     ]
-    
+
     id = models.CharField(max_length=100, primary_key=True)
     content_type = models.CharField(max_length=20, choices=CONTENT_TYPES)
     guide = models.ForeignKey(PaintingGuide, on_delete=models.CASCADE, null=True, blank=True, related_name='comments')
@@ -193,12 +196,47 @@ class Comment(models.Model):
     date = models.DateField()
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         ordering = ['created_at']
-    
+
     def __str__(self):
         return f"Comment by {self.author}"
+
+
+class NewsArticle(models.Model):
+    """News/blog articles"""
+    id = models.CharField(max_length=100, primary_key=True)
+    title = models.CharField(max_length=300)
+    slug = models.SlugField(max_length=300, unique=True, blank=True)
+    content = models.TextField(help_text='Contenido en formato Markdown')
+    excerpt = models.CharField(max_length=500, blank=True)
+    cover_image = models.URLField(max_length=500, blank=True)
+    images = ArrayField(models.URLField(max_length=500), default=list)
+    author = models.CharField(max_length=200, default='Administratum')
+    tags = ArrayField(models.CharField(max_length=100), default=list)
+    is_published = models.BooleanField(default=True)
+    published_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-published_at']
+        verbose_name = 'Artículo de Noticias'
+        verbose_name_plural = 'Artículos de Noticias'
+
+    def __str__(self):
+        return self.title
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            from django.utils.text import slugify
+            self.slug = slugify(self.title)
+        if not self.excerpt and self.content:
+            import re
+            plain = re.sub(r'[#*_`\[\]()>-]', '', self.content)
+            self.excerpt = (plain[:497] + '...') if len(plain) > 500 else plain
+        super().save(*args, **kwargs)
 
 
 class UserLike(models.Model):
@@ -207,10 +245,10 @@ class UserLike(models.Model):
     content_type = models.CharField(max_length=20)
     content_id = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         unique_together = ['user_id', 'content_type', 'content_id']
-    
+
     def __str__(self):
         return f"{self.user_id} likes {self.content_type} {self.content_id}"
 
@@ -220,10 +258,10 @@ class UserFavorite(models.Model):
     user_id = models.CharField(max_length=100)
     content_id = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         unique_together = ['user_id', 'content_id']
-    
+
     def __str__(self):
         return f"{self.user_id} favorited {self.content_id}"
 
