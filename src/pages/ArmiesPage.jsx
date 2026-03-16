@@ -136,7 +136,7 @@ const ArmiesPage = () => {
 const ArmyCard = ({ army, index, language, onClick }) => {
   const name = language === 'es' && army.nameEs ? army.nameEs : army.name;
   const description = language === 'es' && army.descriptionEs ? army.descriptionEs : army.description;
-  const previewImages = army.images?.slice(0, 3) || [];
+  const imageCount = army.images?.length || 0;
 
   return (
     <motion.div
@@ -144,178 +144,141 @@ const ArmyCard = ({ army, index, language, onClick }) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.07, duration: 0.4 }}
       onClick={onClick}
-      whileHover={{ y: -6 }}
+      whileHover={{ y: -5, boxShadow: '0 16px 48px rgba(0,0,0,0.4), 0 0 0 1px rgba(0,212,255,0.18)' }}
       style={{
-        background: 'rgba(255,255,255,0.025)',
-        border: '1px solid rgba(255,255,255,0.07)',
+        background: 'rgba(255,255,255,0.03)',
+        border: '1px solid rgba(255,255,255,0.08)',
         borderRadius: 'var(--radius-xl)',
         overflow: 'hidden',
         cursor: 'pointer',
         display: 'flex',
         flexDirection: 'column',
         transition: 'border-color 0.3s, box-shadow 0.3s',
-        backdropFilter: 'blur(8px)',
+        backdropFilter: 'blur(12px)',
+        position: 'relative',
       }}
-      onHoverStart={e => {}}
     >
-      {/* Hero image area */}
-      {(() => {
-        const heroImg = army.images?.[0]?.url;
-        return (
-          <div style={{
-            height: '180px',
-            position: 'relative',
-            overflow: 'hidden',
-            flexShrink: 0,
-            background: heroImg ? 'transparent' : 'rgba(0,0,0,0.4)',
-          }}>
-            {heroImg && (
-              <img
-                src={heroImg}
-                alt={name}
-                style={{
-                  width: '100%', height: '100%',
-                  objectFit: 'cover',
-                  transition: 'transform 0.5s ease',
-                }}
-              />
-            )}
-            {/* Dark overlay */}
-            <div style={{
-              position: 'absolute', inset: 0,
-              background: heroImg
-                ? 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.55) 100%)'
-                : 'transparent',
-            }} />
-            {/* Icon overlay */}
-            {army.iconUrl && (
-              <div style={{
-                position: 'absolute',
-                top: '50%', left: '50%',
-                transform: 'translate(-50%, -50%)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                <img
-                  src={army.iconUrl}
-                  alt={name}
-                  style={{
-                    maxWidth: heroImg ? '55px' : '75%',
-                    maxHeight: heroImg ? '55px' : '75%',
-                    objectFit: 'contain',
-                    filter: heroImg
-                      ? 'drop-shadow(0 2px 8px rgba(0,0,0,0.8)) brightness(1.15)'
-                      : 'drop-shadow(0 0 20px rgba(0,212,255,0.3))',
-                  }}
-                />
-              </div>
-            )}
-            {!army.iconUrl && !heroImg && (
-              <div style={{
-                position: 'absolute', inset: 0,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                opacity: 0.2,
-              }}>
-                <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-              </div>
-            )}
-        {/* Image count badge */}
-        {army.images?.length > 0 && (
-          <div style={{
-            position: 'absolute', bottom: '0.75rem', right: '0.75rem',
-            background: 'rgba(0,0,0,0.7)',
-            border: '1px solid rgba(255,255,255,0.15)',
-            borderRadius: 'var(--radius-full)',
-            padding: '2px 8px',
-            fontSize: '0.7rem',
-            color: 'rgba(255,255,255,0.6)',
-            backdropFilter: 'blur(4px)',
-          }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline', verticalAlign: 'middle', marginRight: '3px' }}><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-            {army.images.length}
+      {/* Top accent */}
+      <div style={{
+        position: 'absolute', top: 0, left: 0, right: 0, height: '2px',
+        background: 'linear-gradient(90deg, transparent, var(--color-primary), transparent)',
+        opacity: 0.4,
+      }} />
+
+      {/* Icon area — clean, dark, centered icon */}
+      <div style={{
+        height: '140px',
+        background: 'linear-gradient(160deg, rgba(0,20,40,0.8) 0%, rgba(5,5,20,0.95) 100%)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexShrink: 0,
+        borderBottom: '1px solid rgba(255,255,255,0.06)',
+        position: 'relative',
+      }}>
+        {army.iconUrl ? (
+          <img
+            src={army.iconUrl}
+            alt={name}
+            style={{
+              maxWidth: '90px',
+              maxHeight: '90px',
+              objectFit: 'contain',
+              filter: 'drop-shadow(0 0 18px rgba(0,212,255,0.25)) brightness(1.1)',
+              transition: 'filter 0.3s',
+            }}
+          />
+        ) : (
+          <div style={{ opacity: 0.15, color: 'var(--color-primary)' }}>
+            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
           </div>
         )}
+
+        {/* Gallery count badge */}
+        {imageCount > 0 && (
+          <div style={{
+            position: 'absolute', bottom: '0.6rem', right: '0.6rem',
+            background: 'rgba(0,212,255,0.12)',
+            border: '1px solid rgba(0,212,255,0.2)',
+            borderRadius: '20px',
+            padding: '2px 7px',
+            fontSize: '0.68rem',
+            color: 'var(--color-primary)',
+            display: 'flex', alignItems: 'center', gap: '3px',
+          }}>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            {imageCount}
           </div>
-        );
-      })()}
+        )}
+      </div>
 
       {/* Content */}
-      <div style={{ padding: 'clamp(1rem, 3vw, 1.5rem)', flex: 1, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      <div style={{ padding: '1.25rem 1.5rem', flex: 1, display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
         <div>
           <h2 style={{
             fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(1.1rem, 2.5vw, 1.4rem)',
-            color: 'var(--color-primary)',
-            letterSpacing: '1px',
-            marginBottom: '0.25rem',
+            fontSize: 'clamp(1rem, 2.5vw, 1.2rem)',
+            color: 'var(--color-light)',
+            letterSpacing: '1.5px',
+            textTransform: 'uppercase',
+            marginBottom: '0.2rem',
+            lineHeight: 1.2,
           }}>
             {name}
           </h2>
           {army.planetName && (
             <p style={{
-              color: 'var(--color-secondary)',
-              fontSize: '0.8rem',
-              fontStyle: 'italic',
-              opacity: 0.8,
+              color: 'var(--color-primary)',
+              fontSize: '0.75rem',
+              opacity: 0.7,
+              display: 'flex', alignItems: 'center', gap: '3px',
             }}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
               {army.planetName}
             </p>
           )}
         </div>
 
         <p style={{
-          color: 'rgba(255,255,255,0.6)',
+          color: 'rgba(255,255,255,0.5)',
           lineHeight: 1.65,
-          fontSize: '0.875rem',
+          fontSize: '0.82rem',
           flex: 1,
           display: '-webkit-box',
           WebkitLineClamp: 3,
           WebkitBoxOrient: 'vertical',
           overflow: 'hidden',
+          margin: 0,
         }}>
           {description}
         </p>
 
-        {/* Preview thumbnails */}
-        {previewImages.length > 0 && (
-          <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.25rem' }}>
-            {previewImages.map(img => (
-              <div key={img.id} style={{
-                flex: 1, aspectRatio: '1',
-                borderRadius: 'var(--radius-sm)',
-                overflow: 'hidden',
-                border: '1px solid rgba(255,255,255,0.08)',
-              }}>
-                <img
-                  src={img.url}
-                  alt={img.name}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
-              </div>
-            ))}
-          </div>
-        )}
-
         {/* CTA */}
         <div style={{
-          fontSize: '0.8rem',
-          color: 'var(--color-primary)',
-          letterSpacing: '1px',
-          fontFamily: 'var(--font-display)',
-          opacity: 0.8,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          paddingTop: '0.75rem',
+          borderTop: '1px solid rgba(255,255,255,0.05)',
           marginTop: 'auto',
-          paddingTop: '0.5rem',
         }}>
-          Ver facción →
+          <span style={{
+            fontSize: '0.75rem',
+            color: 'var(--color-primary)',
+            letterSpacing: '1.5px',
+            fontFamily: 'var(--font-display)',
+            textTransform: 'uppercase',
+            opacity: 0.8,
+          }}>
+            Ver facción
+          </span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.6 }}>
+            <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+          </svg>
         </div>
       </div>
-
-      {/* Bottom accent */}
-      <div style={{
-        height: '2px',
-        background: 'linear-gradient(90deg, var(--color-primary), var(--color-secondary))',
-        opacity: 0.25,
-      }} />
     </motion.div>
   );
 };

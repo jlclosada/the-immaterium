@@ -237,13 +237,37 @@ export const api = {
     return response.json()
   },
 
+  createUser: async (data, token) => {
+    const response = await fetch(`${API_URL}/api/users/create/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Token ${token}` },
+      body: JSON.stringify(data),
+    })
+    const json = await response.json()
+    if (!response.ok) throw new Error(json.error || 'Failed to create user')
+    return json
+  },
+
+  deleteUser: async (userId, token) => {
+    const response = await fetch(`${API_URL}/api/users/${userId}/delete/`, {
+      method: 'DELETE',
+      headers: { Authorization: `Token ${token}` },
+    })
+    if (!response.ok) {
+      const json = await response.json().catch(() => ({}))
+      throw new Error(json.error || 'Failed to delete user')
+    }
+    return true
+  },
+
   toggleUserActive: async (userId, token) => {
     const response = await fetch(`${API_URL}/api/users/${userId}/toggle-active/`, {
       method: 'PATCH',
       headers: { Authorization: `Token ${token}` },
     })
-    if (!response.ok) throw new Error('Failed to toggle user status')
-    return response.json()
+    const json = await response.json()
+    if (!response.ok) throw new Error(json.error || 'Failed to toggle user status')
+    return json
   },
 
   login: async (username, password) => {

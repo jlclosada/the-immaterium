@@ -10,7 +10,6 @@ const AdminDashboard = () => {
         reports: 0,
         lore: 0,
         news: 0,
-        totalLikes: 0,
     });
     const [loading, setLoading] = useState(true);
 
@@ -41,18 +40,12 @@ const AdminDashboard = () => {
         const loreList = safe(loreRes);
         const newsList = safe(newsRes);
 
-        const totalLikes = [
-            ...guidesList.map(g => g.likes || 0),
-            ...reportsList.map(r => r.likes || 0)
-        ].reduce((a, b) => a + b, 0);
-
         setStats({
             armies: armiesList.length,
             guides: guidesList.length,
             reports: reportsList.length,
             lore: loreList.length,
             news: newsList.length,
-            totalLikes,
         });
         setLoading(false);
     };
@@ -92,13 +85,6 @@ const AdminDashboard = () => {
             icon: <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a4 4 0 0 1-4 4z"/><path d="M8 6h12"/><path d="M8 10h12"/><path d="M8 14h8"/></svg>,
             color: '#f59e0b',
             link: '/admin/news'
-        },
-        {
-            title: 'Total Likes',
-            value: stats.totalLikes,
-            icon: <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>,
-            color: '#ff6464',
-            link: null
         },
     ];
 
