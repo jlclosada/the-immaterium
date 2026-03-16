@@ -345,7 +345,7 @@ Liderados por el Primarca Demonio Fulgrim, buscan sensaciones cada vez más extr
                                                 position: 'absolute',
                                                 left: 0,
                                                 color: army?.color
-                                            }}>⚔️</span>
+                                            }}>·</span>
                                             {figure}
                                         </li>
                                     ))}

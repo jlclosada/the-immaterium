@@ -111,7 +111,7 @@ export default function ArmyList() {
                                 fontSize: '0.8rem',
                                 color: '#aaa'
                             }}>
-                                🖼️ {army.images?.length || 0} Miniaturas
+                                {army.images?.length || 0} Miniaturas
                             </div>
                         </motion.div>
                     ))}

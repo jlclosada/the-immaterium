@@ -27,11 +27,13 @@ const ReportManager = () => {
         player2_score: 0,
         player2_list: [],
         keyMoments: [],
-        mvp: ''
+        mvp: '',
+        images: []
     });
     const [narrative, setNarrative] = useState([]);
     const [newNarrative, setNewNarrative] = useState({ turn: 1, phase: '', text: '' });
     const [newKeyMoment, setNewKeyMoment] = useState('');
+    const [newImageUrl, setNewImageUrl] = useState('');
     const [newPlayer1Unit, setNewPlayer1Unit] = useState('');
     const [newPlayer2Unit, setNewPlayer2Unit] = useState('');
 
@@ -70,8 +72,9 @@ const ReportManager = () => {
                 date: formData.date,
                 tags: formData.tags,
                 factions: formData.factions,
-                key_moments: formData.keyMoments,
+                keyMoments: formData.keyMoments,
                 mvp: formData.mvp,
+                images: formData.images,
                 player1_name: formData.player1_name,
                 player1_faction: formData.player1_faction,
                 player1_score: formData.player1_score,
@@ -122,7 +125,8 @@ const ReportManager = () => {
             player2_score: report.finalScore?.player2 || 0,
             player2_list: report.armies?.player2?.list || [],
             keyMoments: report.keyMoments || [],
-            mvp: report.mvp || ''
+            mvp: report.mvp || '',
+            images: report.images || []
         });
         setNarrative(report.narrative || []);
     };
@@ -157,13 +161,15 @@ const ReportManager = () => {
             player2_score: 0,
             player2_list: [],
             keyMoments: [],
-            mvp: ''
+            mvp: '',
+            images: []
         });
         setNarrative([]);
         setNewNarrative({ turn: 1, phase: '', text: '' });
         setNewKeyMoment('');
         setNewPlayer1Unit('');
         setNewPlayer2Unit('');
+        setNewImageUrl('');
     };
 
     const addTag = (tag) => {
@@ -237,6 +243,17 @@ const ReportManager = () => {
         });
     };
 
+    const addImage = () => {
+        if (newImageUrl.trim()) {
+            setFormData({ ...formData, images: [...formData.images, newImageUrl.trim()] });
+            setNewImageUrl('');
+        }
+    };
+
+    const removeImage = (index) => {
+        setFormData({ ...formData, images: formData.images.filter((_, i) => i !== index) });
+    };
+
     const addNarrative = () => {
         if (newNarrative.phase && newNarrative.text) {
             setNarrative([...narrative, { ...newNarrative }]);
@@ -278,7 +295,7 @@ const ReportManager = () => {
                     color: '#ff0064',
                     fontSize: '1.5rem'
                 }}>
-                    {editingReport ? '✏️ Editar Informe' : '➕ Nuevo Informe'}
+                    {editingReport ? 'Editar Informe' : '+ Nuevo Informe'}
                 </h3>
                 <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '1.5rem' }}>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
@@ -599,7 +616,7 @@ const ReportManager = () => {
                                     fontWeight: 'bold'
                                 }}
                             >
-                                ➕
+                                +
                             </button>
                         </div>
                         {formData.player1_list.length > 0 && (
@@ -726,7 +743,7 @@ const ReportManager = () => {
                                     fontWeight: 'bold'
                                 }}
                             >
-                                ➕
+                                +
                             </button>
                         </div>
                         {formData.player2_list.length > 0 && (
@@ -776,6 +793,36 @@ const ReportManager = () => {
                     </div>
 
                     <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1.5rem' }}>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', color: 'rgba(255,255,255,0.8)' }}>Imágenes de la Batalla (Cloudinary, opcional)</label>
+                        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                            <input
+                                placeholder="URL de imagen (https://res.cloudinary.com/...)"
+                                value={newImageUrl}
+                                onChange={e => setNewImageUrl(e.target.value)}
+                                onKeyPress={e => { if (e.key === 'Enter') { e.preventDefault(); addImage(); } }}
+                                style={{ padding: '0.8rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: 'var(--color-light)', fontSize: '0.9rem', flex: 1 }}
+                            />
+                            <button type="button" onClick={addImage} style={{ padding: '0.8rem 1.2rem', background: 'var(--color-primary)', border: 'none', borderRadius: '8px', color: 'var(--color-light)', cursor: 'pointer', fontWeight: 'bold', whiteSpace: 'nowrap' }}>
+                                + Añadir
+                            </button>
+                        </div>
+                        {formData.images.length > 0 && (
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '0.75rem' }}>
+                                {formData.images.map((url, i) => (
+                                    <div key={i} style={{ position: 'relative', borderRadius: '8px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
+                                        <img src={url} alt="" style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', display: 'block' }} />
+                                        <button
+                                            type="button"
+                                            onClick={() => removeImage(i)}
+                                            style={{ position: 'absolute', top: '4px', right: '4px', background: 'rgba(0,0,0,0.7)', border: 'none', color: '#ff6464', borderRadius: '50%', width: '24px', height: '24px', cursor: 'pointer', fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                        >×</button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1.5rem' }}>
                         <label style={{ display: 'block', marginBottom: '0.5rem', color: 'rgba(255,255,255,0.8)' }}>Momentos Clave</label>
                         <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
                             <input
@@ -811,14 +858,14 @@ const ReportManager = () => {
                                     fontWeight: 'bold'
                                 }}
                             >
-                                ➕
+                                +
                             </button>
                         </div>
                         {formData.keyMoments.length > 0 && (
                             <ul style={{ margin: 0, paddingLeft: '1.5rem', color: 'rgba(255,255,255,0.7)' }}>
                                 {formData.keyMoments.map((moment, index) => (
                                     <li key={index} style={{ marginBottom: '0.3rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <span>⚡ {moment}</span>
+                                        <span>— {moment}</span>
                                         <button
                                             type="button"
                                             onClick={() => removeKeyMoment(index)}
@@ -855,7 +902,7 @@ const ReportManager = () => {
                                     fontWeight: 'bold'
                                 }}
                             >
-                                ➕ Añadir Entrada
+                                + Añadir Entrada
                             </button>
                         </div>
                         {narrative.map((entry, index) => (
@@ -880,7 +927,7 @@ const ReportManager = () => {
                                             cursor: 'pointer'
                                         }}
                                     >
-                                        🗑️
+                                        Eliminar
                                     </button>
                                 </div>
                                 <p style={{ color: 'rgba(255,255,255,0.8)', margin: 0 }}>{entry.text}</p>
@@ -952,7 +999,7 @@ const ReportManager = () => {
                                     fontWeight: 'bold'
                                 }}
                             >
-                                ➕ Añadir
+                                + Añadir
                             </button>
                         </div>
                     </div>
@@ -974,7 +1021,7 @@ const ReportManager = () => {
                             onMouseEnter={e => e.target.style.transform = 'translateY(-2px)'}
                             onMouseLeave={e => e.target.style.transform = 'translateY(0)'}
                         >
-                            💾 {editingReport ? 'Actualizar' : 'Crear'} Informe
+                            {editingReport ? 'Actualizar' : 'Crear'} Informe
                         </button>
 
                         {editingReport && (
@@ -1026,7 +1073,7 @@ const ReportManager = () => {
                                         e.target.style.transform = 'translateY(0)';
                                     }}
                                 >
-                                    🗑️ Eliminar
+                                    Eliminar
                                 </button>
                             </>
                         )}
@@ -1067,12 +1114,11 @@ const ReportManager = () => {
                         >
                             <div style={{ flex: 1 }}>
                                 <h4 style={{ margin: '0 0 5px 0', fontSize: '1.2rem', fontFamily: 'var(--font-display)' }}>{report.title}</h4>
-                                <div style={{ display: 'flex', gap: '1rem', fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)' }}>
-                                    <span>📅 {new Date(report.date).toLocaleDateString('es-ES')}</span>
-                                    <span>🎯 {report.mission}</span>
-                                    <span>⚔️ {report.points} pts</span>
-                                    <span>❤️ {report.likes || 0}</span>
-                                    <span>👁️ {report.views || 0}</span>
+                                <div style={{ display: 'flex', gap: '1rem', fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)', flexWrap: 'wrap' }}>
+                                    {report.date && <span>{new Date(report.date).toLocaleDateString('es-ES')}</span>}
+                                    {report.mission && <span>{report.mission}</span>}
+                                    {report.points && <span>{report.points} pts</span>}
+                                    <span>❤ {report.likes || 0}</span>
                                 </div>
                             </div>
                             <div style={{ display: 'flex', gap: '1rem' }}>
@@ -1095,7 +1141,7 @@ const ReportManager = () => {
                                         e.target.style.color = 'var(--color-light)';
                                     }}
                                 >
-                                    ✏️ Editar
+                                    Editar
                                 </button>
                                 <button
                                     onClick={() => handleDelete(report.id)}
@@ -1116,7 +1162,7 @@ const ReportManager = () => {
                                         e.target.style.background = 'transparent';
                                     }}
                                 >
-                                    🗑️
+                                    Eliminar
                                 </button>
                             </div>
                         </motion.div>

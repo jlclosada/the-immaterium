@@ -23,6 +23,9 @@ import BattleReportsPage from './pages/BattleReportsPage';
 import BattleReportDetailPage from './pages/BattleReportDetailPage';
 import LorePage from './pages/LorePage';
 import LoreDetailPage from './pages/LoreDetailPage';
+import NewsPage from './pages/NewsPage';
+import NewsDetailPage from './pages/NewsDetailPage';
+import NewsManager from './components/Admin/NewsManager';
 
 import './styles/index.css';
 
@@ -64,6 +67,8 @@ function App() {
           <Route path="/lore/:id" element={<AnimatedPage><LoreDetailPage /></AnimatedPage>} />
           <Route path="/battle-reports" element={<AnimatedPage><BattleReportsPage /></AnimatedPage>} />
           <Route path="/battle-reports/:id" element={<AnimatedPage><BattleReportDetailPage /></AnimatedPage>} />
+          <Route path="/news" element={<AnimatedPage><NewsPage /></AnimatedPage>} />
+          <Route path="/news/:id" element={<AnimatedPage><NewsDetailPage /></AnimatedPage>} />
 
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminLayout />}>
@@ -72,6 +77,7 @@ function App() {
             <Route path="guides" element={<GuideManager />} />
             <Route path="lore" element={<LoreManager />} />
             <Route path="reports" element={<ReportManager />} />
+            <Route path="news" element={<NewsManager />} />
           </Route>
 
           {/* Fallback */}

@@ -30,6 +30,7 @@ const ArmiesPage = () => {
   }, []);
 
   const filteredArmies = armies.filter(army => {
+    if (!army.images?.length) return false;
     const term = searchTerm.toLowerCase();
     const name = (language === 'es' && army.nameEs ? army.nameEs : army.name) || '';
     const desc = (language === 'es' && army.descriptionEs ? army.descriptionEs : army.description) || '';
@@ -92,8 +93,10 @@ const ArmiesPage = () => {
           <div style={{ position: 'relative' }}>
             <span style={{
               position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)',
-              color: 'rgba(255,255,255,0.3)', fontSize: '1rem', pointerEvents: 'none',
-            }}>🔍</span>
+              color: 'rgba(255,255,255,0.3)', pointerEvents: 'none', display: 'flex',
+            }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </span>
             <input
               type="text"
               placeholder="Buscar facción..."
@@ -109,7 +112,9 @@ const ArmiesPage = () => {
           <div className="loading-spinner" style={{ margin: '5rem auto' }} />
         ) : filteredArmies.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '5rem 2rem', color: 'rgba(255,255,255,0.3)' }}>
-            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🛡️</div>
+            <div style={{ marginBottom: '1rem', opacity: 0.25 }}>
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
             <p style={{ fontSize: '1rem' }}>
               {searchTerm ? `Sin resultados para "${searchTerm}"` : 'No hay facciones registradas'}
             </p>
@@ -176,7 +181,9 @@ const ArmyCard = ({ army, index, language, onClick }) => {
             }}
           />
         ) : (
-          <div style={{ fontSize: '4rem', opacity: 0.3 }}>🛡️</div>
+          <div style={{ opacity: 0.2 }}>
+            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
         )}
         {/* Image count badge */}
         {army.images?.length > 0 && (
@@ -190,7 +197,8 @@ const ArmyCard = ({ army, index, language, onClick }) => {
             color: 'rgba(255,255,255,0.6)',
             backdropFilter: 'blur(4px)',
           }}>
-            🖼️ {army.images.length}
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline', verticalAlign: 'middle', marginRight: '3px' }}><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            {army.images.length}
           </div>
         )}
       </div>
@@ -214,7 +222,8 @@ const ArmyCard = ({ army, index, language, onClick }) => {
               fontStyle: 'italic',
               opacity: 0.8,
             }}>
-              🪐 {army.planetName}
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              {army.planetName}
             </p>
           )}
         </div>

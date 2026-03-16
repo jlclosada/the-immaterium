@@ -112,10 +112,10 @@ export default function GuideDetail() {
                         flexWrap: 'wrap',
                         color: '#aaa'
                     }}>
-                        <span>👤 {selectedGuide.author}</span>
-                        <span>⏱️ {selectedGuide.estimatedTime}</span>
-                        <span>📊 {selectedGuide.difficulty}</span>
-                        <span>📅 {new Date(selectedGuide.dateCreated).toLocaleDateString('es-ES')}</span>
+                        <span>{selectedGuide.author}</span>
+                        <span>{selectedGuide.estimatedTime}</span>
+                        <span>{selectedGuide.difficulty}</span>
+                        <span>{new Date(selectedGuide.dateCreated).toLocaleDateString('es-ES')}</span>
                         {selectedGuide.faction && (
                             <span style={{
                                 display: 'flex',
@@ -269,7 +269,7 @@ export default function GuideDetail() {
                                 borderRadius: '8px',
                                 padding: '1rem'
                             }}>
-                                <h4 style={{ color: '#00ced1', marginBottom: '0.5rem' }}>💡 Consejos:</h4>
+                                <h4 style={{ color: '#00ced1', marginBottom: '0.5rem' }}>Consejos:</h4>
                                 <ul style={{ margin: 0, paddingLeft: '1.5rem', color: '#ddd' }}>
                                     {step.tips.map((tip, tipIndex) => (
                                         <li key={tipIndex} style={{ marginBottom: '0.3rem' }}>{tip}</li>

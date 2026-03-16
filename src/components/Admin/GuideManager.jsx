@@ -25,6 +25,7 @@ const GuideManager = () => {
     const [newMaterial, setNewMaterial] = useState('');
     const [steps, setSteps] = useState([]);
     const [editingStep, setEditingStep] = useState(null);
+    const [newStepImages, setNewStepImages] = useState({});
 
     useEffect(() => {
         loadGuides();
@@ -132,6 +133,7 @@ const GuideManager = () => {
         setSteps([]);
         setNewMaterial('');
         setEditingStep(null);
+        setNewStepImages({});
     };
 
     const addMaterial = () => {
@@ -245,7 +247,7 @@ const GuideManager = () => {
                     color: 'var(--color-secondary)',
                     fontSize: '1.5rem'
                 }}>
-                    {editingGuide ? '✏️ Editar Guía' : '➕ Nueva Guía'}
+                    {editingGuide ? 'Editar Guía' : 'Nueva Guía'}
                 </h3>
                 <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '1.5rem' }}>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
@@ -506,7 +508,7 @@ const GuideManager = () => {
                                     fontWeight: 'bold'
                                 }}
                             >
-                                ➕
+                                +
                             </button>
                         </div>
                         {materials.length > 0 && (
@@ -520,7 +522,7 @@ const GuideManager = () => {
                                         background: 'rgba(0,0,0,0.3)',
                                         borderRadius: '8px'
                                     }}>
-                                        <span style={{ flex: 1, color: 'rgba(255,255,255,0.8)' }}>✓ {material}</span>
+                                        <span style={{ flex: 1, color: 'rgba(255,255,255,0.8)' }}>{material}</span>
                                         <button
                                             type="button"
                                             onClick={() => removeMaterial(index)}
@@ -557,7 +559,7 @@ const GuideManager = () => {
                                     fontWeight: 'bold'
                                 }}
                             >
-                                ➕ Añadir Paso
+                                + Añadir Paso
                             </button>
                         </div>
                         {steps.map((step, stepIndex) => (
@@ -582,7 +584,7 @@ const GuideManager = () => {
                                             cursor: 'pointer'
                                         }}
                                     >
-                                        🗑️ Eliminar
+                                        Eliminar
                                     </button>
                                 </div>
                                 <div style={{ display: 'grid', gap: '1rem' }}>
@@ -618,12 +620,14 @@ const GuideManager = () => {
                                         <label style={{ display: 'block', marginBottom: '0.5rem', color: 'rgba(255,255,255,0.8)', fontSize: '0.9rem' }}>Imágenes del Paso</label>
                                         <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
                                             <input
-                                                placeholder="URL de imagen"
+                                                placeholder="URL de imagen (Cloudinary)"
+                                                value={newStepImages[stepIndex] || ''}
+                                                onChange={e => setNewStepImages({ ...newStepImages, [stepIndex]: e.target.value })}
                                                 onKeyPress={e => {
                                                     if (e.key === 'Enter') {
                                                         e.preventDefault();
-                                                        addStepImage(stepIndex, e.target.value);
-                                                        e.target.value = '';
+                                                        addStepImage(stepIndex, newStepImages[stepIndex] || '');
+                                                        setNewStepImages({ ...newStepImages, [stepIndex]: '' });
                                                     }
                                                 }}
                                                 style={{
@@ -636,6 +640,25 @@ const GuideManager = () => {
                                                     flex: 1
                                                 }}
                                             />
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    addStepImage(stepIndex, newStepImages[stepIndex] || '');
+                                                    setNewStepImages({ ...newStepImages, [stepIndex]: '' });
+                                                }}
+                                                style={{
+                                                    padding: '0.8rem 1.2rem',
+                                                    background: 'var(--color-primary)',
+                                                    border: 'none',
+                                                    borderRadius: '8px',
+                                                    color: 'var(--color-light)',
+                                                    cursor: 'pointer',
+                                                    fontWeight: 'bold',
+                                                    whiteSpace: 'nowrap'
+                                                }}
+                                            >
+                                                + Añadir
+                                            </button>
                                         </div>
                                         {step.images && step.images.length > 0 && (
                                             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
@@ -736,7 +759,7 @@ const GuideManager = () => {
                             onMouseEnter={e => e.target.style.transform = 'translateY(-2px)'}
                             onMouseLeave={e => e.target.style.transform = 'translateY(0)'}
                         >
-                            💾 {editingGuide ? 'Actualizar' : 'Crear'} Guía
+                            {editingGuide ? 'Actualizar' : 'Crear'} Guía
                         </button>
 
                         {editingGuide && (
@@ -788,7 +811,7 @@ const GuideManager = () => {
                                         e.target.style.transform = 'translateY(0)';
                                     }}
                                 >
-                                    🗑️ Eliminar
+                                    Eliminar
                                 </button>
                             </>
                         )}
@@ -843,10 +866,9 @@ const GuideManager = () => {
                                 <div style={{ flex: 1 }}>
                                     <h4 style={{ margin: '0 0 5px 0', fontSize: '1.2rem', fontFamily: 'var(--font-display)' }}>{guide.title}</h4>
                                     <div style={{ display: 'flex', gap: '1rem', fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)' }}>
-                                        <span>📊 {guide.difficulty}</span>
-                                        <span>👤 {guide.author}</span>
-                                        <span>❤️ {guide.likes || 0}</span>
-                                        <span>👁️ {guide.views || 0}</span>
+                                        <span>{guide.difficulty}</span>
+                                        <span>{guide.author}</span>
+                                        <span>❤ {guide.likes || 0}</span>
                                     </div>
                                 </div>
                             </div>
@@ -870,7 +892,7 @@ const GuideManager = () => {
                                         e.target.style.color = 'var(--color-light)';
                                     }}
                                 >
-                                    ✏️ Editar
+                                    Editar
                                 </button>
                                 <button
                                     onClick={() => handleDelete(guide.id)}
@@ -891,7 +913,7 @@ const GuideManager = () => {
                                         e.target.style.background = 'transparent';
                                     }}
                                 >
-                                    🗑️
+                                    Eliminar
                                 </button>
                             </div>
                         </motion.div>

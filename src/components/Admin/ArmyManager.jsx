@@ -221,7 +221,7 @@ const ArmyManager = () => {
         }}
       >
         <h3 style={{ fontFamily: 'var(--font-display)', color: editingArmy ? 'var(--color-accent)' : 'var(--color-secondary)', marginBottom: '1.75rem', fontSize: '1.2rem' }}>
-          {editingArmy ? `✏️ Editando: ${editingArmy.name}` : '➕ Nuevo Ejército'}
+          {editingArmy ? `Editando: ${editingArmy.name}` : 'Nuevo Ejército'}
         </h3>
 
         <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '1.5rem' }}>
@@ -499,7 +499,7 @@ const ArmyManager = () => {
                 transition: 'all 0.2s',
               }}
             >
-              {loading ? '⏳ Guardando...' : `💾 ${editingArmy ? 'Actualizar' : 'Crear'} Ejército`}
+              {loading ? 'Guardando...' : `${editingArmy ? 'Actualizar' : 'Crear'} Ejército`}
             </button>
             {editingArmy && (
               <>
@@ -531,7 +531,7 @@ const ArmyManager = () => {
                     transition: 'all 0.2s',
                   }}
                 >
-                  🗑️ Eliminar
+                  Eliminar
                 </button>
               </>
             )}
@@ -558,7 +558,7 @@ const ArmyManager = () => {
               textAlign: 'center',
             }}
           >
-            <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>⚠️</div>
+            <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>!</div>
             <h3 style={{ fontFamily: 'var(--font-display)', marginBottom: '0.75rem', color: '#ff6464' }}>
               ¿Eliminar ejército?
             </h3>
@@ -628,7 +628,7 @@ const ArmyManager = () => {
               }}>
                 {army.iconUrl
                   ? <img src={army.iconUrl} alt={army.name} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
-                  : <span style={{ fontSize: '1.5rem' }}>🛡️</span>
+                  : <span style={{ opacity: 0.3 }}><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
                 }
               </div>
 
@@ -655,7 +655,7 @@ const ArmyManager = () => {
                 <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.75rem' }}>{army.id}</span>
                 {army.planetName && (
                   <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem', marginLeft: '0.75rem' }}>
-                    🪐 {army.planetName}
+                    {army.planetName}
                   </span>
                 )}
               </div>
@@ -677,7 +677,7 @@ const ArmyManager = () => {
                   onMouseEnter={e => { e.currentTarget.style.background = 'rgba(0,212,255,0.12)' }}
                   onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
                 >
-                  ✏️ Editar
+                  Editar
                 </button>
                 <button onClick={() => setConfirmDelete(army.id)}
                   style={{
@@ -693,7 +693,7 @@ const ArmyManager = () => {
                   onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,68,102,0.1)' }}
                   onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
                 >
-                  🗑️
+                  Eliminar
                 </button>
               </div>
             </motion.div>

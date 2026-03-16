@@ -219,10 +219,10 @@ export default function BattleReports() {
                             color: '#aaa',
                             fontSize: '0.95rem'
                         }}>
-                            <span>📅 {new Date(report.date).toLocaleDateString('es-ES')}</span>
-                            <span>🎯 {report.mission}</span>
-                            <span>⚔️ {report.points} pts</span>
-                            <span>🏆 MVP: {report.mvp}</span>
+                            <span>{new Date(report.date).toLocaleDateString('es-ES')}</span>
+                            <span>{report.mission}</span>
+                            <span>{report.points} pts</span>
+                            {report.mvp && <span>MVP: {report.mvp}</span>}
                         </div>
 
                         {/* Score */}
@@ -281,7 +281,7 @@ export default function BattleReports() {
                                 fontSize: '1.5rem',
                                 filter: 'drop-shadow(0 0 10px #ff0064)'
                             }}>
-                                ❤️
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none" style={{ color: '#ff6464', filter: 'drop-shadow(0 0 10px #ff0064)' }}><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                             </div>
                         )}
                     </motion.div>

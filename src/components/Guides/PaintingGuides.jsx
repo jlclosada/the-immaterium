@@ -209,8 +209,8 @@ export default function PaintingGuides() {
                                 alignItems: 'center',
                                 flexWrap: 'wrap'
                             }}>
-                                <span>⏱️ {guide.estimatedTime}</span>
-                                <span>📊 {guide.difficulty}</span>
+                                <span>{guide.estimatedTime}</span>
+                                <span>{guide.difficulty}</span>
                                 {guide.faction && (
                                     <span style={{
                                         display: 'flex',

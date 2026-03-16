@@ -88,7 +88,7 @@ export default function Gallery() {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
       >
-        <span>{showFavorites ? '❤️' : '🤍'}</span>
+        <span>{showFavorites ? '♥' : '♡'}</span>
         <span>Favoritos</span>
       </motion.button>
 
@@ -98,7 +98,12 @@ export default function Gallery() {
           initial={{ x: 50, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
         >
-          <div className="empty-state-icon">{showFavorites ? '💔' : '🎨'}</div>
+          <div className="empty-state-icon" style={{ opacity: 0.3 }}>
+            {showFavorites
+              ? <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              : <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M18.37 2.63 14 7l-1.59-1.59a2 2 0 0 0-2.82 0L8 7l9 9 1.59-1.59a2 2 0 0 0 0-2.82L17 10l4.37-4.37a2.12 2.12 0 1 0-3-3z"/><path d="M9 8c-2 3-4 3.5-7 4l8 10c2-1 6-5 6-7"/><path d="M14.5 17.5 4.5 15"/></svg>
+            }
+          </div>
           <p className="empty-state-text">
             {showFavorites
               ? "No hay miniaturas favoritas en este ejército."
@@ -133,8 +138,10 @@ export default function Gallery() {
                     position: 'absolute',
                     top: '10px',
                     right: '10px',
-                    fontSize: '1.2rem'
-                  }}>❤️</span>
+                    display: 'flex'
+                  }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none" style={{ color: '#ff6464' }}><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                  </span>
                 )}
               </div>
             </motion.div>

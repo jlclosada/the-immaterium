@@ -189,6 +189,45 @@ export const api = {
     return response.json()
   },
 
+  // News
+  getNewsArticles: async () => {
+    const response = await fetch(`${API_URL}/api/news/`)
+    if (!response.ok) throw new Error('Failed to fetch news')
+    const data = await response.json()
+    return data.results || data
+  },
+  getNewsArticle: async (id) => {
+    const response = await fetch(`${API_URL}/api/news/${id}/`)
+    if (!response.ok) throw new Error('Failed to fetch article')
+    return response.json()
+  },
+  createNewsArticle: async (data, token) => {
+    const response = await fetch(`${API_URL}/api/news/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Token ${token}` },
+      body: JSON.stringify(data),
+    })
+    if (!response.ok) throw new Error('Failed to create article')
+    return response.json()
+  },
+  updateNewsArticle: async (id, data, token) => {
+    const response = await fetch(`${API_URL}/api/news/${id}/`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Authorization: `Token ${token}` },
+      body: JSON.stringify(data),
+    })
+    if (!response.ok) throw new Error('Failed to update article')
+    return response.json()
+  },
+  deleteNewsArticle: async (id, token) => {
+    const response = await fetch(`${API_URL}/api/news/${id}/`, {
+      method: 'DELETE',
+      headers: { Authorization: `Token ${token}` },
+    })
+    if (!response.ok) throw new Error('Failed to delete article')
+    return true
+  },
+
   login: async (username, password) => {
     const response = await fetch(`${API_URL}/api/auth/login/`, {
       method: 'POST',

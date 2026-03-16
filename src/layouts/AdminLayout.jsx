@@ -30,11 +30,11 @@ class ErrorBoundary extends React.Component {
 }
 
 const navItems = [
-  { to: '/admin', label: 'Dashboard', icon: '📊', end: true },
-  { to: '/admin/armies', label: 'Ejércitos', icon: '🛡️' },
-  { to: '/admin/guides', label: 'Guías', icon: '🎨' },
-  { to: '/admin/reports', label: 'Informes', icon: '⚔️' },
-  { to: '/admin/lore', label: 'Lore', icon: '📖' },
+  { to: '/admin', label: 'Dashboard', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>, end: true },
+  { to: '/admin/armies', label: 'Ejércitos', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> },
+  { to: '/admin/guides', label: 'Guías', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18.37 2.63 14 7l-1.59-1.59a2 2 0 0 0-2.82 0L8 7l9 9 1.59-1.59a2 2 0 0 0 0-2.82L17 10l4.37-4.37a2.12 2.12 0 1 0-3-3z"/><path d="M9 8c-2 3-4 3.5-7 4l8 10c2-1 6-5 6-7"/></svg> },
+  { to: '/admin/reports', label: 'Informes', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" y1="19" x2="19" y2="13"/><line x1="16" y1="16" x2="20" y2="20"/><line x1="19" y1="21" x2="21" y2="19"/></svg> },
+  { to: '/admin/lore', label: 'Lore', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> },
 ]
 
 const AdminLayout = () => {
@@ -121,7 +121,7 @@ const AdminLayout = () => {
                       transition: 'all 0.2s ease',
                     })}
                   >
-                    <span style={{ fontSize: '1.1rem', flexShrink: 0 }}>{item.icon}</span>
+                    <span style={{ display: 'flex', flexShrink: 0, opacity: 0.8 }}>{item.icon}</span>
                     {item.label}
                   </NavLink>
                 </li>
@@ -175,7 +175,7 @@ const AdminLayout = () => {
                 e.currentTarget.style.borderColor = 'rgba(255,68,102,0.3)'
               }}
             >
-              🚪 Cerrar sesión
+              Cerrar sesión
             </button>
           </div>
         </aside>

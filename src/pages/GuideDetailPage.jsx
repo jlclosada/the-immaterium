@@ -123,17 +123,24 @@ const GuideDetailPage = () => {
               fontWeight: 700,
               letterSpacing: '0.5px',
             }}>
-              📊 {diffStyle.label}
+              {diffStyle.label}
             </span>
             {guide.estimatedTime && (
-              <span style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.45)' }}>⏱️ {guide.estimatedTime}</span>
+              <span style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.45)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                {guide.estimatedTime}
+              </span>
             )}
             {guide.author && (
-              <span style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.45)' }}>👤 {guide.author}</span>
+              <span style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.45)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                {guide.author}
+              </span>
             )}
             {guide.dateCreated && (
-              <span style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.45)' }}>
-                📅 {new Date(guide.dateCreated).toLocaleDateString('es-ES')}
+              <span style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.45)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                {new Date(guide.dateCreated).toLocaleDateString('es-ES')}
               </span>
             )}
             {guide.faction && (
@@ -221,7 +228,7 @@ const GuideDetailPage = () => {
               marginBottom: '1.25rem',
               opacity: 0.85,
             }}>
-              🎨 Materiales Necesarios
+              Materiales Necesarios
             </h2>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
               {guide.materials.map((material, i) => (
@@ -343,7 +350,7 @@ const GuideDetailPage = () => {
                 marginLeft: '0.5rem',
               }}>
                 <h4 style={{ color: 'var(--color-secondary)', marginBottom: '0.5rem', fontSize: '0.85rem', letterSpacing: '1px' }}>
-                  💡 Consejos
+                  Consejos
                 </h4>
                 <ul style={{ margin: 0, paddingLeft: '1.25rem', color: 'rgba(255,255,255,0.65)', fontSize: '0.875rem', lineHeight: 1.7 }}>
                   {step.tips.map((tip, tipIdx) => (

@@ -102,7 +102,9 @@ export default function UploadModal({ armyId, onClose }) {
               onChange={handleFileInput}
               style={{ display: 'none' }}
             />
-            <div className="upload-dropzone-icon">📷</div>
+            <div className="upload-dropzone-icon" style={{ opacity: 0.4 }}>
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            </div>
             <p className="upload-dropzone-text">
               Arrastra una imagen o haz clic para seleccionar
             </p>

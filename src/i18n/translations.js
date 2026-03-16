@@ -49,7 +49,7 @@ export const translations = {
     // Armies Page
     factionsTitle: 'FACCIONES DEL IMPERIUM Y MÁS ALLÁ',
     factionsSubtitle: 'Cada facción lucha por la supremacía en la galaxia',
-    searchArmies: '🔍 Buscar facciones...',
+    searchArmies: 'Buscar facciones...',
     armiesCount: 'ejércitos',
     noArmiesFound: 'No se encontraron ejércitos',
 
@@ -65,7 +65,7 @@ export const translations = {
     // Guides Page
     paintingGuidesTitle: 'GUÍAS DE PINTURA',
     paintingGuidesSubtitle: 'Tutoriales y técnicas de pintura para miniaturas',
-    searchGuides: '🔍 Buscar guías...',
+    searchGuides: 'Buscar guías...',
     filterByDifficulty: 'Filtrar por dificultad',
     all: 'Todas',
     beginner: 'Principiante',
@@ -82,7 +82,7 @@ export const translations = {
     // Battle Reports Page
     battleReportsTitle: 'INFORMES DE BATALLA',
     battleReportsSubtitle: 'Crónicas de guerra del 41º Milenio',
-    searchReports: '🔍 Buscar informes...',
+    searchReports: 'Buscar informes...',
     filterByMission: 'Filtrar por misión',
     filterBySize: 'Filtrar por tamaño',
     reportsCount: 'reportes',
@@ -101,7 +101,7 @@ export const translations = {
     // Lore Page
     loreLibraryTitle: 'BIBLIOTECA DE LORE',
     loreLibrarySubtitle: 'Fragmentos de historia del universo de Warhammer 40,000',
-    searchLore: '🔍 Buscar en el lore...',
+    searchLore: 'Buscar en el lore...',
     allCategories: 'Todas',
     historia: 'Historia',
     faccion: 'Facción',
@@ -192,7 +192,7 @@ export const translations = {
     // Armies Page
     factionsTitle: 'FACTIONS OF THE IMPERIUM AND BEYOND',
     factionsSubtitle: 'Each faction fights for supremacy in the galaxy',
-    searchArmies: '🔍 Search factions...',
+    searchArmies: 'Search factions...',
     armiesCount: 'armies',
     noArmiesFound: 'No armies found',
 
@@ -208,7 +208,7 @@ export const translations = {
     // Guides Page
     paintingGuidesTitle: 'PAINTING GUIDES',
     paintingGuidesSubtitle: 'Tutorials and painting techniques for miniatures',
-    searchGuides: '🔍 Search guides...',
+    searchGuides: 'Search guides...',
     filterByDifficulty: 'Filter by difficulty',
     all: 'All',
     beginner: 'Beginner',
@@ -225,7 +225,7 @@ export const translations = {
     // Battle Reports Page
     battleReportsTitle: 'BATTLE REPORTS',
     battleReportsSubtitle: 'War chronicles from the 41st Millennium',
-    searchReports: '🔍 Search reports...',
+    searchReports: 'Search reports...',
     filterByMission: 'Filter by mission',
     filterBySize: 'Filter by size',
     reportsCount: 'reports',
@@ -244,7 +244,7 @@ export const translations = {
     // Lore Page
     loreLibraryTitle: 'LORE LIBRARY',
     loreLibrarySubtitle: 'Fragments of history from the Warhammer 40,000 universe',
-    searchLore: '🔍 Search lore...',
+    searchLore: 'Search lore...',
     allCategories: 'All',
     historia: 'History',
     faccion: 'Faction',

@@ -75,11 +75,11 @@ const Footer = () => {
                         NAVEGACIÓN
                     </h4>
                     <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-                        <li><FooterLink to="/">🏠 Inicio</FooterLink></li>
-                        <li><FooterLink to="/armies">⚔️ Ejércitos</FooterLink></li>
-                        <li><FooterLink to="/guides">🎨 Guías</FooterLink></li>
-                        <li><FooterLink to="/battle-reports">📜 Batallas</FooterLink></li>
-                        <li><FooterLink to="/lore">📖 Lore</FooterLink></li>
+                        <li><FooterLink to="/">Inicio</FooterLink></li>
+                        <li><FooterLink to="/armies">Ejércitos</FooterLink></li>
+                        <li><FooterLink to="/guides">Guías</FooterLink></li>
+                        <li><FooterLink to="/battle-reports">Batallas</FooterLink></li>
+                        <li><FooterLink to="/lore">Lore</FooterLink></li>
                     </ul>
                 </motion.div>
 
@@ -100,7 +100,7 @@ const Footer = () => {
                         RECURSOS
                     </h4>
                     <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-                        <li><FooterLink to="/login">🔐 Admin</FooterLink></li>
+                        <li><FooterLink to="/login">Admin</FooterLink></li>
                         <li>
                             <a
                                 href="https://www.warhammer-community.com"
@@ -124,7 +124,7 @@ const Footer = () => {
                                     e.target.style.paddingLeft = '0';
                                 }}
                             >
-                                🌐 Warhammer Community
+                                Warhammer Community ↗
                             </a>
                         </li>
                     </ul>

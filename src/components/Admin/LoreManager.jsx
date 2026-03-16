@@ -128,7 +128,7 @@ const LoreManager = () => {
     return (
         <div style={{ padding: '2rem' }}>
             <h2 style={{ marginBottom: '2rem', color: 'var(--color-primary)' }}>
-                📖 Gestión de Lore
+                Gestión de Lore
             </h2>
 
             {/* Formulario */}
@@ -430,7 +430,7 @@ const LoreManager = () => {
                                             cursor: 'pointer'
                                         }}
                                     >
-                                        ✏️ Editar
+                                        Editar
                                     </button>
                                     <button
                                         onClick={() => handleDelete(lore.id)}
@@ -443,7 +443,7 @@ const LoreManager = () => {
                                             cursor: 'pointer'
                                         }}
                                     >
-                                        🗑️
+                                        Eliminar
                                     </button>
                                 </div>
                             </div>
@@ -451,7 +451,7 @@ const LoreManager = () => {
                                 {lore.excerpt}
                             </p>
                             <div style={{ fontSize: '0.85rem', color: '#888' }}>
-                                Por {lore.author} • 👁️ {lore.views} vistas
+                                Por {lore.author}
                             </div>
                         </div>
                     ))}

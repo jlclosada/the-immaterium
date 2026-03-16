@@ -9,7 +9,6 @@ const AdminDashboard = () => {
         guides: 0,
         reports: 0,
         totalLikes: 0,
-        totalViews: 0
     });
     const [loading, setLoading] = useState(true);
 
@@ -34,17 +33,11 @@ const AdminDashboard = () => {
                 ...reportsList.map(r => r.likes || 0)
             ].reduce((a, b) => a + b, 0);
 
-            const totalViews = [
-                ...guidesList.map(g => g.views || 0),
-                ...reportsList.map(r => r.views || 0)
-            ].reduce((a, b) => a + b, 0);
-
             setStats({
                 armies: armiesList.length,
                 guides: guidesList.length,
                 reports: reportsList.length,
                 totalLikes,
-                totalViews
             });
         } catch (error) {
             console.error('Failed to load stats:', error);
@@ -57,38 +50,31 @@ const AdminDashboard = () => {
         {
             title: 'Ejércitos',
             value: stats.armies,
-            icon: '🛡️',
+            icon: <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
             color: 'var(--color-primary)',
             link: '/admin/armies'
         },
         {
             title: 'Guías de Pintura',
             value: stats.guides,
-            icon: '🎨',
+            icon: <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18.37 2.63 14 7l-1.59-1.59a2 2 0 0 0-2.82 0L8 7l9 9 1.59-1.59a2 2 0 0 0 0-2.82L17 10l4.37-4.37a2.12 2.12 0 1 0-3-3z"/><path d="M9 8c-2 3-4 3.5-7 4l8 10c2-1 6-5 6-7"/><path d="M14.5 17.5 4.5 15"/></svg>,
             color: 'var(--color-secondary)',
             link: '/admin/guides'
         },
         {
             title: 'Informes de Batalla',
             value: stats.reports,
-            icon: '⚔️',
+            icon: <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" y1="19" x2="19" y2="13"/><line x1="16" y1="16" x2="20" y2="20"/><line x1="19" y1="21" x2="21" y2="19"/></svg>,
             color: '#ff0064',
             link: '/admin/reports'
         },
         {
             title: 'Total Likes',
             value: stats.totalLikes,
-            icon: '❤️',
+            icon: <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>,
             color: '#ff6464',
             link: null
         },
-        {
-            title: 'Total Vistas',
-            value: stats.totalViews,
-            icon: '👁️',
-            color: '#00ced1',
-            link: null
-        }
     ];
 
     if (loading) {
@@ -149,7 +135,7 @@ const AdminDashboard = () => {
                                 justifyContent: 'space-between',
                                 marginBottom: '1rem'
                             }}>
-                                <span style={{ fontSize: '3rem' }}>{card.icon}</span>
+                                <span style={{ display: 'flex', opacity: 0.9 }}>{card.icon}</span>
                                 {card.link && (
                                     <span style={{ color: card.color, fontSize: '1.5rem' }}>→</span>
                                 )}
@@ -216,7 +202,7 @@ const AdminDashboard = () => {
                             onMouseEnter={e => e.target.style.transform = 'translateY(-2px)'}
                             onMouseLeave={e => e.target.style.transform = 'translateY(0)'}
                         >
-                            ➕ Nuevo Ejército
+                            Nuevo Ejército
                         </button>
                     </Link>
                     <Link to="/admin/guides" style={{ textDecoration: 'none' }}>
@@ -235,7 +221,7 @@ const AdminDashboard = () => {
                             onMouseEnter={e => e.target.style.transform = 'translateY(-2px)'}
                             onMouseLeave={e => e.target.style.transform = 'translateY(0)'}
                         >
-                            ➕ Nueva Guía
+                            Nueva Guía
                         </button>
                     </Link>
                     <Link to="/admin/reports" style={{ textDecoration: 'none' }}>
@@ -254,7 +240,7 @@ const AdminDashboard = () => {
                             onMouseEnter={e => e.target.style.transform = 'translateY(-2px)'}
                             onMouseLeave={e => e.target.style.transform = 'translateY(0)'}
                         >
-                            ➕ Nuevo Informe
+                            Nuevo Informe
                         </button>
                     </Link>
                 </div>

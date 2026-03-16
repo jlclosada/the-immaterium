@@ -101,8 +101,10 @@ const GuidesPage = () => {
           <div style={{ position: 'relative' }}>
             <span style={{
               position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)',
-              color: 'rgba(255,255,255,0.3)', pointerEvents: 'none',
-            }}>🔍</span>
+              color: 'rgba(255,255,255,0.3)', pointerEvents: 'none', display: 'flex',
+            }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </span>
             <input
               type="text"
               placeholder="Buscar guía o facción..."
@@ -118,7 +120,9 @@ const GuidesPage = () => {
           <div className="loading-spinner" style={{ margin: '5rem auto' }} />
         ) : filteredGuides.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '5rem 2rem', color: 'rgba(255,255,255,0.3)' }}>
-            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🎨</div>
+            <div style={{ marginBottom: '1rem', opacity: 0.25 }}>
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M18.37 2.63 14 7l-1.59-1.59a2 2 0 0 0-2.82 0L8 7l9 9 1.59-1.59a2 2 0 0 0 0-2.82L17 10l4.37-4.37a2.12 2.12 0 1 0-3-3z"/><path d="M9 8c-2 3-4 3.5-7 4l8 10c2-1 6-5 6-7"/><path d="M14.5 17.5 4.5 15"/></svg>
+          </div>
             <p>{searchTerm ? `Sin resultados para "${searchTerm}"` : 'No hay guías disponibles'}</p>
           </div>
         ) : (
@@ -178,8 +182,10 @@ const GuideCard = ({ guide, index, onClick }) => {
           <div style={{
             width: '100%', height: '100%',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '3.5rem', opacity: 0.2,
-          }}>🎨</div>
+            opacity: 0.15,
+          }}>
+            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M18.37 2.63 14 7l-1.59-1.59a2 2 0 0 0-2.82 0L8 7l9 9 1.59-1.59a2 2 0 0 0 0-2.82L17 10l4.37-4.37a2.12 2.12 0 1 0-3-3z"/><path d="M9 8c-2 3-4 3.5-7 4l8 10c2-1 6-5 6-7"/><path d="M14.5 17.5 4.5 15"/></svg>
+          </div>
         )}
         {/* Gradient overlay */}
         <div style={{

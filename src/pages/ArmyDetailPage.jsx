@@ -120,7 +120,9 @@ const ArmyDetailPage = () => {
                   }}
                 />
               ) : (
-                <div style={{ fontSize: 'clamp(4rem, 10vw, 8rem)', opacity: 0.3 }}>🛡️</div>
+                <div style={{ opacity: 0.15 }}>
+                  <svg width="clamp(80px, 15vw, 120px)" height="clamp(80px, 15vw, 120px)" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.75" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
               )}
             </div>
 
@@ -146,7 +148,8 @@ const ArmyDetailPage = () => {
                 </h1>
                 {army.planetName && (
                   <p style={{ color: 'var(--color-secondary)', fontSize: '0.95rem', fontStyle: 'italic', opacity: 0.8 }}>
-                    🪐 {army.planetName}
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    {army.planetName}
                   </p>
                 )}
               </div>
@@ -170,7 +173,8 @@ const ArmyDetailPage = () => {
                   color: 'var(--color-primary)',
                   alignSelf: 'flex-start',
                 }}>
-                  🖼️ {army.images.length} {army.images.length === 1 ? 'miniatura' : 'miniaturas'}
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                  {army.images.length} {army.images.length === 1 ? 'miniatura' : 'miniaturas'}
                 </div>
               )}
             </div>
@@ -192,7 +196,7 @@ const ArmyDetailPage = () => {
                 marginBottom: '1rem',
                 opacity: 0.8,
               }}>
-                📜 Historia
+                Historia
               </h2>
               <p style={{
                 color: 'rgba(255,255,255,0.65)',
@@ -234,7 +238,7 @@ const ArmyDetailPage = () => {
                 letterSpacing: '2px',
                 margin: 0,
               }}>
-                🎨 Galería de Miniaturas
+                Galería de Miniaturas
               </h2>
               <span style={{
                 background: 'rgba(0,212,255,0.1)',
@@ -253,8 +257,10 @@ const ArmyDetailPage = () => {
             <div style={{ position: 'relative', marginBottom: '1.5rem' }}>
               <span style={{
                 position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)',
-                color: 'rgba(255,255,255,0.3)', pointerEvents: 'none',
-              }}>🔍</span>
+                color: 'rgba(255,255,255,0.3)', pointerEvents: 'none', display: 'flex',
+              }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              </span>
               <input
                 type="text"
                 placeholder="Buscar por nombre..."
@@ -319,7 +325,9 @@ const ArmyDetailPage = () => {
               </div>
             ) : (
               <div style={{ textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.3)' }}>
-                <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>🔍</div>
+                <div style={{ marginBottom: '0.75rem', opacity: 0.25 }}>
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </div>
                 <p>Sin imágenes con "{searchTerm}"</p>
               </div>
             )}

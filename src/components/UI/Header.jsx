@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useStore } from '../../stores/useStore';
 import { useTranslation } from '../../i18n/translations';
-import LanguageToggle from './LanguageToggle';
 
 export default function Header() {
   const navigate = useNavigate();
@@ -26,10 +25,11 @@ export default function Header() {
   }, [location]);
 
   const menuItems = [
-    { path: '/armies', label: t('armies'), icon: '⚔️' },
-    { path: '/guides', label: t('guides'), icon: '🎨' },
-    { path: '/battle-reports', label: t('battles'), icon: '📜' },
-    { path: '/lore', label: t('lore'), icon: '📖' },
+    { path: '/armies', label: t('armies'), icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> },
+    { path: '/guides', label: t('guides'), icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18.37 2.63 14 7l-1.59-1.59a2 2 0 0 0-2.82 0L8 7l9 9 1.59-1.59a2 2 0 0 0 0-2.82L17 10l4.37-4.37a2.12 2.12 0 1 0-3-3z"/><path d="M9 8c-2 3-4 3.5-7 4l8 10c2-1 6-5 6-7"/><path d="M14.5 17.5 4.5 15"/></svg> },
+    { path: '/battle-reports', label: t('battles'), icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" y1="19" x2="19" y2="13"/><line x1="16" y1="16" x2="20" y2="20"/><line x1="19" y1="21" x2="21" y2="19"/></svg> },
+    { path: '/lore', label: t('lore'), icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> },
+    { path: '/news', label: 'Noticias', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a4 4 0 0 1-4 4z"/><path d="M8 6h12"/><path d="M8 10h12"/><path d="M8 14h8"/></svg> },
   ];
 
   return (
@@ -123,9 +123,6 @@ export default function Header() {
               </motion.button>
             ))}
           </div>
-
-          {/* Language Toggle */}
-          <LanguageToggle />
 
           {/* Mobile Hamburger */}
           <motion.button
@@ -269,7 +266,9 @@ export default function Header() {
                     letterSpacing: '1px'
                   }}
                 >
-                  <span style={{ fontSize: '1.3rem' }}>🏠</span>
+                  <span style={{ display: 'flex', alignItems: 'center', flexShrink: 0, opacity: 0.75 }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                  </span>
                   <span>{t('home').toUpperCase()}</span>
                 </motion.button>
 
@@ -299,7 +298,7 @@ export default function Header() {
                       fontWeight: location.pathname.includes(item.path) ? 'bold' : 'normal'
                     }}
                   >
-                    <span style={{ fontSize: '1.3rem' }}>{item.icon}</span>
+                    <span style={{ display: 'flex', alignItems: 'center', flexShrink: 0, opacity: 0.75 }}>{item.icon}</span>
                     <span>{item.label.toUpperCase()}</span>
                   </motion.button>
                 ))}

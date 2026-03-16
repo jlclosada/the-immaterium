@@ -120,8 +120,10 @@ const LorePage = () => {
           <div style={{ position: 'relative', marginBottom: '1rem' }}>
             <span style={{
               position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)',
-              color: 'rgba(255,255,255,0.3)', pointerEvents: 'none',
-            }}>🔍</span>
+              color: 'rgba(255,255,255,0.3)', pointerEvents: 'none', display: 'flex',
+            }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </span>
             <input
               type="text"
               placeholder="Buscar en el lore..."
@@ -185,7 +187,9 @@ const LorePage = () => {
               color: 'rgba(255,255,255,0.25)',
             }}
           >
-            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📚</div>
+            <div style={{ marginBottom: '1rem', opacity: 0.25 }}>
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            </div>
             <p>{searchTerm || selectedCategory !== 'all' ? 'Sin resultados' : 'Los archivos están vacíos'}</p>
           </motion.div>
         )}
@@ -228,8 +232,12 @@ const LoreCard = ({ entry, index }) => {
             fontSize: '0.7rem',
             fontWeight: 700,
             letterSpacing: '0.5px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
           }}>
-            ⭐ Destacado
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            Destacado
           </div>
         )}
 
@@ -301,7 +309,6 @@ const LoreCard = ({ entry, index }) => {
         }}>
           <span>Por {entry.author}</span>
           <div style={{ display: 'flex', gap: '1rem' }}>
-            <span>👁️ {entry.views}</span>
             <span style={{ color: categoryColor, fontWeight: 600 }}>Leer →</span>
           </div>
         </div>

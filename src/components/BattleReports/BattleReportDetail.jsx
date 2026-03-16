@@ -168,9 +168,9 @@ export default function BattleReportDetail() {
                         justifyContent: 'center',
                         color: '#aaa'
                     }}>
-                        <span>📅 {new Date(selectedBattleReport.date).toLocaleDateString('es-ES')}</span>
-                        <span>🎯 {selectedBattleReport.mission}</span>
-                        <span>⚔️ {selectedBattleReport.points} pts</span>
+                        <span>{new Date(selectedBattleReport.date).toLocaleDateString('es-ES')}</span>
+                        <span>{selectedBattleReport.mission}</span>
+                        <span>{selectedBattleReport.points} pts</span>
                     </div>
 
                     {/* Final Score */}
@@ -238,11 +238,10 @@ export default function BattleReportDetail() {
                                 gap: '0.5rem'
                             }}
                         >
-                            <span>{isLiked ? '❤️' : '🤍'}</span>
+                            <span>{isLiked ? '♥' : '♡'}</span>
                             <span>{selectedBattleReport.likes}</span>
                         </button>
 
-                        <span style={{ color: '#888' }}>👁️ {selectedBattleReport.views} vistas</span>
                     </div>
                 </motion.div>
 
@@ -391,7 +390,7 @@ export default function BattleReportDetail() {
                         borderRadius: '8px',
                         border: '1px solid rgba(255,215,0,0.3)'
                     }}>
-                        <h3 style={{ color: '#ffd700', marginBottom: '0.5rem' }}>🏆 MVP de la Batalla</h3>
+                        <h3 style={{ color: '#ffd700', marginBottom: '0.5rem' }}>MVP de la Batalla</h3>
                         <p style={{ color: '#ddd', fontSize: '1.1rem', margin: 0 }}>{selectedBattleReport.mvp}</p>
                     </div>
                 </motion.div>

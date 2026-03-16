@@ -5,7 +5,6 @@ import { useStore } from '../stores/useStore';
 import { useTranslation } from '../i18n/translations';
 import { api } from '../services/api';
 import Footer from '../components/UI/Footer';
-import LanguageToggle from '../components/UI/LanguageToggle';
 
 const NAV_ITEMS = [
   {
@@ -100,11 +99,6 @@ const LandingPage = () => {
       position: 'relative',
     }}>
       <div className="scanline-overlay" />
-
-      {/* Language Toggle */}
-      <div style={{ position: 'fixed', top: 'clamp(1rem, 3vw, 1.5rem)', right: 'clamp(1rem, 3vw, 1.5rem)', zIndex: 1000 }}>
-        <LanguageToggle />
-      </div>
 
       {/* ── HERO ── */}
       <section style={{

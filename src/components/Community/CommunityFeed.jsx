@@ -267,7 +267,7 @@ export default function CommunityFeed() {
                                     color: activity.type === 'guide' ? '#00ced1' : '#ff6464',
                                     border: `1px solid ${activity.type === 'guide' ? '#00ced1' : '#ff6464'}`
                                 }}>
-                                    {activity.type === 'guide' ? '🎨 GUÍA' : '⚔️ BATALLA'}
+                                    {activity.type === 'guide' ? 'GUÍA' : 'BATALLA'}
                                 </span>
                             </div>
 
@@ -289,11 +289,11 @@ export default function CommunityFeed() {
                                 color: '#aaa',
                                 flexWrap: 'wrap'
                             }}>
-                                <span>👤 {activity.author}</span>
-                                <span>📅 {new Date(activity.date).toLocaleDateString('es-ES')}</span>
+                                <span>{activity.author}</span>
+                                <span>{new Date(activity.date).toLocaleDateString('es-ES')}</span>
                                 {activity.faction && (
                                     <span style={{ color: getFactionColor(activity.faction) }}>
-                                        🎯 {armies.find(a => a.id === activity.faction)?.name}
+                                        {armies.find(a => a.id === activity.faction)?.name}
                                     </span>
                                 )}
                             </div>
@@ -305,9 +305,8 @@ export default function CommunityFeed() {
                                 fontSize: '0.9rem',
                                 color: '#888'
                             }}>
-                                <span>❤️ {activity.likes}</span>
-                                <span>👁️ {activity.views}</span>
-                                <span>💬 {activity.comments}</span>
+                                <span>❤ {activity.likes}</span>
+                                <span>{activity.comments} comentarios</span>
                             </div>
                         </div>
 
