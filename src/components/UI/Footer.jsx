@@ -54,7 +54,7 @@ const Footer = () => {
                         lineHeight: '1.7',
                         fontSize: 'clamp(0.85rem, 2vw, 0.95rem)'
                     }}>
-                        Archivos del 41º Milenio. Una comunidad dedicada a Warhammer 40,000 con reportes de batalla, guías de pintura y lore del universo.
+                        Nuestro sitio dedicado a Warhammer 40,000 con imágenes de nuestras miniaturas, reportes de batalla, guías de pintura y lore del universo.
                     </p>
                 </motion.div>
 
@@ -166,7 +166,7 @@ const Footer = () => {
                 textAlign: 'center'
             }}>
                 <div>
-                    © {currentYear} The Immaterium. Proyecto de Fans.
+                    © {currentYear} The Immaterium. José Luis Cáceres.
                 </div>
                 <div style={{ fontSize: 'clamp(0.7rem, 1.8vw, 0.8rem)' }}>
                     Sitio no oficial de Warhammer 40k. No afiliado con Games Workshop.

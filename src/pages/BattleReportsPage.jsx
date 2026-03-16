@@ -9,15 +9,18 @@ const BattleReportsPage = () => {
   const navigate = useNavigate();
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     const fetchReports = async () => {
       try {
         const data = await api.getBattleReports();
-        setReports(Array.isArray(data) ? data : []);
+        const list = Array.isArray(data) ? data : (data?.results || []);
+        setReports(list);
       } catch (error) {
         console.error('Failed to fetch reports:', error);
+        setError(error.message || 'Error al cargar los informes');
       } finally {
         setLoading(false);
       }
@@ -108,6 +111,14 @@ const BattleReportsPage = () => {
 
         {loading ? (
           <div className="loading-spinner" style={{ margin: '5rem auto' }} />
+        ) : error ? (
+          <div style={{ textAlign: 'center', padding: '5rem 2rem', color: 'rgba(255,255,255,0.4)' }}>
+            <div style={{ marginBottom: '1rem', opacity: 0.3 }}>
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            </div>
+            <p style={{ fontSize: '1rem', marginBottom: '0.5rem' }}>No se pudieron cargar los informes</p>
+            <p style={{ fontSize: '0.8rem', opacity: 0.6 }}>{error}</p>
+          </div>
         ) : filteredReports.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '5rem 2rem', color: 'rgba(255,255,255,0.3)' }}>
             <div style={{ marginBottom: '1rem', opacity: 0.25 }}>

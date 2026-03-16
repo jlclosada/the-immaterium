@@ -14,6 +14,7 @@ import ArmyManager from './components/Admin/ArmyManager';
 import GuideManager from './components/Admin/GuideManager';
 import ReportManager from './components/Admin/ReportManager';
 import LoreManager from './components/Admin/LoreManager';
+import UserManager from './components/Admin/UserManager';
 
 import ArmiesPage from './pages/ArmiesPage';
 import ArmyDetailPage from './pages/ArmyDetailPage';
@@ -78,6 +79,7 @@ function App() {
             <Route path="lore" element={<LoreManager />} />
             <Route path="reports" element={<ReportManager />} />
             <Route path="news" element={<NewsManager />} />
+            <Route path="users" element={<UserManager />} />
           </Route>
 
           {/* Fallback */}

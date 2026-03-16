@@ -158,33 +158,66 @@ const ArmyCard = ({ army, index, language, onClick }) => {
       }}
       onHoverStart={e => {}}
     >
-      {/* Icon / Image area */}
-      <div style={{
-        height: '180px',
-        background: 'rgba(0,0,0,0.4)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        position: 'relative',
-        overflow: 'hidden',
-        flexShrink: 0,
-      }}>
-        {army.iconUrl ? (
-          <img
-            src={army.iconUrl}
-            alt={name}
-            style={{
-              maxWidth: '75%', maxHeight: '75%',
-              objectFit: 'contain',
-              filter: 'drop-shadow(0 0 20px rgba(0,212,255,0.3))',
-              transition: 'transform 0.4s',
-            }}
-          />
-        ) : (
-          <div style={{ opacity: 0.2 }}>
-            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          </div>
-        )}
+      {/* Hero image area */}
+      {(() => {
+        const heroImg = army.images?.[0]?.url;
+        return (
+          <div style={{
+            height: '180px',
+            position: 'relative',
+            overflow: 'hidden',
+            flexShrink: 0,
+            background: heroImg ? 'transparent' : 'rgba(0,0,0,0.4)',
+          }}>
+            {heroImg && (
+              <img
+                src={heroImg}
+                alt={name}
+                style={{
+                  width: '100%', height: '100%',
+                  objectFit: 'cover',
+                  transition: 'transform 0.5s ease',
+                }}
+              />
+            )}
+            {/* Dark overlay */}
+            <div style={{
+              position: 'absolute', inset: 0,
+              background: heroImg
+                ? 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.55) 100%)'
+                : 'transparent',
+            }} />
+            {/* Icon overlay */}
+            {army.iconUrl && (
+              <div style={{
+                position: 'absolute',
+                top: '50%', left: '50%',
+                transform: 'translate(-50%, -50%)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <img
+                  src={army.iconUrl}
+                  alt={name}
+                  style={{
+                    maxWidth: heroImg ? '55px' : '75%',
+                    maxHeight: heroImg ? '55px' : '75%',
+                    objectFit: 'contain',
+                    filter: heroImg
+                      ? 'drop-shadow(0 2px 8px rgba(0,0,0,0.8)) brightness(1.15)'
+                      : 'drop-shadow(0 0 20px rgba(0,212,255,0.3))',
+                  }}
+                />
+              </div>
+            )}
+            {!army.iconUrl && !heroImg && (
+              <div style={{
+                position: 'absolute', inset: 0,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                opacity: 0.2,
+              }}>
+                <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              </div>
+            )}
         {/* Image count badge */}
         {army.images?.length > 0 && (
           <div style={{
@@ -201,7 +234,9 @@ const ArmyCard = ({ army, index, language, onClick }) => {
             {army.images.length}
           </div>
         )}
-      </div>
+          </div>
+        );
+      })()}
 
       {/* Content */}
       <div style={{ padding: 'clamp(1rem, 3vw, 1.5rem)', flex: 1, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>

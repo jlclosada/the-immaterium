@@ -228,6 +228,24 @@ export const api = {
     return true
   },
 
+  // Users (admin only)
+  getUsers: async (token) => {
+    const response = await fetch(`${API_URL}/api/users/`, {
+      headers: { Authorization: `Token ${token}` },
+    })
+    if (!response.ok) throw new Error('Failed to fetch users')
+    return response.json()
+  },
+
+  toggleUserActive: async (userId, token) => {
+    const response = await fetch(`${API_URL}/api/users/${userId}/toggle-active/`, {
+      method: 'PATCH',
+      headers: { Authorization: `Token ${token}` },
+    })
+    if (!response.ok) throw new Error('Failed to toggle user status')
+    return response.json()
+  },
+
   login: async (username, password) => {
     const response = await fetch(`${API_URL}/api/auth/login/`, {
       method: 'POST',

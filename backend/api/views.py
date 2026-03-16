@@ -2,7 +2,10 @@ from rest_framework import viewsets, status, generics
 from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from django.contrib.auth import authenticate
+from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from django.db.models import F
 from .models import (
@@ -444,3 +447,56 @@ class NewsArticleViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
+
+
+@api_view(['GET'])
+def users_list(request):
+    """List all users. Requires admin token."""
+    auth_header = request.META.get('HTTP_AUTHORIZATION', '')
+    if not auth_header.startswith('Token '):
+        return Response({'error': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
+    try:
+        token_key = auth_header.split(' ')[1]
+        token = Token.objects.get(key=token_key)
+        if not token.user.is_staff:
+            return Response({'error': 'Admin access required'}, status=status.HTTP_403_FORBIDDEN)
+    except Token.DoesNotExist:
+        return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    users = User.objects.all().order_by('-date_joined')
+    data = [
+        {
+            'id': u.id,
+            'username': u.username,
+            'email': u.email,
+            'isStaff': u.is_staff,
+            'isActive': u.is_active,
+            'dateJoined': u.date_joined.isoformat(),
+            'lastLogin': u.last_login.isoformat() if u.last_login else None,
+        }
+        for u in users
+    ]
+    return Response(data)
+
+
+@api_view(['PATCH'])
+def user_toggle_active(request, user_id):
+    """Toggle a user's active status. Requires admin token."""
+    auth_header = request.META.get('HTTP_AUTHORIZATION', '')
+    if not auth_header.startswith('Token '):
+        return Response({'error': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
+    try:
+        token_key = auth_header.split(' ')[1]
+        token = Token.objects.get(key=token_key)
+        if not token.user.is_staff:
+            return Response({'error': 'Admin access required'}, status=status.HTTP_403_FORBIDDEN)
+        # Prevent admins from deactivating themselves
+        if token.user.id == user_id:
+            return Response({'error': 'Cannot modify your own account'}, status=status.HTTP_400_BAD_REQUEST)
+    except Token.DoesNotExist:
+        return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    user = get_object_or_404(User, id=user_id)
+    user.is_active = not user.is_active
+    user.save()
+    return Response({'id': user.id, 'isActive': user.is_active})

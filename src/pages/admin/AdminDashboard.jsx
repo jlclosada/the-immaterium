@@ -8,6 +8,8 @@ const AdminDashboard = () => {
         armies: 0,
         guides: 0,
         reports: 0,
+        lore: 0,
+        news: 0,
         totalLikes: 0,
     });
     const [loading, setLoading] = useState(true);
@@ -17,33 +19,42 @@ const AdminDashboard = () => {
     }, []);
 
     const loadStats = async () => {
-        try {
-            const [armies, guides, reports] = await Promise.all([
-                api.getArmies(),
-                api.getPaintingGuides(),
-                api.getBattleReports()
-            ]);
+        const [armiesRes, guidesRes, reportsRes, loreRes, newsRes] = await Promise.allSettled([
+            api.getArmies(),
+            api.getPaintingGuides(),
+            api.getBattleReports(),
+            api.getLoreEntries(),
+            api.getNewsArticles(),
+        ]);
 
-            const armiesList = Array.isArray(armies) ? armies : (armies.results || []);
-            const guidesList = Array.isArray(guides) ? guides : (guides.results || []);
-            const reportsList = Array.isArray(reports) ? reports : (reports.results || []);
+        const safe = (res) => {
+            if (res.status === 'fulfilled') {
+                const d = res.value;
+                return Array.isArray(d) ? d : (d?.results || []);
+            }
+            return [];
+        };
 
-            const totalLikes = [
-                ...guidesList.map(g => g.likes || 0),
-                ...reportsList.map(r => r.likes || 0)
-            ].reduce((a, b) => a + b, 0);
+        const armiesList = safe(armiesRes);
+        const guidesList = safe(guidesRes);
+        const reportsList = safe(reportsRes);
+        const loreList = safe(loreRes);
+        const newsList = safe(newsRes);
 
-            setStats({
-                armies: armiesList.length,
-                guides: guidesList.length,
-                reports: reportsList.length,
-                totalLikes,
-            });
-        } catch (error) {
-            console.error('Failed to load stats:', error);
-        } finally {
-            setLoading(false);
-        }
+        const totalLikes = [
+            ...guidesList.map(g => g.likes || 0),
+            ...reportsList.map(r => r.likes || 0)
+        ].reduce((a, b) => a + b, 0);
+
+        setStats({
+            armies: armiesList.length,
+            guides: guidesList.length,
+            reports: reportsList.length,
+            lore: loreList.length,
+            news: newsList.length,
+            totalLikes,
+        });
+        setLoading(false);
     };
 
     const statCards = [
@@ -69,6 +80,20 @@ const AdminDashboard = () => {
             link: '/admin/reports'
         },
         {
+            title: 'Entradas de Lore',
+            value: stats.lore,
+            icon: <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>,
+            color: '#a855f7',
+            link: '/admin/lore'
+        },
+        {
+            title: 'Noticias',
+            value: stats.news,
+            icon: <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a4 4 0 0 1-4 4z"/><path d="M8 6h12"/><path d="M8 10h12"/><path d="M8 14h8"/></svg>,
+            color: '#f59e0b',
+            link: '/admin/news'
+        },
+        {
             title: 'Total Likes',
             value: stats.totalLikes,
             icon: <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>,
@@ -80,7 +105,7 @@ const AdminDashboard = () => {
     if (loading) {
         return (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
-                <div className="loading-spinner"></div>
+                <div className="loading-spinner" />
             </div>
         );
     }
@@ -241,6 +266,44 @@ const AdminDashboard = () => {
                             onMouseLeave={e => e.target.style.transform = 'translateY(0)'}
                         >
                             Nuevo Informe
+                        </button>
+                    </Link>
+                    <Link to="/admin/news" style={{ textDecoration: 'none' }}>
+                        <button style={{
+                            width: '100%',
+                            padding: '1rem',
+                            background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                            border: 'none',
+                            borderRadius: '12px',
+                            color: 'var(--color-light)',
+                            fontFamily: 'var(--font-display)',
+                            fontSize: '1rem',
+                            cursor: 'pointer',
+                            transition: 'transform 0.2s'
+                        }}
+                            onMouseEnter={e => e.target.style.transform = 'translateY(-2px)'}
+                            onMouseLeave={e => e.target.style.transform = 'translateY(0)'}
+                        >
+                            Nueva Noticia
+                        </button>
+                    </Link>
+                    <Link to="/admin/users" style={{ textDecoration: 'none' }}>
+                        <button style={{
+                            width: '100%',
+                            padding: '1rem',
+                            background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                            border: 'none',
+                            borderRadius: '12px',
+                            color: 'var(--color-light)',
+                            fontFamily: 'var(--font-display)',
+                            fontSize: '1rem',
+                            cursor: 'pointer',
+                            transition: 'transform 0.2s'
+                        }}
+                            onMouseEnter={e => e.target.style.transform = 'translateY(-2px)'}
+                            onMouseLeave={e => e.target.style.transform = 'translateY(0)'}
+                        >
+                            Gestionar Usuarios
                         </button>
                     </Link>
                 </div>

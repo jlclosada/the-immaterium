@@ -1,6 +1,10 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import ArmyViewSet, PaintingGuideViewSet, BattleReportViewSet, LoreEntryViewSet, NewsArticleViewSet, login_view
+from .views import (
+    ArmyViewSet, PaintingGuideViewSet, BattleReportViewSet,
+    LoreEntryViewSet, NewsArticleViewSet, login_view,
+    users_list, user_toggle_active,
+)
 
 router = DefaultRouter()
 router.register(r'armies', ArmyViewSet)
@@ -12,4 +16,6 @@ router.register(r'news', NewsArticleViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     path('auth/login/', login_view, name='api_token_auth'),
+    path('users/', users_list, name='users_list'),
+    path('users/<int:user_id>/toggle-active/', user_toggle_active, name='user_toggle_active'),
 ]
