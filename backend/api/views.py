@@ -21,23 +21,22 @@ from .serializers import (
 
 @api_view(['POST'])
 def login_view(request):
-    """Custom login view that accepts JSON"""
     username = request.data.get('username')
     password = request.data.get('password')
-    
+
     if username and password:
         user = authenticate(username=username, password=password)
         if user:
             token, created = Token.objects.get_or_create(user=user)
             return Response({'token': token.key})
-    
+
     return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
 
 class ArmyViewSet(viewsets.ModelViewSet):
     queryset = Army.objects.all()
     serializer_class = ArmySerializer
     lookup_field = 'id'
-    
+
     def list(self, request, *args, **kwargs):
         try:
             return super().list(request, *args, **kwargs)
@@ -45,13 +44,13 @@ class ArmyViewSet(viewsets.ModelViewSet):
             import traceback
             traceback.print_exc()
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
+
     def update(self, request, *args, **kwargs):
         """Handle partial updates (PATCH)"""
         instance = self.get_object()
         # Make a mutable copy
         data = request.data.copy()
-        
+
         # Convert camelCase to snake_case
         if 'iconUrl' in data:
             data['icon_url'] = data.pop('iconUrl')
@@ -59,12 +58,12 @@ class ArmyViewSet(viewsets.ModelViewSet):
             data['planet_type'] = data.pop('planetType')
         if 'planetName' in data:
             data['planet_name'] = data.pop('planetName')
-        
+
         # Use partial=True to allow partial updates
         serializer = self.get_serializer(instance, data=data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        
+
         return Response(serializer.data)
 
     @action(detail=True, methods=['delete'], url_path='images/(?P<image_id>[^/.]+)')
@@ -79,13 +78,13 @@ class PaintingGuideViewSet(viewsets.ModelViewSet):
     queryset = PaintingGuide.objects.all()
     serializer_class = PaintingGuideSerializer
     lookup_field = 'id'
-    
+
     def create(self, request, *args, **kwargs):
         # Make a mutable copy
         data = request.data.copy()
         materials_data = data.pop('materials', [])
         steps_data = data.pop('steps', [])
-        
+
         # Convert camelCase to snake_case
         if 'estimatedTime' in data:
             data['estimated_time'] = data.pop('estimatedTime')
@@ -95,32 +94,32 @@ class PaintingGuideViewSet(viewsets.ModelViewSet):
             data['cover_image'] = data.pop('coverImage')
         if 'faction' in data and data['faction']:
             data['faction_id'] = data.pop('faction')
-        
+
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         guide = serializer.save()
-        
+
         # Create materials
         for i, material_name in enumerate(materials_data):
             GuideMaterial.objects.create(guide=guide, name=material_name, order=i)
-        
+
         # Create steps
         for step_data in steps_data:
             step_data_copy = step_data.copy()
             if 'stepNumber' in step_data_copy:
                 step_data_copy['step_number'] = step_data_copy.pop('stepNumber')
             GuideStep.objects.create(guide=guide, **step_data_copy)
-        
+
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-    
+
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         # Make a mutable copy
         data = request.data.copy()
         materials_data = data.pop('materials', None)
         steps_data = data.pop('steps', None)
-        
+
         # Convert camelCase to snake_case
         if 'estimatedTime' in data:
             data['estimated_time'] = data.pop('estimatedTime')
@@ -134,17 +133,17 @@ class PaintingGuideViewSet(viewsets.ModelViewSet):
             else:
                 data['faction_id'] = None
                 data.pop('faction', None)
-        
+
         serializer = self.get_serializer(instance, data=data, partial=True)
         serializer.is_valid(raise_exception=True)
         guide = serializer.save()
-        
+
         # Update materials
         if materials_data is not None:
             GuideMaterial.objects.filter(guide=guide).delete()
             for i, material_name in enumerate(materials_data):
                 GuideMaterial.objects.create(guide=guide, name=material_name, order=i)
-        
+
         # Update steps
         if steps_data is not None:
             GuideStep.objects.filter(guide=guide).delete()
@@ -153,25 +152,25 @@ class PaintingGuideViewSet(viewsets.ModelViewSet):
                 if 'stepNumber' in step_data_copy:
                     step_data_copy['step_number'] = step_data_copy.pop('stepNumber')
                 GuideStep.objects.create(guide=guide, **step_data_copy)
-        
+
         return Response(serializer.data)
-    
+
     @action(detail=True, methods=['post'])
     def like(self, request, id=None):
         guide = self.get_object()
         user_id = request.data.get('user_id', 'anonymous')
-        
+
         # Check if already liked
         liked = UserLike.objects.filter(
-            user_id=user_id, 
+            user_id=user_id,
             content_type='guide',
             content_id=guide.id
         ).exists()
-        
+
         if liked:
             # Unlike
             UserLike.objects.filter(
-                user_id=user_id, 
+                user_id=user_id,
                 content_type='guide',
                 content_id=guide.id
             ).delete()
@@ -213,12 +212,23 @@ class BattleReportViewSet(viewsets.ModelViewSet):
     queryset = BattleReport.objects.all()
     serializer_class = BattleReportSerializer
     lookup_field = 'id'
-    
+
+    def list(self, request, *args, **kwargs):
+        try:
+            return super().list(request, *args, **kwargs)
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return Response(
+                {'error': str(e), 'detail': 'Error al cargar los informes. Es posible que falten migraciones.'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
     def create(self, request, *args, **kwargs):
         # Make a mutable copy
         data = request.data.copy()
         narrative_data = data.pop('narrative', [])
-        
+
         # Convert camelCase and handle nested data
         if 'finalScore' in data:
             final_score = data.pop('finalScore')
@@ -252,16 +262,16 @@ class BattleReportViewSet(viewsets.ModelViewSet):
                 text=narrative_entry.get('text', ''),
                 order=i
             )
-        
+
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-    
+
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         # Make a mutable copy
         data = request.data.copy()
         narrative_data = data.pop('narrative', None)
-        
+
         # Convert camelCase and handle nested data
         if 'finalScore' in data:
             final_score = data.pop('finalScore')
@@ -283,11 +293,11 @@ class BattleReportViewSet(viewsets.ModelViewSet):
                 data['player2_faction'] = armies_data['player2'].get('faction', instance.player2_faction)
                 data['player2_list'] = armies_data['player2'].get('list', instance.player2_list)
         # keyMoments is now handled by the serializer (source='key_moments')
-        
+
         serializer = self.get_serializer(instance, data=data, partial=True)
         serializer.is_valid(raise_exception=True)
         report = serializer.save()
-        
+
         # Update narrative
         if narrative_data is not None:
             BattleNarrative.objects.filter(battle=report).delete()
@@ -299,25 +309,25 @@ class BattleReportViewSet(viewsets.ModelViewSet):
                     text=narrative_entry.get('text', ''),
                     order=i
                 )
-        
+
         return Response(serializer.data)
 
     @action(detail=True, methods=['post'])
     def like(self, request, id=None):
         report = self.get_object()
         user_id = request.data.get('user_id', 'anonymous')
-        
+
         # Check if already liked
         liked = UserLike.objects.filter(
-            user_id=user_id, 
+            user_id=user_id,
             content_type='report',
             content_id=report.id
         ).exists()
-        
+
         if liked:
             # Unlike
             UserLike.objects.filter(
-                user_id=user_id, 
+                user_id=user_id,
                 content_type='report',
                 content_id=report.id
             ).delete()
@@ -349,7 +359,7 @@ class BattleReportViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
             serializer.save(
                 id=f"comment-{request.data.get('date', '')}",
-                content_type='report', 
+                content_type='report',
                 battle_report=report
             )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -449,52 +459,102 @@ class NewsArticleViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-@api_view(['GET'])
-def users_list(request):
-    """List all users. Requires admin token."""
+def _get_authenticated_user(request):
+    """Helper: returns (user, error_response). Requires Token auth."""
     auth_header = request.META.get('HTTP_AUTHORIZATION', '')
     if not auth_header.startswith('Token '):
-        return Response({'error': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
+        return None, Response({'error': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
     try:
         token_key = auth_header.split(' ')[1]
         token = Token.objects.get(key=token_key)
-        if not token.user.is_staff:
-            return Response({'error': 'Admin access required'}, status=status.HTTP_403_FORBIDDEN)
+        return token.user, None
     except Token.DoesNotExist:
-        return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
+        return None, Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+def _serialize_user(u):
+    return {
+        'id': u.id,
+        'username': u.username,
+        'email': u.email,
+        'isStaff': u.is_staff,
+        'isSuperuser': u.is_superuser,
+        'isActive': u.is_active,
+        'dateJoined': u.date_joined.isoformat(),
+        'lastLogin': u.last_login.isoformat() if u.last_login else None,
+    }
+
+
+@api_view(['GET'])
+def users_list(request):
+    """List all users. Requires staff (admin) token."""
+    requesting_user, err = _get_authenticated_user(request)
+    if err:
+        return err
+    if not requesting_user.is_staff:
+        return Response({'error': 'Admin access required'}, status=status.HTTP_403_FORBIDDEN)
 
     users = User.objects.all().order_by('-date_joined')
-    data = [
-        {
-            'id': u.id,
-            'username': u.username,
-            'email': u.email,
-            'isStaff': u.is_staff,
-            'isActive': u.is_active,
-            'dateJoined': u.date_joined.isoformat(),
-            'lastLogin': u.last_login.isoformat() if u.last_login else None,
-        }
-        for u in users
-    ]
-    return Response(data)
+    return Response([_serialize_user(u) for u in users])
+
+
+@api_view(['POST'])
+def user_create(request):
+    """Create a new admin user. Requires superuser (leader) token."""
+    requesting_user, err = _get_authenticated_user(request)
+    if err:
+        return err
+    if not requesting_user.is_superuser:
+        return Response({'error': 'Solo el leader puede crear administradores'}, status=status.HTTP_403_FORBIDDEN)
+
+    username = request.data.get('username', '').strip()
+    password = request.data.get('password', '').strip()
+    email = request.data.get('email', '').strip()
+
+    if not username or not password:
+        return Response({'error': 'Username y password son requeridos'}, status=status.HTTP_400_BAD_REQUEST)
+    if User.objects.filter(username=username).exists():
+        return Response({'error': f'El usuario "{username}" ya existe'}, status=status.HTTP_400_BAD_REQUEST)
+
+    user = User.objects.create_user(
+        username=username,
+        password=password,
+        email=email,
+        is_staff=True,
+        is_active=True,
+    )
+    return Response(_serialize_user(user), status=status.HTTP_201_CREATED)
+
+
+@api_view(['DELETE'])
+def user_delete(request, user_id):
+    """Delete an admin user. Requires superuser (leader) token."""
+    requesting_user, err = _get_authenticated_user(request)
+    if err:
+        return err
+    if not requesting_user.is_superuser:
+        return Response({'error': 'Solo el leader puede eliminar administradores'}, status=status.HTTP_403_FORBIDDEN)
+    if requesting_user.id == user_id:
+        return Response({'error': 'No puedes eliminarte a ti mismo'}, status=status.HTTP_400_BAD_REQUEST)
+
+    user = get_object_or_404(User, id=user_id)
+    if user.is_superuser:
+        return Response({'error': 'No se puede eliminar a otro leader'}, status=status.HTTP_400_BAD_REQUEST)
+
+    user.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 @api_view(['PATCH'])
 def user_toggle_active(request, user_id):
-    """Toggle a user's active status. Requires admin token."""
-    auth_header = request.META.get('HTTP_AUTHORIZATION', '')
-    if not auth_header.startswith('Token '):
-        return Response({'error': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
-    try:
-        token_key = auth_header.split(' ')[1]
-        token = Token.objects.get(key=token_key)
-        if not token.user.is_staff:
-            return Response({'error': 'Admin access required'}, status=status.HTTP_403_FORBIDDEN)
-        # Prevent admins from deactivating themselves
-        if token.user.id == user_id:
-            return Response({'error': 'Cannot modify your own account'}, status=status.HTTP_400_BAD_REQUEST)
-    except Token.DoesNotExist:
-        return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
+    """Toggle a user's active status. Requires superuser (leader) token."""
+    requesting_user, err = _get_authenticated_user(request)
+    if err:
+        return err
+    if not requesting_user.is_superuser:
+        return Response({'error': 'Solo el leader puede activar/desactivar usuarios'}, status=status.HTTP_403_FORBIDDEN)
+    if requesting_user.id == user_id:
+        return Response({'error': 'No puedes modificar tu propia cuenta'}, status=status.HTTP_400_BAD_REQUEST)
 
     user = get_object_or_404(User, id=user_id)
     user.is_active = not user.is_active
