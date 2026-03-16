@@ -117,13 +117,10 @@ const ArmiesPage = () => {
             fontFamily: 'var(--font-display)',
             fontSize: 'clamp(2rem, 6vw, 3.5rem)',
             textTransform: 'uppercase',
-            background: `linear-gradient(135deg, ${accentColor}, ${secondaryColor})`,
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
+            color: accentColor,
             letterSpacing: '3px',
             marginBottom: '1rem',
-            transition: 'all 0.4s ease',
+            transition: 'color 0.4s ease',
           }}>
             {t('armiesTitle')}
           </h1>
