@@ -4,6 +4,7 @@ from rest_framework.routers import DefaultRouter
 from . import views
 
 router = DefaultRouter()
+router.register(r'games', views.GameViewSet, basename='game')
 router.register(r'armies', views.ArmyViewSet, basename='army')
 router.register(r'guides', views.PaintingGuideViewSet, basename='guide')
 router.register(r'battle-reports', views.BattleReportViewSet, basename='battlereport')

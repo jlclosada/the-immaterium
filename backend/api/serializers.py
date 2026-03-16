@@ -2,8 +2,19 @@ from rest_framework import serializers
 from .models import (
     Army, ArmyImage, PaintingGuide, GuideMaterial, GuideStep,
     BattleReport, BattleNarrative, Comment, UserLike, UserFavorite, LoreEntry,
-    NewsArticle
+    NewsArticle, Game
 )
+
+class GameSerializer(serializers.ModelSerializer):
+    accentColor = serializers.CharField(source='accent_color', required=False)
+    secondaryColor = serializers.CharField(source='secondary_color', required=False)
+    iconUrl = serializers.URLField(source='icon_url', required=False, allow_blank=True)
+    isActive = serializers.BooleanField(source='is_active', required=False, default=True)
+
+    class Meta:
+        model = Game
+        fields = ['id', 'name', 'slug', 'description', 'iconUrl', 'accentColor', 'secondaryColor', 'theme', 'order', 'isActive']
+
 
 class ArmyImageSerializer(serializers.ModelSerializer):
     isFavorite = serializers.BooleanField(source='is_favorite', required=False, default=False)
@@ -25,6 +36,7 @@ class ArmySerializer(serializers.ModelSerializer):
     iconUrl = serializers.URLField(source='icon_url', required=False, allow_blank=True)
     planetType = serializers.CharField(source='planet_type', required=False, allow_blank=True)
     planetName = serializers.CharField(source='planet_name', required=False, allow_blank=True)
+    gameId = serializers.CharField(source='game_id', required=False, allow_null=True, allow_blank=True, default=None)
     # Campos de traducción - solo si existen en el modelo
     nameEs = serializers.SerializerMethodField()
     descriptionEs = serializers.SerializerMethodField()
@@ -38,7 +50,7 @@ class ArmySerializer(serializers.ModelSerializer):
             'history', 'historyEs',
             'iconUrl', 'images',
             'position', 'size', 'color', 'emissive',
-            'planetType', 'planetName'
+            'planetType', 'planetName', 'gameId'
         ]
 
     def get_nameEs(self, obj):
@@ -53,6 +65,10 @@ class ArmySerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         import uuid
         images_data = validated_data.pop('images', [])
+        # Handle game_id: remove if None or empty string to avoid FK issues
+        game_id = validated_data.pop('game_id', None)
+        if game_id:
+            validated_data['game_id'] = game_id
         # Auto-generate ID if not provided
         if not validated_data.get('id'):
             validated_data['id'] = str(uuid.uuid4())
@@ -66,6 +82,10 @@ class ArmySerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         images_data = validated_data.pop('images', None)
+        # Handle game_id explicitly
+        if 'game_id' in validated_data:
+            game_id = validated_data.pop('game_id')
+            instance.game_id = game_id if game_id else None
 
         # Update army fields
         for attr, value in validated_data.items():
@@ -146,6 +166,10 @@ class BattleReportSerializer(serializers.ModelSerializer):
     # Read-only computed fields for the API response
     armies = serializers.SerializerMethodField()
     finalScore = serializers.SerializerMethodField()
+    # Explicitly declare ArrayField-based fields to allow empty lists
+    factions = serializers.ListField(child=serializers.CharField(), allow_empty=True, required=False, default=list)
+    tags = serializers.ListField(child=serializers.CharField(), allow_empty=True, required=False, default=list)
+    images = serializers.ListField(child=serializers.URLField(), allow_empty=True, required=False, default=list)
     # keyMoments maps to key_moments for both read and write
     keyMoments = serializers.ListField(
         child=serializers.CharField(), source='key_moments',

@@ -270,6 +270,13 @@ export const api = {
     return json
   },
 
+  getGames: async () => {
+    const response = await fetch(`${API_URL}/api/games/`)
+    if (!response.ok) throw new Error('Failed to fetch games')
+    const data = await response.json()
+    return data.results || data
+  },
+
   login: async (username, password) => {
     const response = await fetch(`${API_URL}/api/auth/login/`, {
       method: 'POST',

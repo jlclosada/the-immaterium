@@ -42,6 +42,7 @@ const emptyForm = {
   iconUrl: '', position: [0, 0, 0], size: 1.0,
   color: '#ffffff', emissive: '#ffffff',
   planetType: 'standard', planetName: '',
+  gameId: '',
 }
 
 const planetTypes = [
@@ -56,6 +57,7 @@ const planetTypes = [
 
 const ArmyManager = () => {
   const [armies, setArmies] = useState([])
+  const [games, setGames] = useState([])
   const [editingArmy, setEditingArmy] = useState(null)
   const [formData, setFormData] = useState(emptyForm)
   const [images, setImages] = useState([])
@@ -66,7 +68,10 @@ const ArmyManager = () => {
   const token = useStore(state => state.token)
   const toast = useToast()
 
-  useEffect(() => { loadArmies() }, [])
+  useEffect(() => {
+    loadArmies()
+    api.getGames().then(setGames).catch(() => {})
+  }, [])
 
   const loadArmies = async () => {
     try {
@@ -94,6 +99,7 @@ const ArmyManager = () => {
           emissive: formData.emissive,
           planetType: formData.planetType,
           planetName: formData.planetName,
+          gameId: formData.gameId || null,
           images: images,
         }, token)
         toast('Ejército actualizado correctamente', 'success')
@@ -110,6 +116,7 @@ const ArmyManager = () => {
           emissive: formData.emissive,
           planetType: formData.planetType,
           planetName: formData.planetName,
+          gameId: formData.gameId || null,
           images: images,
         }, token)
         toast('Ejército creado correctamente', 'success')
@@ -137,6 +144,7 @@ const ArmyManager = () => {
       emissive: army.emissive || '#ffffff',
       planetType: army.planetType || 'standard',
       planetName: army.planetName || '',
+      gameId: army.gameId || '',
     })
     setImages(army.images || [])
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -364,6 +372,26 @@ const ArmyManager = () => {
               ))}
             </div>
           </div>
+
+          {/* Juego */}
+          {games.length > 0 && (
+            <div>
+              <p style={sectionTitle}>Universo</p>
+              <div>
+                <label style={labelStyle}>Juego / Universo</label>
+                <select
+                  value={formData.gameId || ''}
+                  onChange={e => setFormData({ ...formData, gameId: e.target.value })}
+                  style={{ ...inputStyle, cursor: 'pointer' }}
+                >
+                  <option value="">Sin asignar</option>
+                  {games.map(g => (
+                    <option key={g.id} value={g.id}>{g.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
 
           {/* Imágenes */}
           <div>

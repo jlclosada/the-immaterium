@@ -11,12 +11,12 @@ from django.db.models import F
 from .models import (
     Army, ArmyImage, PaintingGuide, GuideMaterial, GuideStep,
     BattleReport, BattleNarrative, Comment,
-    UserLike, UserFavorite, LoreEntry, NewsArticle
+    UserLike, UserFavorite, LoreEntry, NewsArticle, Game
 )
 from .serializers import (
     ArmySerializer, PaintingGuideSerializer, BattleReportSerializer,
     CommentSerializer, UserLikeSerializer, UserFavoriteSerializer,
-    LoreEntrySerializer, NewsArticleSerializer
+    LoreEntrySerializer, NewsArticleSerializer, GameSerializer
 )
 
 @api_view(['POST'])
@@ -31,6 +31,19 @@ def login_view(request):
             return Response({'token': token.key})
 
     return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class GameViewSet(viewsets.ModelViewSet):
+    queryset = Game.objects.filter(is_active=True)
+    serializer_class = GameSerializer
+    lookup_field = 'id'
+
+    def get_queryset(self):
+        # Admin can see all, public only active
+        if self.request.user.is_staff:
+            return Game.objects.all()
+        return Game.objects.filter(is_active=True)
+
 
 class ArmyViewSet(viewsets.ModelViewSet):
     queryset = Army.objects.all()

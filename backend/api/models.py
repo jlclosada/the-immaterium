@@ -6,6 +6,27 @@ def default_position():
     return [0, 0, 0]
 
 
+class Game(models.Model):
+    id = models.CharField(max_length=100, primary_key=True)
+    name = models.CharField(max_length=200)
+    slug = models.SlugField(max_length=100, unique=True)
+    description = models.TextField(blank=True)
+    icon_url = models.URLField(max_length=500, blank=True)
+    accent_color = models.CharField(max_length=20, default='#00d4ff')
+    secondary_color = models.CharField(max_length=20, default='#7b2fff')
+    theme = models.CharField(max_length=50, default='sci-fi')  # 'sci-fi' | 'medieval'
+    order = models.IntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['order', 'name']
+        verbose_name = 'Game'
+        verbose_name_plural = 'Games'
+
+    def __str__(self):
+        return self.name
+
+
 class Army(models.Model):
     """Model representing a Warhammer 40k army/faction"""
     PLANET_TYPE_CHOICES = [
@@ -34,6 +55,7 @@ class Army(models.Model):
     emissive = models.CharField(max_length=20, default='#ffffff')
     planet_type = models.CharField(max_length=20, choices=PLANET_TYPE_CHOICES, default='standard')
     planet_name = models.CharField(max_length=200, blank=True)
+    game = models.ForeignKey('Game', on_delete=models.SET_NULL, null=True, blank=True, related_name='armies')
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
