@@ -217,10 +217,30 @@ class BattleReportViewSet(viewsets.ModelViewSet):
         try:
             return super().list(request, *args, **kwargs)
         except Exception as e:
+            # Fallback: if 'images' column is missing (migration not applied),
+            # fetch all other columns via VALUES and inject images=[] so the
+            # endpoint remains functional until the migration is applied.
+            error_msg = str(e)
+            if 'images' in error_msg and 'does not exist' in error_msg:
+                try:
+                    # Fetch all reports deferring the missing column, then
+                    # inject images=[] directly into the instance dict so
+                    # the serializer never triggers a deferred DB load.
+                    qs = BattleReport.objects.defer('images').order_by('-date')
+                    reports = []
+                    for r in qs:
+                        r.__dict__['images'] = []  # Prevent deferred access
+                        s = self.get_serializer(r)
+                        row = dict(s.data)
+                        row['images'] = []
+                        reports.append(row)
+                    return Response(reports)
+                except Exception:
+                    pass
             import traceback
             traceback.print_exc()
             return Response(
-                {'error': str(e), 'detail': 'Error al cargar los informes. Es posible que falten migraciones.'},
+                {'error': error_msg, 'detail': 'Error al cargar los informes. Es posible que falten migraciones.'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
