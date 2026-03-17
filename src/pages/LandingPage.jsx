@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { useStore } from '../stores/useStore';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import Footer from '../components/UI/Footer';
 import { useTranslation } from '../i18n/translations';
 import { api } from '../services/api';
-import Footer from '../components/UI/Footer';
+import { useStore } from '../stores/useStore';
 
 const NAV_ITEMS = [
   {
@@ -217,28 +217,6 @@ const LandingPage = () => {
             <SectionCard key={item.to} item={item} t={t} />
           ))}
         </motion.div>
-
-        {/* Admin link */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.1 }}
-          style={{ marginTop: 'clamp(2.5rem, 5vw, 4rem)', zIndex: 1 }}
-        >
-          <Link to="/login" style={{
-            color: 'rgba(255,255,255,0.25)',
-            textDecoration: 'none',
-            fontSize: '0.75rem',
-            letterSpacing: '3px',
-            textTransform: 'uppercase',
-            transition: 'color 0.3s',
-          }}
-            onMouseEnter={e => e.target.style.color = 'var(--color-primary)'}
-            onMouseLeave={e => e.target.style.color = 'rgba(255,255,255,0.25)'}
-          >
-            {t('adminAccess')}
-          </Link>
-        </motion.div>
       </section>
 
       {/* ── FEATURED CONTENT ── */}
@@ -318,6 +296,27 @@ const LandingPage = () => {
               />
             )}
           </div>
+          {/* Admin link */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.1 }}
+          style={{ marginTop: 'clamp(2.5rem, 5vw, 4rem)', zIndex: 1 }}
+        >
+          <Link to="/login" style={{
+            color: 'rgba(255,255,255,0.25)',
+            textDecoration: 'none',
+            fontSize: '0.75rem',
+            letterSpacing: '3px',
+            textTransform: 'uppercase',
+            transition: 'color 0.3s',
+          }}
+            onMouseEnter={e => e.target.style.color = 'var(--color-primary)'}
+            onMouseLeave={e => e.target.style.color = 'rgba(255,255,255,0.25)'}
+          >
+            {t('adminAccess')}
+          </Link>
+        </motion.div>
         </section>
       )}
 
