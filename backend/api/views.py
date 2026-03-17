@@ -61,16 +61,11 @@ class ArmyViewSet(viewsets.ModelViewSet):
     def update(self, request, *args, **kwargs):
         """Handle partial updates (PATCH)"""
         instance = self.get_object()
-        # Make a mutable copy
+        # NOTE: do NOT manually convert camelCase → snake_case here.
+        # The ArmySerializer fields (iconUrl, planetName, planetType, gameId)
+        # already declare source='...' so DRF handles the mapping internally.
+        # Manual conversion would REMOVE the field the serializer is looking for.
         data = request.data.copy()
-
-        # Convert camelCase to snake_case
-        if 'iconUrl' in data:
-            data['icon_url'] = data.pop('iconUrl')
-        if 'planetType' in data:
-            data['planet_type'] = data.pop('planetType')
-        if 'planetName' in data:
-            data['planet_name'] = data.pop('planetName')
 
         # Use partial=True to allow partial updates
         serializer = self.get_serializer(instance, data=data, partial=True)

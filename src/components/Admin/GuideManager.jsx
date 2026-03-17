@@ -26,6 +26,7 @@ const GuideManager = () => {
     const [steps, setSteps] = useState([]);
     const [editingStep, setEditingStep] = useState(null);
     const [newStepImages, setNewStepImages] = useState({});
+    const [newStepTips, setNewStepTips] = useState({});
 
     useEffect(() => {
         loadGuides();
@@ -695,11 +696,13 @@ const GuideManager = () => {
                                         <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
                                             <input
                                                 placeholder="Añadir consejo"
+                                                value={newStepTips[stepIndex] || ''}
+                                                onChange={e => setNewStepTips({ ...newStepTips, [stepIndex]: e.target.value })}
                                                 onKeyPress={e => {
                                                     if (e.key === 'Enter') {
                                                         e.preventDefault();
-                                                        addStepTip(stepIndex, e.target.value);
-                                                        e.target.value = '';
+                                                        addStepTip(stepIndex, newStepTips[stepIndex] || '');
+                                                        setNewStepTips({ ...newStepTips, [stepIndex]: '' });
                                                     }
                                                 }}
                                                 style={{
@@ -712,6 +715,25 @@ const GuideManager = () => {
                                                     flex: 1
                                                 }}
                                             />
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    addStepTip(stepIndex, newStepTips[stepIndex] || '');
+                                                    setNewStepTips({ ...newStepTips, [stepIndex]: '' });
+                                                }}
+                                                style={{
+                                                    padding: '0.8rem 1.2rem',
+                                                    background: 'var(--color-secondary)',
+                                                    border: 'none',
+                                                    borderRadius: '8px',
+                                                    color: '#000',
+                                                    cursor: 'pointer',
+                                                    fontWeight: 'bold',
+                                                    whiteSpace: 'nowrap'
+                                                }}
+                                            >
+                                                + Añadir
+                                            </button>
                                         </div>
                                         {step.tips && step.tips.length > 0 && (
                                             <ul style={{ margin: 0, paddingLeft: '1.5rem', color: 'rgba(255,255,255,0.7)' }}>

@@ -165,11 +165,13 @@ class BattleReport(models.Model):
     player1_name = models.CharField(max_length=200)
     player1_faction = models.CharField(max_length=100)
     player1_list = ArrayField(models.CharField(max_length=300), default=list)
+    player1_list_text = models.TextField(blank=True, default='')  # Parsed army list JSON
 
     # Player 2 army
     player2_name = models.CharField(max_length=200)
     player2_faction = models.CharField(max_length=100)
     player2_list = ArrayField(models.CharField(max_length=300), default=list)
+    player2_list_text = models.TextField(blank=True, default='')  # Parsed army list JSON
 
     # Key moments and MVP
     key_moments = ArrayField(models.TextField(), default=list)

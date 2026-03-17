@@ -253,36 +253,12 @@ const BattleReportDetailPage = () => {
               </span>
             </h2>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
               {[
-                { player: p1, factionId: f0, colorFn: getFactionColor },
-                { player: p2, factionId: f1, colorFn: getFactionColor },
-              ].map(({ player, factionId, colorFn }, i) => player && (
-                <div key={i}>
-                  <h3 style={{
-                    fontSize: '1rem',
-                    marginBottom: '1rem',
-                    color: colorFn(factionId),
-                    fontFamily: 'var(--font-display)',
-                    letterSpacing: '0.5px',
-                  }}>
-                    {player.name}
-                  </h3>
-                  <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                    {player.list?.map((unit, idx) => (
-                      <li key={idx} style={{
-                        padding: '0.5rem 0',
-                        borderBottom: idx < (player.list?.length || 0) - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
-                        color: 'rgba(255,255,255,0.6)',
-                        fontSize: '0.875rem',
-                        display: 'flex', alignItems: 'center', gap: '0.5rem',
-                      }}>
-                        <span style={{ color: colorFn(factionId), fontSize: '0.7rem' }}>●</span>
-                        {unit}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                { player: p1, factionId: f0 },
+                { player: p2, factionId: f1 },
+              ].map(({ player, factionId }, i) => player && (
+                <ArmyListDisplay key={i} player={player} color={getFactionColor(factionId)} />
               ))}
             </div>
           </motion.div>
@@ -476,6 +452,160 @@ const BattleReportDetailPage = () => {
       </div>
 
       <Footer />
+    </div>
+  );
+};
+
+/* ── Army list display component ──────────────────────────────── */
+const ArmyListDisplay = ({ player, color }) => {
+  const [openUnits, setOpenUnits] = useState({});
+  const toggle = (key) => setOpenUnits(s => ({ ...s, [key]: !s[key] }));
+
+  // Try to parse the rich listText JSON; fall back to simple list
+  let parsed = null;
+  if (player.listText) {
+    try { parsed = JSON.parse(player.listText); } catch {}
+  }
+
+  const accentColor = color && color !== '#fff' ? color : '#00d4ff';
+
+  if (!parsed) {
+    // Simple list fallback
+    return (
+      <div>
+        <h3 style={{ fontSize: '1rem', marginBottom: '1rem', color: accentColor, fontFamily: 'var(--font-display)', letterSpacing: '0.5px' }}>
+          {player.name}
+        </h3>
+        <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+          {player.list?.map((unit, idx) => (
+            <li key={idx} style={{
+              padding: '0.5rem 0',
+              borderBottom: idx < (player.list?.length || 0) - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
+              color: 'rgba(255,255,255,0.6)', fontSize: '0.875rem',
+              display: 'flex', alignItems: 'center', gap: '0.5rem',
+            }}>
+              <span style={{ color: accentColor, fontSize: '0.7rem' }}>●</span>
+              {unit}
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
+
+  // Rich parsed list
+  const totalPts = parsed.categories.flatMap(c => c.units).reduce((s, u) => s + (u.points || 0), 0);
+
+  return (
+    <div>
+      {/* Player header */}
+      <div style={{ marginBottom: '1.25rem' }}>
+        <h3 style={{ fontSize: '1.1rem', color: accentColor, fontFamily: 'var(--font-display)', letterSpacing: '1px', margin: 0 }}>
+          {player.name}
+        </h3>
+        <div style={{ marginTop: '0.35rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.95rem', color: '#fff', letterSpacing: '0.5px' }}>
+            {parsed.armyName}
+          </span>
+          {parsed.detachment && (
+            <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.06)', borderRadius: '4px', padding: '2px 8px' }}>
+              {parsed.detachment}
+            </span>
+          )}
+          {parsed.listSize && (
+            <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.06)', borderRadius: '4px', padding: '2px 8px' }}>
+              {parsed.listSize}
+            </span>
+          )}
+        </div>
+        <div style={{ marginTop: '0.4rem', fontSize: '0.8rem', color: accentColor, fontWeight: 700 }}>
+          {totalPts} pts
+        </div>
+      </div>
+
+      {/* Categories */}
+      {parsed.categories.map((cat, ci) => (
+        <div key={ci} style={{ marginBottom: '1rem' }}>
+          <p style={{
+            fontSize: '0.65rem', letterSpacing: '2.5px', textTransform: 'uppercase',
+            color: 'rgba(255,255,255,0.3)', margin: '0 0 0.4rem',
+            borderBottom: '1px solid rgba(255,255,255,0.07)', paddingBottom: '0.3rem',
+          }}>
+            {cat.name}
+          </p>
+          {cat.units.map((unit, ui) => {
+            const key = `${ci}-${ui}`;
+            const isOpen = openUnits[key];
+            const hasDetail = unit.models?.some(m => m.equipment?.length > 0 || m.enhancements?.length > 0)
+              || unit.unitEnhancements?.length > 0;
+            return (
+              <div key={ui} style={{ marginBottom: '0.3rem' }}>
+                <button
+                  onClick={() => hasDetail && toggle(key)}
+                  style={{
+                    width: '100%', background: 'none', border: 'none', padding: '0.35rem 0',
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    cursor: hasDetail ? 'pointer' : 'default', gap: '0.5rem',
+                  }}
+                >
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', minWidth: 0 }}>
+                    <span style={{ color: accentColor, fontSize: '0.65rem', flexShrink: 0 }}>●</span>
+                    <span style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.875rem', textAlign: 'left' }}>{unit.name}</span>
+                    {unit.unitEnhancements?.length > 0 && (
+                      <span style={{ fontSize: '0.65rem', color: '#f59e0b', background: 'rgba(245,158,11,0.12)', borderRadius: '4px', padding: '1px 5px', flexShrink: 0 }}>
+                        Reliquia
+                      </span>
+                    )}
+                  </span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0 }}>
+                    <span style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.35)', fontWeight: 600 }}>{unit.points}pts</span>
+                    {hasDetail && (
+                      <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '0.7rem' }}>{isOpen ? '▲' : '▼'}</span>
+                    )}
+                  </span>
+                </button>
+
+                {/* Expanded detail */}
+                {isOpen && hasDetail && (
+                  <div style={{
+                    padding: '0.5rem 0.75rem',
+                    background: 'rgba(0,0,0,0.2)',
+                    borderLeft: `2px solid ${accentColor}40`,
+                    borderRadius: '0 0 6px 6px',
+                    marginBottom: '0.25rem',
+                    fontSize: '0.8rem',
+                  }}>
+                    {unit.unitEnhancements?.length > 0 && (
+                      <p style={{ color: '#f59e0b', margin: '0 0 0.4rem', fontStyle: 'italic' }}>
+                        ✦ {unit.unitEnhancements.join(', ')}
+                      </p>
+                    )}
+                    {unit.models?.map((model, mi) => (
+                      <div key={mi} style={{ marginBottom: '0.4rem' }}>
+                        {model.name && (
+                          <p style={{ color: 'rgba(255,255,255,0.55)', margin: '0 0 0.2rem', fontWeight: 600 }}>
+                            {model.count > 1 ? `${model.count}× ` : ''}{model.name}
+                          </p>
+                        )}
+                        {model.equipment?.map((eq, ei) => (
+                          <p key={ei} style={{ color: 'rgba(255,255,255,0.4)', margin: '0 0 0.1rem', paddingLeft: '0.75rem' }}>
+                            – {eq}
+                          </p>
+                        ))}
+                        {model.enhancements?.map((enh, ei) => (
+                          <p key={ei} style={{ color: '#f59e0b', margin: '0 0 0.1rem', paddingLeft: '0.75rem', fontStyle: 'italic' }}>
+                            ✦ {enh}
+                          </p>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      ))}
     </div>
   );
 };

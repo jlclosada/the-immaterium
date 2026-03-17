@@ -188,6 +188,8 @@ class BattleReportSerializer(serializers.ModelSerializer):
     player2_list = serializers.ListField(
         child=serializers.CharField(), required=False, default=list
     )
+    player1ListText = serializers.CharField(source='player1_list_text', required=False, allow_blank=True, default='')
+    player2ListText = serializers.CharField(source='player2_list_text', required=False, allow_blank=True, default='')
 
     class Meta:
         model = BattleReport
@@ -195,8 +197,8 @@ class BattleReportSerializer(serializers.ModelSerializer):
             'id', 'title', 'factions', 'mission', 'points', 'date',
             'tags', 'likes', 'views', 'mvp', 'images',
             # Writable player fields
-            'player1_name', 'player1_faction', 'player1_score', 'player1_list',
-            'player2_name', 'player2_faction', 'player2_score', 'player2_list',
+            'player1_name', 'player1_faction', 'player1_score', 'player1_list', 'player1ListText',
+            'player2_name', 'player2_faction', 'player2_score', 'player2_list', 'player2ListText',
             'keyMoments',
             # Read-only computed fields
             'finalScore', 'armies',
@@ -210,11 +212,13 @@ class BattleReportSerializer(serializers.ModelSerializer):
                 'name': obj.player1_name,
                 'faction': obj.player1_faction,
                 'list': obj.player1_list,
+                'listText': obj.player1_list_text,
             },
             'player2': {
                 'name': obj.player2_name,
                 'faction': obj.player2_faction,
                 'list': obj.player2_list,
+                'listText': obj.player2_list_text,
             },
         }
 

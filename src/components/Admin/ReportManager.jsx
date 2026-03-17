@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { api } from '../../services/api';
 import { useStore } from '../../stores/useStore';
 import { useToast } from './Toast';
+import { parseArmyList } from '../../utils/armyListParser';
 
 const ReportManager = () => {
     const [reports, setReports] = useState([]);
@@ -22,10 +23,12 @@ const ReportManager = () => {
         player1_faction: '',
         player1_score: 0,
         player1_list: [],
+        player1ListText: '',
         player2_name: '',
         player2_faction: '',
         player2_score: 0,
         player2_list: [],
+        player2ListText: '',
         keyMoments: [],
         mvp: '',
         images: []
@@ -36,6 +39,8 @@ const ReportManager = () => {
     const [newImageUrl, setNewImageUrl] = useState('');
     const [newPlayer1Unit, setNewPlayer1Unit] = useState('');
     const [newPlayer2Unit, setNewPlayer2Unit] = useState('');
+    // Army list import state: { player: 1|2|null, text: '', parsed: null }
+    const [importModal, setImportModal] = useState({ player: null, text: '', parsed: null });
 
     useEffect(() => {
         loadReports();
@@ -79,10 +84,12 @@ const ReportManager = () => {
                 player1_faction: formData.player1_faction,
                 player1_score: formData.player1_score,
                 player1_list: formData.player1_list,
+                player1ListText: formData.player1ListText,
                 player2_name: formData.player2_name,
                 player2_faction: formData.player2_faction,
                 player2_score: formData.player2_score,
                 player2_list: formData.player2_list,
+                player2ListText: formData.player2ListText,
                 narrative: narrative.map(n => ({
                     turn: n.turn,
                     phase: n.phase,
@@ -120,10 +127,12 @@ const ReportManager = () => {
             player1_faction: report.armies?.player1?.faction || '',
             player1_score: report.finalScore?.player1 || 0,
             player1_list: report.armies?.player1?.list || [],
+            player1ListText: report.armies?.player1?.listText || '',
             player2_name: report.armies?.player2?.name || '',
             player2_faction: report.armies?.player2?.faction || '',
             player2_score: report.finalScore?.player2 || 0,
             player2_list: report.armies?.player2?.list || [],
+            player2ListText: report.armies?.player2?.listText || '',
             keyMoments: report.keyMoments || [],
             mvp: report.mvp || '',
             images: report.images || []
@@ -156,10 +165,12 @@ const ReportManager = () => {
             player1_faction: '',
             player1_score: 0,
             player1_list: [],
+            player1ListText: '',
             player2_name: '',
             player2_faction: '',
             player2_score: 0,
             player2_list: [],
+            player2ListText: '',
             keyMoments: [],
             mvp: '',
             images: []
@@ -170,6 +181,7 @@ const ReportManager = () => {
         setNewPlayer1Unit('');
         setNewPlayer2Unit('');
         setNewImageUrl('');
+        setImportModal({ player: null, text: '', parsed: null });
     };
 
     const addTag = (tag) => {
@@ -263,6 +275,30 @@ const ReportManager = () => {
 
     const removeNarrative = (index) => {
         setNarrative(narrative.filter((_, i) => i !== index));
+    };
+
+    // ── Army list import ──────────────────────────────────────────
+    const handleParseImport = () => {
+        const parsed = parseArmyList(importModal.text);
+        setImportModal(s => ({ ...s, parsed }));
+    };
+
+    const handleApplyImport = () => {
+        const { player, parsed } = importModal;
+        if (!parsed) return;
+        const jsonText = JSON.stringify(parsed);
+        // Extract simple unit names for player_list (backward compat)
+        const unitNames = parsed.categories.flatMap(c =>
+            c.units.map(u => `${u.name} (${u.points}pts)`)
+        );
+        if (player === 1) {
+            setFormData(f => ({ ...f, player1ListText: jsonText, player1_list: unitNames,
+                player1_faction: f.player1_faction || parsed.armyName }));
+        } else {
+            setFormData(f => ({ ...f, player2ListText: jsonText, player2_list: unitNames,
+                player2_faction: f.player2_faction || parsed.armyName }));
+        }
+        setImportModal({ player: null, text: '', parsed: null });
     };
 
     return (
@@ -582,6 +618,34 @@ const ReportManager = () => {
                                 />
                             </div>
                         </div>
+                        {/* Army list import for player 1 */}
+                        <div style={{ marginBottom: '1rem' }}>
+                            {importModal.player === 1 ? (
+                                <ArmyListImport
+                                    text={importModal.text}
+                                    parsed={importModal.parsed}
+                                    onChange={t => setImportModal(s => ({ ...s, text: t, parsed: null }))}
+                                    onParse={handleParseImport}
+                                    onApply={handleApplyImport}
+                                    onCancel={() => setImportModal({ player: null, text: '', parsed: null })}
+                                />
+                            ) : (
+                                <button
+                                    type="button"
+                                    onClick={() => setImportModal({ player: 1, text: '', parsed: null })}
+                                    style={{
+                                        padding: '0.5rem 1rem', fontSize: '0.82rem',
+                                        background: 'rgba(0,212,255,0.1)',
+                                        border: '1px solid rgba(0,212,255,0.3)',
+                                        borderRadius: '6px', color: 'var(--color-primary)',
+                                        cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px'
+                                    }}
+                                >
+                                    📋 Importar lista desde texto
+                                    {formData.player1ListText && <span style={{ color: '#4ade80', fontSize: '0.75rem' }}>✓ Importada</span>}
+                                </button>
+                            )}
+                        </div>
                         <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
                             <input
                                 placeholder="Añadir unidad a la lista"
@@ -708,6 +772,34 @@ const ReportManager = () => {
                                     }}
                                 />
                             </div>
+                        </div>
+                        {/* Army list import for player 2 */}
+                        <div style={{ marginBottom: '1rem' }}>
+                            {importModal.player === 2 ? (
+                                <ArmyListImport
+                                    text={importModal.text}
+                                    parsed={importModal.parsed}
+                                    onChange={t => setImportModal(s => ({ ...s, text: t, parsed: null }))}
+                                    onParse={handleParseImport}
+                                    onApply={handleApplyImport}
+                                    onCancel={() => setImportModal({ player: null, text: '', parsed: null })}
+                                />
+                            ) : (
+                                <button
+                                    type="button"
+                                    onClick={() => setImportModal({ player: 2, text: '', parsed: null })}
+                                    style={{
+                                        padding: '0.5rem 1rem', fontSize: '0.82rem',
+                                        background: 'rgba(0,212,255,0.1)',
+                                        border: '1px solid rgba(0,212,255,0.3)',
+                                        borderRadius: '6px', color: 'var(--color-primary)',
+                                        cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px'
+                                    }}
+                                >
+                                    📋 Importar lista desde texto
+                                    {formData.player2ListText && <span style={{ color: '#4ade80', fontSize: '0.75rem' }}>✓ Importada</span>}
+                                </button>
+                            )}
                         </div>
                         <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
                             <input
@@ -1172,5 +1264,82 @@ const ReportManager = () => {
         </div>
     );
 };
+
+/* ── Army list import UI ──────────────────────────────────────── */
+const ArmyListImport = ({ text, parsed, onChange, onParse, onApply, onCancel }) => (
+    <div style={{
+        background: 'rgba(0,212,255,0.05)',
+        border: '1px solid rgba(0,212,255,0.2)',
+        borderRadius: '10px',
+        padding: '1rem',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '0.75rem',
+    }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ color: 'var(--color-primary)', fontSize: '0.85rem', fontWeight: 600 }}>
+                📋 Importar lista de ejército
+            </span>
+            <button type="button" onClick={onCancel}
+                style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: '1.1rem' }}>×</button>
+        </div>
+        <textarea
+            placeholder={'Pega aquí la lista exportada desde la app oficial o BattleScribe...\n\nEjemplo:\nThousand Sons\nGrand Coven\nStrike Force (2.000 Points)\nCHARACTERS\nInfernal Master (130 Points)\n • 1x Fires of the Abyss\n ...'}
+            value={text}
+            onChange={e => onChange(e.target.value)}
+            rows={10}
+            style={{
+                width: '100%', padding: '0.75rem',
+                background: 'rgba(0,0,0,0.3)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '8px', color: '#fff',
+                fontSize: '0.82rem', fontFamily: 'monospace',
+                resize: 'vertical', boxSizing: 'border-box',
+            }}
+        />
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button type="button" onClick={onParse}
+                style={{
+                    padding: '0.5rem 1rem', background: 'var(--color-primary)',
+                    border: 'none', borderRadius: '6px', color: '#000',
+                    fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem',
+                }}>
+                Parsear lista
+            </button>
+            {parsed && (
+                <button type="button" onClick={onApply}
+                    style={{
+                        padding: '0.5rem 1rem', background: '#4ade80',
+                        border: 'none', borderRadius: '6px', color: '#000',
+                        fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem',
+                    }}>
+                    ✓ Aplicar
+                </button>
+            )}
+        </div>
+        {parsed && (
+            <div style={{
+                background: 'rgba(0,0,0,0.2)', borderRadius: '8px',
+                padding: '0.75rem', fontSize: '0.8rem', maxHeight: '200px', overflowY: 'auto',
+            }}>
+                <p style={{ color: 'var(--color-primary)', fontWeight: 700, marginBottom: '0.4rem' }}>
+                    {parsed.armyName} — {parsed.detachment} — {parsed.listSize} ({parsed.points}pts)
+                </p>
+                {parsed.categories.map((cat, i) => (
+                    <div key={i} style={{ marginBottom: '0.5rem' }}>
+                        <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '1px', margin: '0 0 0.2rem' }}>
+                            {cat.name}
+                        </p>
+                        {cat.units.map((u, j) => (
+                            <p key={j} style={{ color: 'rgba(255,255,255,0.75)', margin: '0 0 0.1rem', paddingLeft: '0.5rem' }}>
+                                • {u.name} <span style={{ color: 'rgba(255,255,255,0.4)' }}>({u.points}pts)</span>
+                            </p>
+                        ))}
+                    </div>
+                ))}
+            </div>
+        )}
+    </div>
+);
 
 export default ReportManager;
