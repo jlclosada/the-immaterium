@@ -76,7 +76,7 @@ const NAV_ITEMS = [
 const LandingPage = () => {
   const { fetchInitialData, language } = useStore();
   const t = useTranslation(language);
-  const [featuredArmy, setFeaturedArmy] = useState(null);
+  const [featuredNews, setFeaturedNews] = useState(null);
   const [featuredGuide, setFeaturedGuide] = useState(null);
   const [featuredReport, setFeaturedReport] = useState(null);
 
@@ -86,17 +86,18 @@ const LandingPage = () => {
   }, []);
 
   const loadFeaturedContent = async () => {
-    const [armiesRes, guidesRes, reportsRes] = await Promise.allSettled([
-      api.getArmies(),
+    // APIs devuelven ítems ordenados por fecha descendente → [0] es siempre el más reciente
+    const [newsRes, guidesRes, reportsRes] = await Promise.allSettled([
+      api.getNewsArticles(),
       api.getPaintingGuides(),
       api.getBattleReports(),
     ]);
     const safe = (res) => (res.status === 'fulfilled' ? (Array.isArray(res.value) ? res.value : []) : []);
-    const armies = safe(armiesRes);
-    const guides = safe(guidesRes);
+    const news    = safe(newsRes);
+    const guides  = safe(guidesRes);
     const reports = safe(reportsRes);
-    if (armies.length > 0) setFeaturedArmy(armies[0]);
-    if (guides.length > 0) setFeaturedGuide(guides[0]);
+    if (news.length    > 0) setFeaturedNews(news[0]);
+    if (guides.length  > 0) setFeaturedGuide(guides[0]);
     if (reports.length > 0) setFeaturedReport(reports[0]);
   };
 
@@ -241,7 +242,7 @@ const LandingPage = () => {
       </section>
 
       {/* ── FEATURED CONTENT ── */}
-      {(featuredArmy || featuredGuide || featuredReport) && (
+      {(featuredNews || featuredGuide || featuredReport) && (
         <section style={{
           maxWidth: '1100px',
           margin: '0 auto',
@@ -259,7 +260,7 @@ const LandingPage = () => {
               opacity: 0.7,
               marginBottom: '0.5rem',
             }}>
-              Última actualización
+              Últimas publicaciones
             </p>
             <h2 style={{
               fontFamily: 'var(--font-display)',
@@ -277,43 +278,43 @@ const LandingPage = () => {
             gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
             gap: 'clamp(1rem, 2.5vw, 1.5rem)',
           }}>
-            {featuredArmy && (
-              <FeaturedCard
-                to={`/armies/${featuredArmy.id}`}
-                badge={language === 'es' ? 'Facción Destacada' : 'Featured Faction'}
-                badgeColor="var(--color-primary)"
-                title={language === 'es' && featuredArmy.nameEs ? featuredArmy.nameEs : featuredArmy.name}
-                excerpt={(language === 'es' && featuredArmy.descriptionEs ? featuredArmy.descriptionEs : featuredArmy.description)?.substring(0, 110)}
-                linkLabel={t('viewArmy')}
-                linkColor="var(--color-primary)"
-                accentColor="rgba(0,212,255,0.15)"
-                borderColor="rgba(0,212,255,0.2)"
-              />
-            )}
             {featuredReport && (
               <FeaturedCard
                 to={`/battle-reports/${featuredReport.id}`}
-                badge={language === 'es' ? 'Reporte de Batalla' : 'Battle Report'}
+                badge={language === 'es' ? 'Último Informe de Batalla' : 'Latest Battle Report'}
                 badgeColor="#ff6464"
                 title={featuredReport.title}
                 excerpt={(featuredReport.summary || featuredReport.description)?.substring(0, 110)}
                 linkLabel={t('viewReport')}
                 linkColor="#ff6464"
-                accentColor="rgba(255,100,100,0.1)"
-                borderColor="rgba(255,100,100,0.2)"
+                accentColor="rgba(255,100,100,0.08)"
+                borderColor="rgba(255,100,100,0.18)"
               />
             )}
             {featuredGuide && (
               <FeaturedCard
                 to={`/guides/${featuredGuide.id}`}
-                badge={language === 'es' ? 'Técnica de Pintura' : 'Painting Technique'}
+                badge={language === 'es' ? 'Última Guía de Pintura' : 'Latest Painting Guide'}
                 badgeColor="var(--color-secondary)"
                 title={featuredGuide.title}
                 excerpt={featuredGuide.description?.substring(0, 110)}
                 linkLabel={t('viewGuide')}
                 linkColor="var(--color-secondary)"
-                accentColor="rgba(135,206,250,0.1)"
-                borderColor="rgba(135,206,250,0.2)"
+                accentColor="rgba(135,206,250,0.08)"
+                borderColor="rgba(135,206,250,0.18)"
+              />
+            )}
+            {featuredNews && (
+              <FeaturedCard
+                to={`/news/${featuredNews.id}`}
+                badge={language === 'es' ? 'Última Noticia' : 'Latest News'}
+                badgeColor="#f59e0b"
+                title={featuredNews.title}
+                excerpt={(featuredNews.excerpt || featuredNews.content)?.substring(0, 110)}
+                linkLabel={language === 'es' ? 'Leer noticia' : 'Read news'}
+                linkColor="#f59e0b"
+                accentColor="rgba(245,158,11,0.08)"
+                borderColor="rgba(245,158,11,0.18)"
               />
             )}
           </div>
