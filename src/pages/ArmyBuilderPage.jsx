@@ -178,6 +178,21 @@ function DatasheetCard({ datasheet, onAdd, added }) {
                   </div>
                 </div>
               )}
+              {/* Keywords */}
+              {(datasheet.keywords?.length > 0 || datasheet.faction_keywords?.length > 0) && (
+                <div style={{ marginBottom: '0.6rem', display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }}>
+                  {datasheet.faction_keywords?.map((kw, i) => (
+                    <span key={`fkw-${i}`} style={{ fontSize: '0.6rem', background: 'rgba(0,212,255,0.1)', color: 'var(--color-primary)', padding: '1px 6px', borderRadius: '3px', fontFamily: 'var(--font-display)', letterSpacing: '0.5px' }}>
+                      {kw}
+                    </span>
+                  ))}
+                  {datasheet.keywords?.map((kw, i) => (
+                    <span key={`kw-${i}`} style={{ fontSize: '0.6rem', background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)', padding: '1px 6px', borderRadius: '3px', fontFamily: 'var(--font-display)', letterSpacing: '0.5px' }}>
+                      {kw}
+                    </span>
+                  ))}
+                </div>
+              )}
               {/* Weapons */}
               {datasheet.weapons?.length > 0 && (
                 <div style={{ marginBottom: '0.6rem' }}>
@@ -209,8 +224,27 @@ function DatasheetCard({ datasheet, onAdd, added }) {
               )}
               {/* Wargear options */}
               {datasheet.wargear_options?.length > 0 && (
-                <div style={{ marginTop: '0.4rem', fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', fontStyle: 'italic' }}>
-                  {datasheet.wargear_options.map((o, i) => <div key={i}>• {o}</div>)}
+                <div style={{ marginTop: '0.5rem' }}>
+                  <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.35)', fontFamily: 'var(--font-display)', letterSpacing: '1px', marginBottom: '0.3rem' }}>
+                    OPCIONES DE EQUIPO
+                  </div>
+                  {datasheet.wargear_options.map((group, i) => (
+                    <div key={i} style={{ marginBottom: '0.25rem', paddingLeft: '0.5rem', borderLeft: '2px solid rgba(255,255,255,0.08)' }}>
+                      <span style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.5)', fontStyle: 'italic' }}>
+                        {group.name}
+                        {group.min != null && group.max != null && group.min !== group.max
+                          ? ` (${group.min}–${group.max})`
+                          : ''}:{' '}
+                      </span>
+                      {group.options?.map((opt, j) => (
+                        <span key={j} style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.55)' }}>
+                          {j > 0 ? ' · ' : ''}
+                          {opt.name}
+                          {opt.points > 0 ? <span style={{ color: 'var(--color-primary)', fontSize: '0.6rem' }}> +{opt.points}pts</span> : null}
+                        </span>
+                      ))}
+                    </div>
+                  ))}
                 </div>
               )}
             </div>

@@ -405,13 +405,28 @@ class BSDataParser:
         units = []
         seen  = set()
 
-        def _collect_unit(entry):
+        def _collect_unit(entry, allow_model_type=False):
             name = entry.get('name', '')
             # Skip GW-retired Legends units
             if '[Legends]' in name or '(Legends)' in name:
                 return
-            eid = entry.get('id', '')
-            if eid in seen or entry.get('type') != 'unit':
+            if '[Crucible]' in name:
+                return
+            eid  = entry.get('id', '')
+            etype = entry.get('type', '')
+            if eid in seen:
+                return
+            # Accept type="unit" always.
+            # Accept type="model" only when explicitly allowed (top-level
+            # entryLinks) AND only if the entry has categoryLinks — that
+            # distinguishes standalone character datasheets from nested
+            # weapon/upgrade model entries.
+            if etype == 'unit':
+                pass  # always ok
+            elif allow_model_type and etype == 'model':
+                if not entry.findall(f'{ns}categoryLinks/{ns}categoryLink'):
+                    return
+            else:
                 return
             seen.add(eid)
             try:
@@ -430,12 +445,14 @@ class BSDataParser:
                 f'{ns}sharedSelectionEntries/{ns}selectionEntry'):
             _collect_unit(entry)
 
-        # 3. Follow top-level entryLinks → sharedSelectionEntries
+        # 3. Follow top-level entryLinks → sharedSelectionEntries.
+        #    Characters like Ahriman/Magnus have type="model" (not "unit") so
+        #    we allow model-type entries here.
         for el in root.findall(f'{ns}entryLinks/{ns}entryLink'):
             tid = el.get('targetId', '')
             entry = shared_entries.get(tid)
             if entry is not None:
-                _collect_unit(entry)
+                _collect_unit(entry, allow_model_type=True)
 
         # 4. Deeply nested: selectionEntryGroups at root level
         for seg in root.findall(
@@ -622,21 +639,45 @@ class BSDataParser:
     # ── Model count ───────────────────────────────────────────────────────────
 
     def _model_count(self, entry, ns):
-        models = entry.findall(
+        # Direct model-type children
+        direct_models = entry.findall(
             f'{ns}selectionEntries/{ns}selectionEntry[@type="model"]')
-        if models:
-            total_min = total_max = 0
-            for m in models:
-                m_min = m_max = 1
-                for con in m.findall(f'{ns}constraints/{ns}constraint'):
-                    if con.get('field') == 'selections':
-                        v = _int(con.get('value', 1))
-                        if con.get('type') == 'min':
-                            m_min = max(0, v)
-                        elif con.get('type') == 'max':
-                            m_max = max(0, v)
-                total_min += m_min
-                total_max += m_max
+        direct_min = direct_max = 0
+        for m in direct_models:
+            m_min = m_max = 1
+            for con in m.findall(f'{ns}constraints/{ns}constraint'):
+                if con.get('field') == 'selections':
+                    v = _int(con.get('value', 1))
+                    if con.get('type') == 'min':
+                        m_min = max(0, v)
+                    elif con.get('type') == 'max':
+                        m_max = max(0, v)
+            direct_min += m_min
+            direct_max += m_max
+
+        # Model-type entries inside selectionEntryGroups
+        group_min = group_max = 0
+        for seg in entry.findall(
+                f'{ns}selectionEntryGroups/{ns}selectionEntryGroup'):
+            has_models = bool(seg.findall(
+                f'{ns}selectionEntries/{ns}selectionEntry[@type="model"]'))
+            if not has_models:
+                continue
+            seg_min = seg_max = 0
+            for con in seg.findall(f'{ns}constraints/{ns}constraint'):
+                if con.get('field') == 'selections':
+                    v = _int(con.get('value', 0))
+                    if con.get('type') == 'min':
+                        seg_min = max(0, v)
+                    elif con.get('type') == 'max':
+                        seg_max = max(0, v)
+            group_min += seg_min
+            group_max += seg_max
+
+        total_min = direct_min + group_min
+        total_max = direct_max + group_max
+
+        if total_min > 0 or total_max > 0:
             return max(1, total_min), max(1, total_max)
 
         # Fall back to unit-level constraints
@@ -654,10 +695,19 @@ class BSDataParser:
 
     def _keywords(self, entry, ns):
         kws = []
+        # Try explicit keyword elements first
         for kw in entry.findall(f'.//{ns}keywords/{ns}keyword'):
             val = kw.get('name') or _text(kw)
             if val:
                 kws.append(val)
+
+        # In 10th-ed BSData, keywords are stored as categoryLinks
+        if not kws:
+            for cl in entry.findall(f'{ns}categoryLinks/{ns}categoryLink'):
+                name = cl.get('name', '').strip()
+                if name:
+                    kws.append(name)
+
         return list(dict.fromkeys(kws))  # deduplicate preserving order
 
     # ── Profiles (local + resolved via infoLinks) ─────────────────────────────
@@ -722,20 +772,20 @@ class BSDataParser:
 
     def _entry_weapons(self, entry, ctx, depth=0):
         """Extract all weapons from a selectionEntry (upgrade, model, etc.)."""
-        if depth > 4:
+        if depth > 5:
             return []
         ns    = ctx['ns']
         sents = ctx['shared_entries']
         sprof = ctx['shared_profiles']
         out   = []
 
-        # Direct profiles
+        # Direct profiles on this entry
         for p in entry.findall(f'{ns}profiles/{ns}profile'):
             w = self._profile_to_weapon(p, ns)
             if w:
                 out.append(w)
 
-        # infoLinks to shared profiles
+        # infoLinks → shared profiles
         for il in entry.findall(f'{ns}infoLinks/{ns}infoLink'):
             if il.get('type') == 'profile':
                 p = sprof.get(il.get('targetId', ''))
@@ -744,11 +794,15 @@ class BSDataParser:
                     if w:
                         out.append(w)
 
-        # Nested entryLinks
+        # entryLinks → shared entries
         for el in entry.findall(f'{ns}entryLinks/{ns}entryLink'):
             t = sents.get(el.get('targetId', ''))
             if t is not None:
                 out.extend(self._entry_weapons(t, ctx, depth + 1))
+
+        # Nested selectionEntries (weapon upgrades within model variants)
+        for se in entry.findall(f'{ns}selectionEntries/{ns}selectionEntry'):
+            out.extend(self._entry_weapons(se, ctx, depth + 1))
 
         return out
 
@@ -776,12 +830,17 @@ class BSDataParser:
         def _collect_group_weapons(seg):
             default_id = seg.get('defaultSelectionEntryId', '')
             local = []
+            # Recurse into nested selectionEntryGroups (e.g. Forgefiend "Wargear"
+            # contains sub-groups "Arm weapons" and "Head weapons")
+            for subseg in seg.findall(
+                    f'{ns}selectionEntryGroups/{ns}selectionEntryGroup'):
+                _collect_group_weapons(subseg)
             # Direct selectionEntries in the group
             for se in seg.findall(f'{ns}selectionEntries/{ns}selectionEntry'):
                 ws = self._entry_weapons(se, ctx)
                 is_default = (se.get('id') == default_id)
                 local.extend((is_default, w) for w in ws)
-            # entryLinks in the group → shared entries
+            # entryLinks in the group → shared entries or linked groups
             for el in seg.findall(f'{ns}entryLinks/{ns}entryLink'):
                 if el.get('type') == 'selectionEntryGroup':
                     grp = sgrps.get(el.get('targetId', ''))
@@ -813,6 +872,12 @@ class BSDataParser:
             for child in entry.findall(
                     f'{ns}selectionEntries/{ns}selectionEntry[@type="model"]'):
                 weapons.extend(self._weapons(child, ctx, depth + 1))
+
+        # 5. Direct upgrade selectionEntry children (e.g. weapon upgrades
+        #    placed directly on a character entry like Magnus the Red)
+        for child in entry.findall(
+                f'{ns}selectionEntries/{ns}selectionEntry[@type="upgrade"]'):
+            weapons.extend(self._entry_weapons(child, ctx))
 
         # Deduplicate by name, preserve order
         seen = set()
