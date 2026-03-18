@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useStore } from '../../stores/useStore';
@@ -9,6 +9,9 @@ export default function Header() {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const searchInputRef = useRef(null);
   const language = useStore(state => state.language);
   const t = useTranslation(language);
 
@@ -19,10 +22,24 @@ export default function Header() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Close menu on route change
+  // Close menus on route change
   useEffect(() => {
     setMobileMenuOpen(false);
+    setSearchOpen(false);
+    setSearchQuery('');
   }, [location]);
+
+  // Focus search input when opened
+  useEffect(() => {
+    if (searchOpen) searchInputRef.current?.focus();
+  }, [searchOpen]);
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim().length >= 2) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
 
   const menuItems = [
     { path: '/armies', label: t('armies'), icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> },
@@ -30,6 +47,7 @@ export default function Header() {
     { path: '/battle-reports', label: t('battles'), icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" y1="19" x2="19" y2="13"/><line x1="16" y1="16" x2="20" y2="20"/><line x1="19" y1="21" x2="21" y2="19"/></svg> },
     { path: '/lore', label: t('lore'), icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> },
     { path: '/news', label: 'Noticias', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a4 4 0 0 1-4 4z"/><path d="M8 6h12"/><path d="M8 10h12"/><path d="M8 14h8"/></svg> },
+    { path: '/army-builder', label: 'Builder', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M7 8h3m4 0h3M7 12h10"/></svg> },
   ];
 
   return (
@@ -124,6 +142,31 @@ export default function Header() {
             ))}
           </div>
 
+          {/* Search icon button */}
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setSearchOpen(!searchOpen)}
+            title="Buscar"
+            style={{
+              background: searchOpen ? 'rgba(0, 212, 255, 0.15)' : 'rgba(255, 255, 255, 0.07)',
+              border: `1px solid ${searchOpen ? 'var(--color-primary)' : 'rgba(255, 255, 255, 0.15)'}`,
+              borderRadius: '10px',
+              padding: '0.55rem',
+              cursor: 'pointer',
+              color: searchOpen ? 'var(--color-primary)' : '#ccc',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'all 0.2s',
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+          </motion.button>
+
           {/* Mobile Hamburger */}
           <motion.button
             whileTap={{ scale: 0.9 }}
@@ -155,6 +198,80 @@ export default function Header() {
           </motion.button>
         </nav>
       </motion.header>
+
+      {/* Search bar dropdown */}
+      <AnimatePresence>
+        {searchOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.18 }}
+            style={{
+              position: 'fixed',
+              top: '70px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: 'min(560px, 92vw)',
+              zIndex: 120,
+            }}
+          >
+            <form onSubmit={handleSearchSubmit} style={{ display: 'flex', gap: '0.5rem' }}>
+              <div style={{ position: 'relative', flex: 1 }}>
+                <div style={{
+                  position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)',
+                  color: '#666', pointerEvents: 'none', display: 'flex',
+                }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+                  </svg>
+                </div>
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  placeholder="Buscar en The Immaterium..."
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem 1rem 0.75rem 2.75rem',
+                    background: 'rgba(10, 10, 26, 0.97)',
+                    border: '1px solid rgba(0, 212, 255, 0.4)',
+                    borderRadius: '12px',
+                    color: '#fff',
+                    fontSize: '0.95rem',
+                    outline: 'none',
+                    fontFamily: 'var(--font-body)',
+                    boxSizing: 'border-box',
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+                    backdropFilter: 'blur(20px)',
+                  }}
+                />
+              </div>
+              <motion.button
+                type="submit"
+                whileTap={{ scale: 0.95 }}
+                style={{
+                  background: 'var(--color-primary)',
+                  border: 'none',
+                  borderRadius: '12px',
+                  padding: '0.75rem 1.25rem',
+                  color: '#000',
+                  fontFamily: 'var(--font-display)',
+                  fontSize: '0.8rem',
+                  letterSpacing: '1px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold',
+                  whiteSpace: 'nowrap',
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+                }}
+              >
+                BUSCAR
+              </motion.button>
+            </form>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Mobile Menu Overlay */}
       <AnimatePresence>
@@ -270,6 +387,38 @@ export default function Header() {
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
                   </span>
                   <span>{t('home').toUpperCase()}</span>
+                </motion.button>
+
+                {/* Search */}
+                <motion.button
+                  whileHover={{ x: 10 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => navigate('/search')}
+                  style={{
+                    background: location.pathname === '/search'
+                      ? 'rgba(0, 212, 255, 0.15)'
+                      : 'rgba(255, 255, 255, 0.05)',
+                    border: `1px solid ${location.pathname === '/search' ? 'var(--color-primary)' : 'rgba(255, 255, 255, 0.1)'}`,
+                    borderRadius: '12px',
+                    padding: '1rem 1.25rem',
+                    color: location.pathname === '/search' ? 'var(--color-primary)' : '#fff',
+                    fontSize: '1.1rem',
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1rem',
+                    fontFamily: 'var(--font-display)',
+                    letterSpacing: '1px'
+                  }}
+                >
+                  <span style={{ display: 'flex', alignItems: 'center', flexShrink: 0, opacity: 0.75 }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+                    </svg>
+                  </span>
+                  <span>BUSCAR</span>
                 </motion.button>
 
                 {menuItems.map((item) => (

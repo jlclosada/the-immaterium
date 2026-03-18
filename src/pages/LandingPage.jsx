@@ -156,7 +156,7 @@ const LandingPage = () => {
             marginBottom: '1rem',
             opacity: 0.8,
           }}>
-            The Immaterium
+            Wargame portal
           </p>
           <h1 style={{
             fontFamily: 'var(--font-display)',
@@ -170,7 +170,7 @@ const LandingPage = () => {
             marginBottom: '1.5rem',
             textShadow: 'none',
           }}>
-            WARHAMMER<br />GALAXY
+            THE<br />IMMATERIUM
           </h1>
           {/* Divider */}
           <div style={{

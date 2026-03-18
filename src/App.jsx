@@ -15,6 +15,7 @@ import GuideManager from './components/Admin/GuideManager';
 import ReportManager from './components/Admin/ReportManager';
 import LoreManager from './components/Admin/LoreManager';
 import UserManager from './components/Admin/UserManager';
+import NewRecruitManager from './components/Admin/NewRecruitManager';
 
 import ArmiesPage from './pages/ArmiesPage';
 import ArmyDetailPage from './pages/ArmyDetailPage';
@@ -27,6 +28,8 @@ import LoreDetailPage from './pages/LoreDetailPage';
 import NewsPage from './pages/NewsPage';
 import NewsDetailPage from './pages/NewsDetailPage';
 import NewsManager from './components/Admin/NewsManager';
+import SearchPage from './pages/SearchPage';
+import ArmyBuilderPage from './pages/ArmyBuilderPage';
 
 import './styles/index.css';
 
@@ -70,6 +73,9 @@ function App() {
           <Route path="/battle-reports/:id" element={<AnimatedPage><BattleReportDetailPage /></AnimatedPage>} />
           <Route path="/news" element={<AnimatedPage><NewsPage /></AnimatedPage>} />
           <Route path="/news/:id" element={<AnimatedPage><NewsDetailPage /></AnimatedPage>} />
+          <Route path="/search" element={<AnimatedPage><SearchPage /></AnimatedPage>} />
+          <Route path="/army-builder" element={<AnimatedPage><ArmyBuilderPage /></AnimatedPage>} />
+          <Route path="/army-builder/:listId" element={<AnimatedPage><ArmyBuilderPage /></AnimatedPage>} />
 
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminLayout />}>
@@ -80,6 +86,7 @@ function App() {
             <Route path="reports" element={<ReportManager />} />
             <Route path="news" element={<NewsManager />} />
             <Route path="users" element={<UserManager />} />
+            <Route path="new-recruit" element={<NewRecruitManager />} />
           </Route>
 
           {/* Fallback */}

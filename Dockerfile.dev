@@ -1,0 +1,20 @@
+# =============================================================================
+#  Frontend – Dockerfile de desarrollo (React + Vite)
+# =============================================================================
+FROM node:20-alpine
+
+ENV NODE_ENV=development
+
+WORKDIR /app
+
+# Instalar dependencias antes de copiar el código (mejor cache)
+COPY package*.json ./
+RUN npm ci
+
+# Copiar el resto del código
+COPY . .
+
+EXPOSE 5173
+
+# --host 0.0.0.0 necesario para exponer Vite dentro del contenedor
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

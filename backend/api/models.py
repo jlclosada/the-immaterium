@@ -329,3 +329,95 @@ class LoreEntry(models.Model):
             self.excerpt = self.content[:497] + '...' if len(self.content) > 500 else self.content
         super().save(*args, **kwargs)
 
+
+class BuilderFaction(models.Model):
+    """Warhammer 40k faction for the army builder"""
+    id = models.CharField(max_length=100, primary_key=True)
+    name = models.CharField(max_length=200)
+    category = models.CharField(max_length=50, default='Unknown')  # Imperium/Chaos/Xenos
+    short_name = models.CharField(max_length=100, blank=True)
+    color = models.CharField(max_length=20, default='#00d4ff')
+    detachments = models.JSONField(default=list)
+    subfaction_of = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, related_name='subfactions')
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['category', 'name']
+        verbose_name = 'Builder Faction'
+        verbose_name_plural = 'Builder Factions'
+
+    def __str__(self):
+        return self.name
+
+
+class BuilderDatasheet(models.Model):
+    """Unit datasheet for the army builder"""
+    ROLE_CHOICES = [
+        ('HQ', 'HQ'),
+        ('Troops', 'Troops'),
+        ('Elites', 'Elites'),
+        ('Fast Attack', 'Fast Attack'),
+        ('Heavy Support', 'Heavy Support'),
+        ('Dedicated Transport', 'Dedicated Transport'),
+        ('Flyer', 'Flyer'),
+        ('Lord of War', 'Lord of War'),
+    ]
+
+    id = models.CharField(max_length=100, primary_key=True)
+    faction = models.ForeignKey(BuilderFaction, on_delete=models.CASCADE, related_name='datasheets')
+    name = models.CharField(max_length=200)
+    role = models.CharField(max_length=50, choices=ROLE_CHOICES, default='Troops')
+    base_points = models.IntegerField(default=0)
+    points_per_model = models.IntegerField(default=0)
+    keywords = ArrayField(models.CharField(max_length=100), default=list)
+    faction_keywords = ArrayField(models.CharField(max_length=100), default=list)
+    is_character = models.BooleanField(default=False)
+    is_epic_hero = models.BooleanField(default=False)
+    weapons = models.JSONField(default=list)
+    abilities = models.JSONField(default=list)
+    wargear_options = models.JSONField(default=list)
+    model_count_min = models.IntegerField(default=1)
+    model_count_max = models.IntegerField(default=1)
+    stats = models.JSONField(default=dict)  # {M, T, Sv, W, Ld, OC}
+    leader_keywords = models.JSONField(default=list, help_text='Keywords required to attach this unit as Leader')
+    can_be_leader = models.BooleanField(default=False, help_text='Can this unit lead other units?')
+    attached_to = models.JSONField(default=list, help_text='List of unit names this character can be attached to')
+
+    class Meta:
+        ordering = ['role', 'name']
+        verbose_name = 'Builder Datasheet'
+        verbose_name_plural = 'Builder Datasheets'
+
+    def __str__(self):
+        return f"{self.faction.name} - {self.name}"
+
+
+class BuilderArmyList(models.Model):
+    """Saved army list for the builder"""
+    id = models.CharField(max_length=100, primary_key=True, default='')
+    name = models.CharField(max_length=300, default='Mi Lista')
+    owner_id = models.CharField(max_length=100)
+    faction = models.ForeignKey(BuilderFaction, null=True, blank=True, on_delete=models.SET_NULL)
+    detachment = models.CharField(max_length=200, blank=True)
+    game_size = models.IntegerField(default=2000)
+    total_points = models.IntegerField(default=0)
+    units = models.JSONField(default=list)
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_public = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-updated_at']
+        verbose_name = 'Builder Army List'
+        verbose_name_plural = 'Builder Army Lists'
+
+    def __str__(self):
+        return f"{self.name} ({self.owner_id})"
+
+    def save(self, *args, **kwargs):
+        if not self.id:
+            import uuid
+            self.id = str(uuid.uuid4())
+        super().save(*args, **kwargs)
+

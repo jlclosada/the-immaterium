@@ -22,3 +22,28 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# =============================================================================
+# Warhammer Galaxy – específico del proyecto
+# =============================================================================
+
+# Variables de entorno – NUNCA subir al repo
+backend/.env
+backend/.env.docker
+!backend/.env.example
+
+# Python
+backend/__pycache__/
+backend/**/__pycache__/
+backend/**/*.pyc
+backend/**/*.pyo
+backend/venv/
+backend/.venv/
+backend/staticfiles/
+backend/media/
+
+# Docker volúmenes locales
+postgres_data/
+
+# Build frontend
+dist/

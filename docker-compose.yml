@@ -1,0 +1,85 @@
+
+# =============================================================================
+#  Warhammer Galaxy – Entorno de desarrollo local con Docker
+# =============================================================================
+#
+#  Servicios:
+#    db       -> PostgreSQL 16 (puerto 5432)
+#    backend  -> Django 5 + DRF (puerto 8000)
+#    frontend -> React 19 + Vite (puerto 5173)
+#
+#  Uso:
+#    Primera vez:   docker compose up --build
+#    Uso diario:    docker compose up
+#    Reset BD:      docker compose down -v && docker compose up --build
+#    -> Abre http://localhost:5173
+#
+# =============================================================================
+
+services:
+
+  # ---------------------------------------------------------------------------
+  #  Base de datos PostgreSQL
+  # ---------------------------------------------------------------------------
+  db:
+    image: postgres:16-alpine
+    container_name: wg_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: warhammer_portal
+      POSTGRES_USER: wg_user
+      POSTGRES_PASSWORD: wg_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wg_user -d warhammer_portal"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ---------------------------------------------------------------------------
+  #  Backend Django (entrypoint.sh: migrate + seed_db + createsuperuser)
+  # ---------------------------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: wg_backend
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env.docker
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - media_data:/app/media
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ---------------------------------------------------------------------------
+  #  Frontend React + Vite
+  # ---------------------------------------------------------------------------
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: wg_frontend
+    restart: unless-stopped
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+    driver: local
+  media_data:
+    driver: local

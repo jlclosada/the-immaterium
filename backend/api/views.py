@@ -4,10 +4,11 @@ from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.filters import SearchFilter, OrderingFilter
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
-from django.db.models import F
+from django.db.models import F, Q
 from .models import (
     Army, ArmyImage, PaintingGuide, GuideMaterial, GuideStep,
     BattleReport, BattleNarrative, Comment,
@@ -49,6 +50,10 @@ class ArmyViewSet(viewsets.ModelViewSet):
     queryset = Army.objects.all()
     serializer_class = ArmySerializer
     lookup_field = 'id'
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ['name', 'description', 'planet_name']
+    ordering_fields = ['name', 'planet_name']
+    ordering = ['name']
 
     def list(self, request, *args, **kwargs):
         try:
@@ -86,6 +91,10 @@ class PaintingGuideViewSet(viewsets.ModelViewSet):
     queryset = PaintingGuide.objects.all()
     serializer_class = PaintingGuideSerializer
     lookup_field = 'id'
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ['title', 'difficulty', 'author', 'faction__name']
+    ordering_fields = ['title', 'date_created', 'views', 'likes']
+    ordering = ['-date_created']
 
     def create(self, request, *args, **kwargs):
         # Make a mutable copy
@@ -220,6 +229,10 @@ class BattleReportViewSet(viewsets.ModelViewSet):
     queryset = BattleReport.objects.all()
     serializer_class = BattleReportSerializer
     lookup_field = 'id'
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ['title', 'player1_name', 'player2_name', 'player1_faction', 'player2_faction', 'mission']
+    ordering_fields = ['date', 'views', 'likes']
+    ordering = ['-date']
 
     def list(self, request, *args, **kwargs):
         try:
@@ -398,6 +411,10 @@ class LoreEntryViewSet(viewsets.ModelViewSet):
     queryset = LoreEntry.objects.all()
     serializer_class = LoreEntrySerializer
     lookup_field = 'id'
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ['title', 'content', 'category', 'era']
+    ordering_fields = ['title', 'date_created', 'views']
+    ordering = ['-date_created']
 
     def create(self, request, *args, **kwargs):
         data = request.data.copy()
@@ -451,6 +468,10 @@ class NewsArticleViewSet(viewsets.ModelViewSet):
     queryset = NewsArticle.objects.filter(is_published=True)
     serializer_class = NewsArticleSerializer
     lookup_field = 'id'
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ['title', 'content', 'excerpt', 'author']
+    ordering_fields = ['title', 'published_at']
+    ordering = ['-published_at']
 
     def get_queryset(self):
         # Admin can see all; public only sees published
@@ -485,6 +506,184 @@ class NewsArticleViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
+
+
+@api_view(['GET'])
+def global_search(request):
+    """
+    Global search across all content types.
+    GET /api/search/?q=<query>&type=<armies|guides|reports|lore|news>
+    Returns up to 5 results per type (or filtered by ?type=).
+    """
+    q = request.query_params.get('q', '').strip()
+    content_type = request.query_params.get('type', 'all')
+
+    if not q or len(q) < 2:
+        return Response({'results': [], 'total': 0, 'query': q})
+
+    results = []
+
+    if content_type in ('all', 'armies'):
+        armies = Army.objects.filter(
+            Q(name__icontains=q) | Q(description__icontains=q) | Q(planet_name__icontains=q)
+        )[:5]
+        for a in armies:
+            results.append({
+                'type': 'army',
+                'id': a.id,
+                'title': a.name,
+                'subtitle': a.planet_name or '',
+                'description': (a.description or '')[:120],
+                'url': f'/armies/{a.id}',
+                'image': a.icon_url or '',
+            })
+
+    if content_type in ('all', 'guides'):
+        guides = PaintingGuide.objects.filter(
+            Q(title__icontains=q) | Q(author__icontains=q) | Q(difficulty__icontains=q)
+        )[:5]
+        for g in guides:
+            results.append({
+                'type': 'guide',
+                'id': g.id,
+                'title': g.title,
+                'subtitle': g.author or '',
+                'description': f'{g.difficulty} · {g.estimated_time}',
+                'url': f'/guides/{g.id}',
+                'image': g.cover_image or '',
+            })
+
+    if content_type in ('all', 'reports'):
+        reports = BattleReport.objects.filter(
+            Q(title__icontains=q) | Q(player1_name__icontains=q) |
+            Q(player2_name__icontains=q) | Q(player1_faction__icontains=q) |
+            Q(player2_faction__icontains=q)
+        )[:5]
+        for r in reports:
+            results.append({
+                'type': 'report',
+                'id': r.id,
+                'title': r.title,
+                'subtitle': f'{r.player1_name} vs {r.player2_name}',
+                'description': f'{r.player1_faction} vs {r.player2_faction}',
+                'url': f'/battle-reports/{r.id}',
+                'image': r.images[0] if r.images else '',
+            })
+
+    if content_type in ('all', 'lore'):
+        lore = LoreEntry.objects.filter(
+            Q(title__icontains=q) | Q(content__icontains=q) | Q(category__icontains=q)
+        )[:5]
+        for l in lore:
+            results.append({
+                'type': 'lore',
+                'id': l.id,
+                'title': l.title,
+                'subtitle': l.category or '',
+                'description': (getattr(l, 'excerpt', '') or l.content or '')[:120],
+                'url': f'/lore/{l.id}',
+                'image': '',
+            })
+
+    if content_type in ('all', 'news'):
+        news = NewsArticle.objects.filter(
+            is_published=True
+        ).filter(
+            Q(title__icontains=q) | Q(content__icontains=q) | Q(excerpt__icontains=q) | Q(author__icontains=q)
+        )[:5]
+        for n in news:
+            results.append({
+                'type': 'news',
+                'id': n.id,
+                'title': n.title,
+                'subtitle': n.author or '',
+                'description': (n.excerpt or n.content or '')[:120],
+                'url': f'/news/{n.id}',
+                'image': n.cover_image or '',
+            })
+
+    return Response({'results': results, 'total': len(results), 'query': q})
+
+
+@api_view(['POST'])
+def new_recruit_proxy(request):
+    """
+    Proxy para la API de New Recruit (evita CORS desde el frontend).
+    POST /api/new-recruit/
+    Body: { login, password, report: { title, player1_name, player1_faction,
+            player1_list_text, player2_name, player2_faction, player2_list_text,
+            player1_score, player2_score, mission, date, points } }
+    """
+    import urllib.request
+    import urllib.error
+    import json as _json
+
+    login = request.data.get('login', '').strip()
+    password = request.data.get('password', '').strip()
+    report_data = request.data.get('report', {})
+
+    if not login or not password:
+        return Response({'error': 'Credenciales de New Recruit requeridas (login y password).'}, status=status.HTTP_400_BAD_REQUEST)
+    if not report_data:
+        return Response({'error': 'No se proporcionó ningún informe.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Build New Recruit API payload
+    # https://www.newrecruit.eu — POST /api/reports
+    payload = {
+        'title': report_data.get('title', ''),
+        'players': [
+            {
+                'name': report_data.get('player1_name', report_data.get('player1Name', '')),
+                'faction': report_data.get('player1_faction', report_data.get('player1Faction', '')),
+                'roster': report_data.get('player1_list_text', report_data.get('player1ListText', '')),
+                'score': report_data.get('player1_score', report_data.get('player1Score', 0)),
+            },
+            {
+                'name': report_data.get('player2_name', report_data.get('player2Name', '')),
+                'faction': report_data.get('player2_faction', report_data.get('player2Faction', '')),
+                'roster': report_data.get('player2_list_text', report_data.get('player2ListText', '')),
+                'score': report_data.get('player2_score', report_data.get('player2Score', 0)),
+            },
+        ],
+        'mission': report_data.get('mission', ''),
+        'date': str(report_data.get('date', '')),
+        'points': report_data.get('points', 2000),
+    }
+
+    nr_url = 'https://www.newrecruit.eu/api/reports'
+    headers = {
+        'Content-Type': 'application/json',
+        'NR-Login': login,
+        'NR-Password': password,
+        'User-Agent': 'TheImmaterium/1.0',
+    }
+
+    try:
+        body = _json.dumps(payload).encode('utf-8')
+        req = urllib.request.Request(nr_url, data=body, headers=headers, method='POST')
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            resp_body = resp.read().decode('utf-8')
+            try:
+                resp_json = _json.loads(resp_body)
+            except Exception:
+                resp_json = {'message': resp_body}
+            return Response({'success': True, **resp_json}, status=status.HTTP_200_OK)
+
+    except urllib.error.HTTPError as e:
+        err_body = ''
+        try:
+            err_body = e.read().decode('utf-8')
+            err_json = _json.loads(err_body)
+            err_msg = err_json.get('message', err_json.get('error', err_body))
+        except Exception:
+            err_msg = err_body or str(e)
+        return Response({'error': f'New Recruit devolvió {e.code}: {err_msg}'}, status=status.HTTP_502_BAD_GATEWAY)
+
+    except urllib.error.URLError as e:
+        return Response({'error': f'No se pudo conectar con New Recruit: {e.reason}'}, status=status.HTTP_502_BAD_GATEWAY)
+
+    except Exception as e:
+        return Response({'error': f'Error inesperado: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 def _get_authenticated_user(request):

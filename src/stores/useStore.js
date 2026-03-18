@@ -1,21 +1,22 @@
 import { create } from 'zustand';
 import { api } from '../services/api';
 
+// Persistent anonymous user ID — generated once per browser, stored in localStorage
+function getOrCreateUserId() {
+  const key = 'wg-user-id';
+  let id = localStorage.getItem(key);
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem(key, id);
+  }
+  return id;
+}
+
 export const useStore = create((set, get) => ({
-  // Navigation state
-  currentView: 'galaxy', // 'galaxy' | 'planet' | 'gallery'
-  selectedPlanet: null,
+  // UI state
   selectedImage: null,
   selectedGuide: null,
   selectedBattleReport: null,
-
-  // Camera state
-  cameraTarget: [0, 0, 0],
-  cameraPosition: [0, 0, 50],
-  isTransitioning: false,
-
-  // UI state
-  showUI: true,
   menuOpen: false,
 
   // Language state
@@ -73,37 +74,6 @@ export const useStore = create((set, get) => ({
     }
   },
 
-  setCurrentView: (view) => set({ currentView: view }),
-
-  selectPlanet: (planetId) => {
-    const army = get().armies.find(a => a.id === planetId);
-    if (army) {
-      set({
-        selectedPlanet: army,
-        isTransitioning: true,
-        cameraTarget: army.position,
-      });
-    }
-  },
-
-  enterPlanet: () => {
-    set({
-      currentView: 'planet',
-      isTransitioning: false
-    });
-  },
-
-  returnToGalaxy: () => {
-    set({
-      currentView: 'galaxy',
-      selectedPlanet: null,
-      isTransitioning: true,
-      cameraTarget: [0, 0, 0],
-      cameraPosition: [0, 0, 50]
-    });
-    setTimeout(() => set({ isTransitioning: false }), 2000);
-  },
-
   selectImage: (image) => set({ selectedImage: image }),
   clearSelectedImage: () => set({ selectedImage: null }),
 
@@ -128,8 +98,6 @@ export const useStore = create((set, get) => ({
       )
     }));
   },
-
-  finishTransition: () => set({ isTransitioning: false }),
 
   // Painting Guide Actions
   selectGuide: (guideId) => {
@@ -156,7 +124,7 @@ export const useStore = create((set, get) => ({
   toggleLike: async (contentId, contentType) => {
     const userLikes = get().userLikes;
     const isLiked = userLikes.includes(contentId);
-    const userId = 'user-session-id'; // Could be real ID if auth implemented
+    const userId = getOrCreateUserId();
 
     // Optimistic update
     if (isLiked) {

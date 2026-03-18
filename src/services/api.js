@@ -1,5 +1,5 @@
 // Use relative URL in development (with Vite proxy) or absolute URL in production
-const API_URL = import.meta.env.VITE_API_URL
+const API_URL = import.meta.env.VITE_API_URL || ''
 
 export const api = {
   // Armies
@@ -275,6 +275,74 @@ export const api = {
     if (!response.ok) throw new Error('Failed to fetch games')
     const data = await response.json()
     return data.results || data
+  },
+
+  // New Recruit integration
+  newRecruitExport: async ({ report, login, password }) => {
+    const response = await fetch(`${API_URL}/api/new-recruit/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ login, password, report }),
+    })
+    const data = await response.json()
+    if (!response.ok) throw new Error(data.error || 'Error al exportar a New Recruit')
+    return data
+  },
+
+  // Global Search
+  search: async (query, type = 'all') => {
+    const params = new URLSearchParams({ q: query })
+    if (type !== 'all') params.append('type', type)
+    const response = await fetch(`${API_URL}/api/search/?${params}`)
+    if (!response.ok) throw new Error('Search failed')
+    return response.json()
+  },
+
+  // Army Builder
+  getBuilderFactions: async () => {
+    const response = await fetch(`${API_URL}/api/builder/factions/`)
+    if (!response.ok) throw new Error('Failed to fetch builder factions')
+    return response.json()
+  },
+
+  getBuilderFaction: async (id) => {
+    const response = await fetch(`${API_URL}/api/builder/factions/${id}/`)
+    if (!response.ok) throw new Error('Failed to fetch faction')
+    return response.json()
+  },
+
+  getBuilderLists: async (ownerId) => {
+    const response = await fetch(`${API_URL}/api/builder/lists/?owner_id=${ownerId}`)
+    if (!response.ok) throw new Error('Failed to fetch army lists')
+    return response.json()
+  },
+
+  createBuilderList: async (data) => {
+    const response = await fetch(`${API_URL}/api/builder/lists/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+    if (!response.ok) throw new Error('Failed to create army list')
+    return response.json()
+  },
+
+  updateBuilderList: async (id, data) => {
+    const response = await fetch(`${API_URL}/api/builder/lists/${id}/`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+    if (!response.ok) throw new Error('Failed to update army list')
+    return response.json()
+  },
+
+  deleteBuilderList: async (id) => {
+    const response = await fetch(`${API_URL}/api/builder/lists/${id}/`, {
+      method: 'DELETE',
+    })
+    if (!response.ok) throw new Error('Failed to delete army list')
+    return true
   },
 
   login: async (username, password) => {

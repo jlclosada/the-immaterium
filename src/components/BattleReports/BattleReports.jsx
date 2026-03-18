@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
-import { useStore } from '../../stores/useStore';
 import { useState } from 'react';
+import { useStore } from '../../stores/useStore';
 
 export default function BattleReports() {
     const { battleReports, setCurrentView, armies } = useStore();
@@ -78,7 +78,7 @@ export default function BattleReports() {
                     INFORMES DE BATALLA
                 </h1>
                 <p style={{ color: '#aaa', fontSize: '1.1rem' }}>
-                    Revive épicas batallas del universo de Warhammer 40K
+                    Revive épicas batallas del universo de Warhammer 40K o El Señor de los Anillos
                 </p>
             </motion.div>
 
