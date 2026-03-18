@@ -619,7 +619,7 @@ export default function ArmyBuilderPage() {
                                 fontWeight: selectedFaction?.id === f.id ? 600 : 400,
                               }}
                             >
-                              {f.short_name || f.name}
+                              {f.name}
                             </button>
                           ))}
                         </div>

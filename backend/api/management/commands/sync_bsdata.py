@@ -1158,6 +1158,24 @@ class Command(BaseCommand):
                 self.stdout.write(
                     f'  {len(cat_files)} catálogos encontrados')
 
+                # ── Overlay with local bsdata/ overrides ──────────────────
+                # Any .cat file in backend/bsdata/ overrides the downloaded one
+                local_override_dir = Path(__file__).resolve().parents[3] / 'bsdata'
+                if local_override_dir.is_dir():
+                    overrides = list(local_override_dir.glob('*.cat'))
+                    if overrides:
+                        override_names = {f.stem: f for f in overrides}
+                        cat_files = [
+                            override_names.get(f.stem, f) for f in cat_files
+                        ]
+                        # Add any override file not present in the downloaded set
+                        existing_stems = {f.stem for f in cat_files}
+                        for stem, f in override_names.items():
+                            if stem not in existing_stems:
+                                cat_files.append(f)
+                        self.stdout.write(
+                            f'  ↳ {len(overrides)} archivo(s) local(es) sobrescriben la descarga')
+
             # ── Init parser ───────────────────────────────────────────────
             parser = BSDataParser()
             if gst_file and gst_file.exists():
