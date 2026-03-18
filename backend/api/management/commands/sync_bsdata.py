@@ -960,38 +960,92 @@ class BSDataParser:
 
     def _extract_detachments(self, root, ns, ctx):
         """
-        Try to find detachment names and abilities from the catalogue.
-        Detachments in wh40k-10e BSData appear as special selectionEntries
-        with category 'Detachment' or as rules with certain naming patterns.
+        Extract detachment names and abilities from the catalogue.
+
+        BSData wh40k-10e uses two structural patterns:
+
+        Pattern A (most factions):
+          selectionEntries/selectionEntry[@name="Detachment"]/
+            selectionEntryGroups/selectionEntryGroup[@name="Detachment"]/
+              selectionEntries/selectionEntry  ← each is a real detachment
+                rules/rule                     ← detachment ability
+
+        Pattern B (older catalogues):
+          selectionEntries/selectionEntry whose categoryLinks contain
+          a link named "Detachment".
         """
         detachments = []
         seen = set()
 
-        # Strategy 1: Look for selectionEntry with type='upgrade' or 'unit'
-        # whose name looks like a detachment
-        detachment_markers = {'detachment', 'formation'}
-        for entry in root.findall(f'.//{ns}selectionEntry'):
-            for cl in entry.findall(f'{ns}categoryLinks/{ns}categoryLink'):
-                if cl.get('name', '').lower() in detachment_markers:
-                    dname = entry.get('name', '').strip()
-                    if dname and dname not in seen:
-                        seen.add(dname)
-                        ability = self._detachment_ability(entry, ctx)
-                        detachments.append({
-                            'name':         dname,
-                            'ability_name': ability.get('name', 'Detachment Ability'),
-                            'ability_text': ability.get('text', ''),
-                        })
+        # ── Pattern A ──────────────────────────────────────────────────────
+        # Find the "Detachment" upgrade entry that acts as a container, then
+        # descend into its selectionEntryGroup to collect each real detachment
+        # option.  It can live in selectionEntries OR sharedSelectionEntries
+        # (the latter is the 10th-ed standard – linked via root entryLinks).
+        det_containers = [
+            e for src in (
+                f'{ns}selectionEntries/{ns}selectionEntry',
+                f'{ns}sharedSelectionEntries/{ns}selectionEntry',
+            )
+            for e in root.findall(src)
+            if 'detachment' in e.get('name', '').strip().lower()
+            and e.get('type', '') == 'upgrade'
+        ]
+        for det_container in det_containers:
+            for seg in det_container.findall(
+                    f'{ns}selectionEntryGroups/{ns}selectionEntryGroup'):
+                seg_name = seg.get('name', '').strip().lower()
+                if 'detachment' not in seg_name and seg_name != '':
+                    continue
+                for se in seg.findall(
+                        f'{ns}selectionEntries/{ns}selectionEntry'):
+                    dname = se.get('name', '').strip()
+                    if not dname or dname in seen:
+                        continue
+                    seen.add(dname)
+                    ability_name = ''
+                    ability_text = ''
+                    # The detachment special rule is the first <rule> child
+                    for rule in se.findall(f'{ns}rules/{ns}rule'):
+                        ability_name = rule.get('name', '').strip()
+                        desc = rule.find(f'{ns}description')
+                        if desc is not None:
+                            ability_text = _text(desc)
+                        break
+                    detachments.append({
+                        'name':         dname,
+                        'ability_name': ability_name or dname,
+                        'ability_text': ability_text,
+                    })
 
-        # Strategy 2: Look for rules in the root whose name ends with
-        # known detachment keywords
+        # ── Pattern B ──────────────────────────────────────────────────────
+        # Classic pattern: selectionEntry has a categoryLink named "Detachment"
         if not detachments:
-            for rule in root.findall(f'.//{ns}rule'):
+            detachment_markers = {'detachment', 'formation'}
+            for entry in root.findall(
+                    f'{ns}selectionEntries/{ns}selectionEntry'):
+                for cl in entry.findall(
+                        f'{ns}categoryLinks/{ns}categoryLink'):
+                    if cl.get('name', '').lower() in detachment_markers:
+                        dname = entry.get('name', '').strip()
+                        if dname and dname.lower() != 'detachment' \
+                                and dname not in seen:
+                            seen.add(dname)
+                            ability = self._detachment_ability(entry, ctx)
+                            detachments.append({
+                                'name':         dname,
+                                'ability_name': ability.get(
+                                    'name', 'Detachment Ability'),
+                                'ability_text': ability.get('text', ''),
+                            })
+
+        # ── Pattern C (fallback) ───────────────────────────────────────────
+        # Some very old or simple catalogues just have root-level rules.
+        if not detachments:
+            for rule in root.findall(f'{ns}rules/{ns}rule'):
                 rname = rule.get('name', '').strip()
                 desc  = rule.find(f'{ns}description')
                 text  = _text(desc) if desc is not None else ''
-                # Heuristic: long descriptions in root-level rules often are
-                # detachment abilities
                 if text and len(text) > 40 and rname not in seen:
                     seen.add(rname)
                     detachments.append({
@@ -999,10 +1053,10 @@ class BSDataParser:
                         'ability_name': rname,
                         'ability_text': text,
                     })
-                    if len(detachments) >= 4:
+                    if len(detachments) >= 6:
                         break
 
-        return detachments[:6]
+        return detachments[:8]
 
     def _detachment_ability(self, entry, ctx):
         abilities = self._abilities(entry, ctx)
