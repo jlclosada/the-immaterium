@@ -7,6 +7,7 @@ class BuilderDatasheetSerializer(serializers.ModelSerializer):
         model = BuilderDatasheet
         fields = [
             'id', 'name', 'role', 'base_points', 'points_per_model',
+            'cost_thresholds',
             'keywords', 'faction_keywords', 'is_character', 'is_epic_hero',
             'weapons', 'abilities', 'wargear_options',
             'model_count_min', 'model_count_max', 'stats',

@@ -379,6 +379,7 @@ class BuilderDatasheet(models.Model):
     model_count_min = models.IntegerField(default=1)
     model_count_max = models.IntegerField(default=1)
     stats = models.JSONField(default=dict)  # {M, T, Sv, W, Ld, OC}
+    cost_thresholds = models.JSONField(default=list, help_text='[{min_models: N, cost: X}] — 10th ed two-tier pricing')
     leader_keywords = models.JSONField(default=list, help_text='Keywords required to attach this unit as Leader')
     can_be_leader = models.BooleanField(default=False, help_text='Can this unit lead other units?')
     attached_to = models.JSONField(default=list, help_text='List of unit names this character can be attached to')

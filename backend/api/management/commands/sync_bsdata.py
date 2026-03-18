@@ -515,15 +515,16 @@ class BSDataParser:
         eid = entry.get('id') or slugify(name)
         ns  = ctx['ns']
 
-        stats       = self._unit_stats(entry, ctx)
-        base_pts    = self._unit_points(entry, ns)
-        ppm         = self._points_per_model(entry, ns)
-        role        = self._unit_role(entry, ns)
-        min_c, max_c = self._model_count(entry, ns)
-        keywords    = self._keywords(entry, ns)
-        weapons     = self._weapons(entry, ctx)
-        abilities   = self._abilities(entry, ctx)
-        wargear     = self._wargear_groups(entry, ctx)
+        stats         = self._unit_stats(entry, ctx)
+        base_pts      = self._unit_points(entry, ns)
+        ppm           = self._points_per_model(entry, ns)
+        cost_tiers    = self._unit_cost_tiers(entry, ns)
+        role          = self._unit_role(entry, ns)
+        min_c, max_c  = self._model_count(entry, ns)
+        keywords      = self._keywords(entry, ns)
+        weapons       = self._weapons(entry, ctx)
+        abilities     = self._abilities(entry, ctx)
+        wargear       = self._wargear_groups(entry, ctx)
 
         is_char     = any(k.lower() in ('character', 'epic hero') for k in keywords)
         is_epic     = 'epic hero' in [k.lower() for k in keywords]
@@ -536,6 +537,7 @@ class BSDataParser:
             'role':             role,
             'base_points':      base_pts,
             'points_per_model': ppm,
+            'cost_thresholds':  cost_tiers,
             'stats':            stats,
             'keywords':         ukws[:30],
             'faction_keywords': fkws[:10],
@@ -591,6 +593,53 @@ class BSDataParser:
                 if c > 0:
                     model_costs.append(c)
         return min(model_costs) if model_costs else 0
+
+    def _unit_cost_tiers(self, entry, ns):
+        """
+        Extract 10th-edition two-tier pricing from BSData modifier blocks.
+
+        Pattern:
+          <costs><cost name="pts" value="180"/></costs>
+          <modifiers>
+            <modifier type="set" field="<pts-type-id>" value="360">
+              <conditions>
+                <condition type="greaterThan" field="selections"
+                           value="5" childId="model"/>
+              </conditions>
+            </modifier>
+          </modifiers>
+
+        Returns [{min_models, cost}, ...] sorted by min_models, e.g.:
+          [{min_models: 1, cost: 180}, {min_models: 6, cost: 360}]
+        Returns [] when there is only one price point.
+        """
+        base = self._unit_points(entry, ns)
+        if base <= 0:
+            return []
+
+        tiers = [{'min_models': 1, 'cost': base}]
+
+        for mod in entry.findall(f'{ns}modifiers/{ns}modifier'):
+            if mod.get('type') != 'set':
+                continue
+            mod_value = _int(mod.get('value', 0))
+            if mod_value <= 0:
+                continue
+            # Look for a greaterThan selections/model condition
+            for cond in mod.findall(f'{ns}conditions/{ns}condition'):
+                if (cond.get('type') == 'greaterThan'
+                        and cond.get('field') == 'selections'
+                        and cond.get('childId', '').lower() in ('model', '')):
+                    threshold = _int(cond.get('value', 0))
+                    # greaterThan N means count > N, i.e. min_models = N + 1
+                    tiers.append({
+                        'min_models': threshold + 1,
+                        'cost':       mod_value,
+                    })
+                    break
+
+        tiers.sort(key=lambda t: t['min_models'])
+        return tiers if len(tiers) > 1 else []
 
     # ── Role ──────────────────────────────────────────────────────────────────
 
