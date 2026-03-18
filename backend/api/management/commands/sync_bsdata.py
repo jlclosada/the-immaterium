@@ -37,89 +37,145 @@ GITHUB_API = 'https://api.github.com/repos/BSData/wh40k-10e/releases/latest'
 
 # Faction name → Imperium / Chaos / Xenos
 FACTION_ALIGN = {
-    'Space Marines':        'Imperium',
-    'Blood Angels':         'Imperium',
-    'Dark Angels':          'Imperium',
-    'Space Wolves':         'Imperium',
-    'Deathwatch':           'Imperium',
-    'Grey Knights':         'Imperium',
-    'Adepta Sororitas':     'Imperium',
-    'Adeptus Custodes':     'Imperium',
-    'Adeptus Mechanicus':   'Imperium',
-    'Astra Militarum':      'Imperium',
-    'Imperial Knights':     'Imperium',
-    'Leagues of Votann':    'Imperium',
-    'Imperial Agents':      'Imperium',
-    'Chaos Space Marines':  'Chaos',
-    'Death Guard':          'Chaos',
-    "Thousand Sons":        'Chaos',
-    'World Eaters':         'Chaos',
-    'Chaos Daemons':        'Chaos',
-    'Chaos Knights':        'Chaos',
-    'Necrons':              'Xenos',
-    'Orks':                 'Xenos',
-    "T'au Empire":          'Xenos',
-    'Tyranids':             'Xenos',
-    'Genestealer Cults':    'Xenos',
-    'Aeldari':              'Xenos',
-    'Drukhari':             'Xenos',
-    'Leagues of Votann':    'Xenos',
+    # Imperium
+    'Space Marines':            'Imperium',
+    'Black Templars':           'Imperium',
+    'Blood Angels':             'Imperium',
+    'Dark Angels':              'Imperium',
+    'Deathwatch':               'Imperium',
+    'Grey Knights':             'Imperium',
+    'Space Wolves':             'Imperium',
+    'Ultramarines':             'Imperium',
+    'White Scars':              'Imperium',
+    'Iron Hands':               'Imperium',
+    'Salamanders':              'Imperium',
+    'Raven Guard':              'Imperium',
+    'Imperial Fists':           'Imperium',
+    'Adepta Sororitas':         'Imperium',
+    'Adeptus Custodes':         'Imperium',
+    'Adeptus Mechanicus':       'Imperium',
+    'Astra Militarum':          'Imperium',
+    'Imperial Knights':         'Imperium',
+    'Imperial Agents':          'Imperium',
+    'Leagues of Votann':        'Imperium',
+    # Chaos
+    'Chaos Space Marines':      'Chaos',
+    'Death Guard':              'Chaos',
+    "Thousand Sons":            'Chaos',
+    'World Eaters':             'Chaos',
+    'Chaos Daemons':            'Chaos',
+    'Chaos Knights':            'Chaos',
+    "Emperor's Children":       'Chaos',
+    'Iron Warriors':            'Chaos',
+    'Night Lords':              'Chaos',
+    'Word Bearers':             'Chaos',
+    # Xenos
+    'Necrons':                  'Xenos',
+    'Orks':                     'Xenos',
+    "T'au Empire":              'Xenos',
+    'Tyranids':                 'Xenos',
+    'Genestealer Cults':        'Xenos',
+    'Aeldari':                  'Xenos',
+    'Drukhari':                 'Xenos',
+    "Ynnari":                   'Xenos',
 }
 
 FACTION_COLOR = {
-    'Space Marines':        '#1a6bb5',
-    'Blood Angels':         '#8b0000',
-    'Dark Angels':          '#1a5c2a',
-    'Space Wolves':         '#4a6a8a',
-    'Deathwatch':           '#2a2a3a',
-    'Grey Knights':         '#c0c0c0',
-    'Adepta Sororitas':     '#8b1a1a',
-    'Adeptus Custodes':     '#ffd700',
-    'Adeptus Mechanicus':   '#cc2222',
-    'Astra Militarum':      '#556b2f',
-    'Imperial Knights':     '#a0522d',
-    'Leagues of Votann':    '#8b7355',
-    'Chaos Space Marines':  '#8b0000',
-    'Death Guard':          '#4a5a2a',
-    "Thousand Sons":        '#1a4a8b',
-    'World Eaters':         '#cc2200',
-    'Chaos Daemons':        '#6a1a6a',
-    'Chaos Knights':        '#4a1a4a',
-    'Necrons':              '#00cc66',
-    'Orks':                 '#4a7a1e',
-    "T'au Empire":          '#4bbcff',
-    'Tyranids':             '#9b30ff',
-    'Genestealer Cults':    '#cc44cc',
-    'Aeldari':              '#4488ff',
-    'Drukhari':             '#880044',
+    # Imperium - Space Marines
+    'Space Marines':            '#1a6bb5',
+    'Black Templars':           '#1a1a1a',
+    'Blood Angels':             '#8b0000',
+    'Dark Angels':              '#1a5c2a',
+    'Deathwatch':               '#2a2a3a',
+    'Grey Knights':             '#c0c0c0',
+    'Space Wolves':             '#4a6a8a',
+    'Ultramarines':             '#003087',
+    'White Scars':              '#e8e8e8',
+    'Iron Hands':               '#3a3a3a',
+    'Salamanders':              '#1a6b1a',
+    'Raven Guard':              '#111111',
+    'Imperial Fists':           '#ffd700',
+    # Imperium - Other
+    'Adepta Sororitas':         '#8b1a1a',
+    'Adeptus Custodes':         '#ffd700',
+    'Adeptus Mechanicus':       '#cc2222',
+    'Astra Militarum':          '#556b2f',
+    'Imperial Knights':         '#a0522d',
+    'Imperial Agents':          '#556b8a',
+    'Leagues of Votann':        '#8b7355',
+    # Chaos
+    'Chaos Space Marines':      '#8b0000',
+    'Death Guard':              '#4a5a2a',
+    "Thousand Sons":            '#1a4a8b',
+    'World Eaters':             '#cc2200',
+    'Chaos Daemons':            '#6a1a6a',
+    'Chaos Knights':            '#4a1a4a',
+    "Emperor's Children":       '#9b1a9b',
+    'Iron Warriors':            '#555555',
+    'Night Lords':              '#1a1a6a',
+    'Word Bearers':             '#5a1a1a',
+    # Xenos
+    'Necrons':                  '#00cc66',
+    'Orks':                     '#4a7a1e',
+    "T'au Empire":              '#4bbcff',
+    'Tyranids':                 '#9b30ff',
+    'Genestealer Cults':        '#cc44cc',
+    'Aeldari':                  '#4488ff',
+    'Drukhari':                 '#880044',
+    'Ynnari':                   '#cc66aa',
+}
+
+# Default colors by alignment for factions not in FACTION_COLOR
+CATEGORY_DEFAULT_COLORS = {
+    'Imperium': '#1a6bb5',
+    'Chaos':    '#8b0000',
+    'Xenos':    '#4a7a1e',
+    'Unknown':  '#888888',
 }
 
 FACTION_SHORT = {
-    'Space Marines':        'SM',
-    'Blood Angels':         'BA',
-    'Dark Angels':          'DA',
-    'Space Wolves':         'SW',
-    'Deathwatch':           'DW',
-    'Grey Knights':         'GK',
-    'Adepta Sororitas':     'SoB',
-    'Adeptus Custodes':     'CUST',
-    'Adeptus Mechanicus':   'AdMech',
-    'Astra Militarum':      'AM',
-    'Imperial Knights':     'IK',
-    'Leagues of Votann':    'LoV',
-    'Chaos Space Marines':  'CSM',
-    'Death Guard':          'DG',
-    "Thousand Sons":        'TS',
-    'World Eaters':         'WE',
-    'Chaos Daemons':        'CD',
-    'Chaos Knights':        'CK',
-    'Necrons':              'NEC',
-    'Orks':                 'ORK',
-    "T'au Empire":          "T'AU",
-    'Tyranids':             'TYR',
-    'Genestealer Cults':    'GSC',
-    'Aeldari':              'AEL',
-    'Drukhari':             'DRU',
+    # Imperium - Space Marines
+    'Space Marines':            'SM',
+    'Black Templars':           'BT',
+    'Blood Angels':             'BA',
+    'Dark Angels':              'DA',
+    'Space Wolves':             'SW',
+    'Deathwatch':               'DW',
+    'Grey Knights':             'GK',
+    'Ultramarines':             'UM',
+    'White Scars':              'WS',
+    'Iron Hands':               'IH',
+    'Salamanders':              'SAL',
+    'Raven Guard':              'RG',
+    'Imperial Fists':           'IF',
+    # Imperium - Other
+    'Adepta Sororitas':         'SoB',
+    'Adeptus Custodes':         'CUST',
+    'Adeptus Mechanicus':       'AdMech',
+    'Astra Militarum':          'AM',
+    'Imperial Knights':         'IK',
+    'Imperial Agents':          'IA',
+    'Leagues of Votann':        'LoV',
+    # Chaos
+    'Chaos Space Marines':      'CSM',
+    'Death Guard':              'DG',
+    "Thousand Sons":            'TS',
+    'World Eaters':             'WE',
+    'Chaos Daemons':            'CD',
+    'Chaos Knights':            'CK',
+    "Emperor's Children":       'EC',
+    'Iron Warriors':            'IW',
+    'Night Lords':              'NL',
+    'Word Bearers':             'WB',
+    # Xenos
+    'Necrons':                  'NEC',
+    'Orks':                     'ORK',
+    "T'au Empire":              "T'AU",
+    'Tyranids':                 'TYR',
+    'Genestealer Cults':        'GSC',
+    'Aeldari':                  'AEL',
+    'Drukhari':                 'DRU',
+    'Ynnari':                   'YNN',
 }
 
 CATEGORY_ROLE = {
@@ -169,6 +225,14 @@ SKIP_CATALOGUES = {
     'common keywords', 'compulsory unit types', 'rulebook stratagems',
     'matched play', 'open play', 'narrative play', 'core rules', 'rules',
     'age of darkness', 'boarding actions',
+}
+
+# Fix BSData catalogue names that are incomplete or inconsistent
+NAME_OVERRIDES = {
+    'Daemons': 'Chaos Daemons',
+    'Chaos Daemons': 'Chaos Daemons',
+    'Heretic Astartes': 'Chaos Space Marines',
+    'Adeptus Astartes': 'Space Marines',
 }
 
 
@@ -238,38 +302,15 @@ class BSDataParser:
         Parse a single .cat file.
         Returns a dict  { id, name, category, color, short_name, units, detachments }
         or None if the file should be skipped.
+
+        Uses the catalogue's XML <name> attribute as the authoritative faction name,
+        so ALL faction catalogues are processed (including subfactions).
         """
-        raw_stem     = Path(filepath).stem.strip()
-        faction_name = raw_stem
+        raw_stem = Path(filepath).stem.strip()
 
-        # Skip known non-faction files
-        if faction_name.lower() in SKIP_CATALOGUES:
+        # Quick skip by filename for obviously non-faction files
+        if raw_stem.lower() in SKIP_CATALOGUES:
             return None
-
-        # BSData uses prefixed filenames: "Chaos - Chaos Space Marines",
-        # "Imperium - Adepta Sororitas", "Aeldari - Drukhari", etc.
-        # Strategy: try progressively shorter suffixes after " - "
-        if faction_name not in FACTION_ALIGN:
-            resolved = None
-            parts = faction_name.split(' - ')
-            # Try suffix first (most specific): "Chaos Space Marines"
-            for i in range(1, len(parts)):
-                candidate = ' - '.join(parts[i:]).strip()
-                if candidate in FACTION_ALIGN:
-                    resolved = candidate
-                    break
-            # Also try just the last part
-            if resolved is None and parts[-1].strip() in FACTION_ALIGN:
-                resolved = parts[-1].strip()
-            # Also check if any known faction name is contained in the stem
-            if resolved is None:
-                for known in sorted(FACTION_ALIGN.keys(), key=len, reverse=True):
-                    if known in faction_name:
-                        resolved = known
-                        break
-            if resolved is None:
-                return None
-            faction_name = resolved
 
         try:
             tree = ET.parse(filepath)
@@ -279,6 +320,70 @@ class BSDataParser:
             return None
 
         ns = _ns(root)
+
+        # Get authoritative faction name from the XML <catalogue name="..."> attribute
+        # BSData stores names with alignment prefix: "Xenos - Necrons", "Imperium - Space Marines"
+        # or nested: "Imperium - Adeptus Astartes - Deathwatch"
+        # We strip the prefix and use just the last meaningful part.
+        xml_name = root.get('name', '').strip()
+        if not xml_name:
+            xml_name = raw_stem
+
+        # Strip alignment/parent prefix: take the last segment after ' - '
+        if ' - ' in xml_name:
+            faction_name = xml_name.split(' - ')[-1].strip()
+        else:
+            faction_name = xml_name
+
+        # If the last segment is a generic word, take the second-to-last
+        supplement_words = {'library', 'legends', 'supplement', 'compendium', 'beta'}
+        if faction_name.lower() in supplement_words and ' - ' in xml_name:
+            parts = xml_name.split(' - ')
+            faction_name = parts[-2].strip() if len(parts) >= 2 else faction_name
+
+        # Strip " Library" suffix (e.g. "Aeldari Library" → "Aeldari",
+        # "Chaos Daemons Library" → "Chaos Daemons")
+        if faction_name.endswith(' Library'):
+            faction_name = faction_name[:-8].strip()
+
+        # Apply known name overrides (e.g. "Daemons" → "Chaos Daemons")
+        faction_name = NAME_OVERRIDES.get(faction_name, faction_name)
+
+        # Skip non-playable catalogues by name
+        if faction_name.lower() in SKIP_CATALOGUES:
+            return None
+
+        # Skip utility/rules-only catalogues (no units expected)
+        skip_patterns = {
+            'common keywords', 'compulsory', 'matched play', 'open play',
+            'narrative play', 'core rules', 'boarding actions', 'rulebook',
+            'age of darkness', 'shared', 'stratagems', 'unaligned forces',
+        }
+        fname_lower = faction_name.lower()
+        if any(p in fname_lower for p in skip_patterns):
+            return None
+
+        # Determine alignment (Imperium / Chaos / Xenos) from filename prefix
+        stem_lower = raw_stem.lower()
+        if stem_lower.startswith('imperium'):
+            category = 'Imperium'
+        elif stem_lower.startswith('chaos'):
+            category = 'Chaos'
+        elif stem_lower.startswith(('xenos', 'necrons', 'orks', "t'au",
+                                     'tyranids', 'aeldari', 'drukhari',
+                                     'genestealer', 'leagues')):
+            category = 'Xenos'
+        else:
+            # Fall back to FACTION_ALIGN lookup or infer from xml_name prefix
+            category = FACTION_ALIGN.get(faction_name, 'Unknown')
+            if category == 'Unknown':
+                xml_prefix = xml_name.split(' - ')[0].lower()
+                if xml_prefix == 'imperium':
+                    category = 'Imperium'
+                elif xml_prefix == 'chaos':
+                    category = 'Chaos'
+                elif xml_prefix in ('xenos', 'aeldari'):
+                    category = 'Xenos'
 
         # Per-catalogue registries
         shared_entries  = {}
@@ -301,6 +406,10 @@ class BSDataParser:
         seen  = set()
 
         def _collect_unit(entry):
+            name = entry.get('name', '')
+            # Skip GW-retired Legends units
+            if '[Legends]' in name or '(Legends)' in name:
+                return
             eid = entry.get('id', '')
             if eid in seen or entry.get('type') != 'unit':
                 return
@@ -339,12 +448,27 @@ class BSDataParser:
 
         detachments = self._extract_detachments(root, ns, ctx)
 
+        # Resolve color: use known color, else use alignment default
+        color = FACTION_COLOR.get(
+            faction_name,
+            CATEGORY_DEFAULT_COLORS.get(category, '#888888')
+        )
+
+        # Resolve short name: use known short, else auto-generate from initials
+        short_name = FACTION_SHORT.get(faction_name, '')
+        if not short_name:
+            words = faction_name.split()
+            if len(words) == 1:
+                short_name = faction_name[:4].upper()
+            else:
+                short_name = ''.join(w[0] for w in words if w).upper()[:6]
+
         return {
             'id':          slugify(faction_name),
             'name':        faction_name,
-            'category':    FACTION_ALIGN.get(faction_name, 'Unknown'),
-            'color':       FACTION_COLOR.get(faction_name, '#888888'),
-            'short_name':  FACTION_SHORT.get(faction_name, ''),
+            'category':    category,
+            'color':       color,
+            'short_name':  short_name,
             'units':       units,
             'detachments': detachments,
         }
@@ -988,9 +1112,10 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if options['list_factions']:
-            self.stdout.write('Facciones soportadas:')
+            self.stdout.write('Facciones conocidas (se parsean TODAS las que tengan unidades):')
             for name, align in sorted(FACTION_ALIGN.items()):
                 self.stdout.write(f'  [{align:10}] {name}')
+            self.stdout.write('\nNota: también se procesan subfacciones y catálogos adicionales con unidades.')
             return
 
         source_dir = options.get('source')
@@ -1046,9 +1171,11 @@ class Command(BaseCommand):
                 BuilderDatasheet.objects.all().delete()
                 BuilderFaction.objects.all().delete()
 
-            # ── Parse & save ──────────────────────────────────────────────
-            total_factions = total_units = 0
-            updated_f = updated_u = 0
+            # ── Parse all catalogues, merging by faction ID ───────────────
+            # Multiple .cat files can map to the same faction
+            # (e.g. "Aeldari Library" and "Craftworlds" both → "Aeldari")
+            # We merge them before writing to the DB.
+            merged = {}  # faction_id → { faction_meta, units: [], detachments: [] }
 
             for cat_file in sorted(cat_files):
                 self.stdout.write(f'\nParsing: {cat_file.stem}…')
@@ -1062,6 +1189,7 @@ class Command(BaseCommand):
                     self.stdout.write('  → omitido (no es una facción jugable)')
                     continue
 
+                fid          = faction_data['id']
                 units_data   = faction_data.pop('units')
                 detachments  = faction_data.pop('detachments', [])
 
@@ -1070,13 +1198,47 @@ class Command(BaseCommand):
                     f'{len(units_data)} unidades, '
                     f'{len(detachments)} destacamentos')
 
-                if options['dry_run']:
-                    continue
+                if fid not in merged:
+                    merged[fid] = {
+                        'meta':        faction_data,
+                        'units':       list(units_data),
+                        'detachments': list(detachments),
+                    }
+                else:
+                    # Merge: add new units (deduplicate by unit id), append detachments
+                    existing_ids = {u['id'] for u in merged[fid]['units']}
+                    for u in units_data:
+                        if u['id'] not in existing_ids:
+                            merged[fid]['units'].append(u)
+                            existing_ids.add(u['id'])
+                    seen_det = {d['name'] for d in merged[fid]['detachments']}
+                    for d in detachments:
+                        if d['name'] not in seen_det:
+                            merged[fid]['detachments'].append(d)
+                            seen_det.add(d['name'])
+                    self.stdout.write(
+                        f'    ↳ Fusionado con {merged[fid]["meta"]["name"]} '
+                        f'(total: {len(merged[fid]["units"])} unidades)')
+
+            if options['dry_run']:
+                total_units = sum(len(v['units']) for v in merged.values())
+                self.stdout.write(
+                    f'\nDry run — {len(merged)} facciones, {total_units} unidades')
+                return
+
+            # ── Write to DB ───────────────────────────────────────────────
+            total_factions = total_units = 0
+            updated_f = updated_u = 0
+
+            for fid, data in merged.items():
+                faction_data = data['meta']
+                units_data   = data['units']
+                detachments  = data['detachments']
 
                 # ── Upsert faction ────────────────────────────────────────
                 faction_data['detachments'] = detachments
                 faction, created = BuilderFaction.objects.update_or_create(
-                    id=faction_data['id'],
+                    id=fid,
                     defaults=faction_data,
                 )
                 if created:
@@ -1107,16 +1269,13 @@ class Command(BaseCommand):
                 if stale_count:
                     stale.delete()
                     self.stdout.write(
-                        f'  🗑 {stale_count} unidades obsoletas eliminadas')
+                        f'  {stale_count} unidades obsoletas eliminadas de {faction_data["name"]}')
 
             # ── Summary ───────────────────────────────────────────────────
-            if not options['dry_run']:
-                self.stdout.write('\n' + self.style.SUCCESS(
-                    f'Sincronización completada:\n'
-                    f'  Facciones: {total_factions} nuevas, {updated_f} actualizadas\n'
-                    f'  Unidades:  {total_units} nuevas, {updated_u} actualizadas\n'
-                    f'  Total BD:  {BuilderFaction.objects.count()} facciones, '
-                    f'{BuilderDatasheet.objects.count()} unidades'
-                ))
-            else:
-                self.stdout.write('\n' + self.style.WARNING('Dry run — nada escrito en BD'))
+            self.stdout.write('\n' + self.style.SUCCESS(
+                f'Sincronización completada:\n'
+                f'  Facciones: {total_factions} nuevas, {updated_f} actualizadas\n'
+                f'  Unidades:  {total_units} nuevas, {updated_u} actualizadas\n'
+                f'  Total BD:  {BuilderFaction.objects.count()} facciones, '
+                f'{BuilderDatasheet.objects.count()} unidades'
+            ))

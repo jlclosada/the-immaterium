@@ -175,31 +175,37 @@ const GuideManager = () => {
     };
 
     const addStepImage = (stepIndex, url) => {
-        if (url.trim()) {
-            const updatedSteps = [...steps];
-            updatedSteps[stepIndex].images = [...(updatedSteps[stepIndex].images || []), url.trim()];
-            setSteps(updatedSteps);
-        }
+        if (!url.trim()) return;
+        setSteps(prev => prev.map((step, idx) =>
+            idx === stepIndex
+                ? { ...step, images: [...(step.images || []), url.trim()] }
+                : step
+        ));
     };
 
     const removeStepImage = (stepIndex, imageIndex) => {
-        const updatedSteps = [...steps];
-        updatedSteps[stepIndex].images = updatedSteps[stepIndex].images.filter((_, i) => i !== imageIndex);
-        setSteps(updatedSteps);
+        setSteps(prev => prev.map((step, idx) =>
+            idx === stepIndex
+                ? { ...step, images: step.images.filter((_, i) => i !== imageIndex) }
+                : step
+        ));
     };
 
     const addStepTip = (stepIndex, tip) => {
-        if (tip.trim()) {
-            const updatedSteps = [...steps];
-            updatedSteps[stepIndex].tips = [...(updatedSteps[stepIndex].tips || []), tip.trim()];
-            setSteps(updatedSteps);
-        }
+        if (!tip.trim()) return;
+        setSteps(prev => prev.map((step, idx) =>
+            idx === stepIndex
+                ? { ...step, tips: [...(step.tips || []), tip.trim()] }
+                : step
+        ));
     };
 
     const removeStepTip = (stepIndex, tipIndex) => {
-        const updatedSteps = [...steps];
-        updatedSteps[stepIndex].tips = updatedSteps[stepIndex].tips.filter((_, i) => i !== tipIndex);
-        setSteps(updatedSteps);
+        setSteps(prev => prev.map((step, idx) =>
+            idx === stepIndex
+                ? { ...step, tips: step.tips.filter((_, i) => i !== tipIndex) }
+                : step
+        ));
     };
 
     const addTag = (tag) => {
@@ -662,26 +668,46 @@ const GuideManager = () => {
                                             </button>
                                         </div>
                                         {step.images && step.images.length > 0 && (
-                                            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
                                                 {step.images.map((img, imgIndex) => (
                                                     <div key={imgIndex} style={{
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        gap: '0.5rem',
-                                                        padding: '0.5rem',
-                                                        background: 'rgba(0,206,209,0.1)',
-                                                        borderRadius: '8px'
+                                                        position: 'relative',
+                                                        width: '100px',
+                                                        height: '100px',
+                                                        borderRadius: '8px',
+                                                        overflow: 'hidden',
+                                                        border: '1px solid rgba(0,206,209,0.4)',
+                                                        background: 'rgba(0,0,0,0.4)',
                                                     }}>
-                                                        <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.7)' }}>{img.substring(0, 30)}...</span>
+                                                        <img
+                                                            src={img}
+                                                            alt={`Paso ${step.stepNumber} imagen ${imgIndex + 1}`}
+                                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                            onError={e => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
+                                                        />
+                                                        <div style={{
+                                                            display: 'none',
+                                                            position: 'absolute', inset: 0,
+                                                            alignItems: 'center', justifyContent: 'center',
+                                                            fontSize: '0.65rem', color: 'rgba(255,100,100,0.8)',
+                                                            textAlign: 'center', padding: '0.25rem',
+                                                        }}>
+                                                            URL inválida
+                                                        </div>
                                                         <button
                                                             type="button"
                                                             onClick={() => removeStepImage(stepIndex, imgIndex)}
                                                             style={{
-                                                                background: 'none',
+                                                                position: 'absolute', top: '2px', right: '2px',
+                                                                background: 'rgba(0,0,0,0.7)',
                                                                 border: 'none',
                                                                 color: '#ff6464',
                                                                 cursor: 'pointer',
-                                                                fontSize: '1rem'
+                                                                fontSize: '0.9rem',
+                                                                width: '20px', height: '20px',
+                                                                borderRadius: '50%',
+                                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                                lineHeight: 1,
                                                             }}
                                                         >
                                                             ×

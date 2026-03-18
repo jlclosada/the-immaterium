@@ -122,13 +122,15 @@ class PaintingGuideViewSet(viewsets.ModelViewSet):
 
         # Create steps
         for step_data in steps_data:
-            step_data_copy = step_data.copy()
+            step_data_copy = {k: v for k, v in step_data.items()}
             if 'stepNumber' in step_data_copy:
                 step_data_copy['step_number'] = step_data_copy.pop('stepNumber')
             GuideStep.objects.create(guide=guide, **step_data_copy)
 
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        # Re-serialize from DB so the response includes the created steps/materials
+        response_serializer = self.get_serializer(guide)
+        headers = self.get_success_headers(response_serializer.data)
+        return Response(response_serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -165,12 +167,14 @@ class PaintingGuideViewSet(viewsets.ModelViewSet):
         if steps_data is not None:
             GuideStep.objects.filter(guide=guide).delete()
             for step_data in steps_data:
-                step_data_copy = step_data.copy()
+                step_data_copy = {k: v for k, v in step_data.items()}
                 if 'stepNumber' in step_data_copy:
                     step_data_copy['step_number'] = step_data_copy.pop('stepNumber')
                 GuideStep.objects.create(guide=guide, **step_data_copy)
 
-        return Response(serializer.data)
+        # Re-serialize from DB so the response reflects all changes
+        response_serializer = self.get_serializer(guide)
+        return Response(response_serializer.data)
 
     @action(detail=True, methods=['post'])
     def like(self, request, id=None):
