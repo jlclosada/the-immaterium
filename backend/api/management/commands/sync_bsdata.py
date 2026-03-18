@@ -1107,6 +1107,10 @@ class Command(BaseCommand):
             '--dry-run', action='store_true',
             help='Parse only, do not write to database',
         )
+        parser.add_argument(
+            '--if-empty', action='store_true',
+            help='Skip sync if BuilderFaction table already has data (idempotent for deployments)',
+        )
 
     # ── handle ────────────────────────────────────────────────────────────────
 
@@ -1116,6 +1120,10 @@ class Command(BaseCommand):
             for name, align in sorted(FACTION_ALIGN.items()):
                 self.stdout.write(f'  [{align:10}] {name}')
             self.stdout.write('\nNota: también se procesan subfacciones y catálogos adicionales con unidades.')
+            return
+
+        if options.get('if_empty') and BuilderFaction.objects.exists():
+            self.stdout.write('BuilderFaction ya tiene datos — omitiendo sync (--if-empty).')
             return
 
         source_dir = options.get('source')

@@ -541,8 +541,8 @@ commit local → push a GitHub (rama dev/main)
        ↓
 Render detecta el push y lanza un nuevo deploy
        ↓
-Build command: pip install + migrate + collectstatic
-       ↓  (migrate aplica automáticamente sobre Neon)
+Build command: pip install + migrate + collectstatic + sync_bsdata --if-empty
+       ↓  (migrate aplica sobre Neon; sync_bsdata solo corre si la BD está vacía)
 Start command: gunicorn arranca el servidor
        ↓
 Producción actualizada ✅
@@ -570,7 +570,7 @@ Producción actualizada ✅
 | Campo | Valor |
 |-------|-------|
 | **Root Directory** | `backend` |
-| **Build Command** | `pip install -r requirements.txt && python manage.py migrate --noinput && python manage.py collectstatic --noinput` |
+| **Build Command** | `pip install -r requirements.txt && python manage.py migrate --noinput && python manage.py collectstatic --noinput && python manage.py sync_bsdata --if-empty` |
 | **Start Command** | `gunicorn warhammer_backend.wsgi:application --bind 0.0.0.0:$PORT` |
 | **Python Version** | `3.12` |
 
