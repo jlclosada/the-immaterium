@@ -22,6 +22,20 @@ export const translations = {
     loreSubtitle: 'Biblioteca & Historia',
     newsTitle: 'NOTICIAS',
     newsSubtitle: 'Novedades & Actualizaciones',
+
+    // Videos
+    videos: 'Videos',
+    videosTitle: 'MIS VIDEOS',
+    videosSubtitle: 'Mi canal de YouTube',
+    videosPageTitle: 'MIS VIDEOS',
+    videosSubLabel: 'Mi canal de YouTube',
+    videosPageDescription: 'Partidas, tutoriales de pintura, unboxings y mucho más contenido sobre Warhammer 40,000 directamente desde mi canal de YouTube.',
+    visitChannel: 'Visitar canal',
+    visitChannelDirectly: 'Visitar canal directamente en YouTube',
+    noVideosFound: 'No se encontraron videos',
+    videosCount: 'videos',
+    nowPlaying: 'Reproduciendo',
+
     adminAccess: 'Acceso Administrativo // Autorización Requerida',
 
     // Featured Intel
@@ -171,10 +185,10 @@ export const translations = {
 
     // Videos
     videos: 'Videos',
-    videosTitle: 'VIDEOS',
-    videosSubtitle: 'YouTube Channel',
+    videosTitle: 'MY VIDEOS',
+    videosSubtitle: 'My YouTube Channel',
     videosPageTitle: 'MY VIDEOS',
-    videosSubLabel: 'YouTube Channel',
+    videosSubLabel: 'My YouTube Channel',
     videosPageDescription: 'Games, painting tutorials, unboxings, and more Warhammer 40,000 content straight from my YouTube channel.',
     visitChannel: 'Visit channel',
     visitChannelDirectly: 'Visit channel directly on YouTube',

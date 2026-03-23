@@ -335,9 +335,8 @@ const VideosPage = () => {
                 <motion.div
                   key={video.id + '-' + idx}
                   initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: idx * 0.05, duration: 0.4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.06, duration: 0.4 }}
                   whileHover={{ y: -6, scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => {
@@ -356,9 +355,10 @@ const VideosPage = () => {
                   {/* Thumbnail */}
                   <div style={{ position: 'relative', width: '100%', paddingBottom: '56.25%', background: '#111' }}>
                     <img
-                      src={video.thumbnail || `https://img.youtube.com/vi/${video.id}/hqdefault.jpg`}
+                      src={`https://img.youtube.com/vi/${video.id}/hqdefault.jpg`}
                       alt={video.title}
-                      loading="lazy"
+                      referrerPolicy="no-referrer"
+                      crossOrigin="anonymous"
                       style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }}
                     />
                     {/* Play icon overlay */}
