@@ -8,6 +8,10 @@ import { useTranslation } from '../i18n/translations';
 // ─── CONFIG ──────────────────────────────────────────────────────────
 const YOUTUBE_CHANNEL_URL = 'https://www.youtube.com/@itsmrjoss';
 const YOUTUBE_CHANNEL_ID = 'UCRSvtnW26zUos-X1uWfc7ZQ';
+// YouTube Data API v3 key (opcional pero necesaria para cargar TODOS los vídeos)
+// Sin ella solo se cargan los 10 más recientes vía RSS.
+// Configúrala en Netlify → Environment variables → VITE_YOUTUBE_API_KEY
+const YOUTUBE_API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY || '';
 // ─────────────────────────────────────────────────────────────────────
 
 const VideosPage = () => {
@@ -23,9 +27,65 @@ const VideosPage = () => {
     fetchYouTubeVideos();
   }, []);
 
-  /* ── Carga vídeos del canal vía RSS feed (hasta 15 vídeos recientes) ── */
+  /* ── Estrategia:
+     1. Si hay YOUTUBE_API_KEY → YouTube Data API v3 (pagina hasta obtener TODOS)
+     2. Fallback → RSS feed vía rss2json (máx. 10 vídeos)
+  ── */
   const fetchYouTubeVideos = async () => {
     setLoading(true);
+
+    // ── 1. YouTube Data API v3 — carga TODOS los vídeos paginando ──
+    if (YOUTUBE_API_KEY) {
+      try {
+        const allVideos = [];
+        let pageToken = '';
+        let hasMore = true;
+
+        while (hasMore) {
+          const url =
+            `https://www.googleapis.com/youtube/v3/search` +
+            `?key=${YOUTUBE_API_KEY}` +
+            `&channelId=${YOUTUBE_CHANNEL_ID}` +
+            `&part=snippet` +
+            `&order=date` +
+            `&type=video` +
+            `&maxResults=50` +
+            (pageToken ? `&pageToken=${pageToken}` : '');
+
+          const res = await fetch(url);
+          if (!res.ok) break;
+
+          const data = await res.json();
+          if (data.items?.length > 0) {
+            const batch = data.items.map((item) => ({
+              id: item.id.videoId,
+              title: item.snippet.title,
+              description: item.snippet.description?.substring(0, 200) || '',
+              date: item.snippet.publishedAt?.split('T')[0] || '',
+              thumbnail:
+                item.snippet.thumbnails?.high?.url ||
+                item.snippet.thumbnails?.medium?.url ||
+                `https://img.youtube.com/vi/${item.id.videoId}/hqdefault.jpg`,
+            }));
+            allVideos.push(...batch);
+          }
+
+          pageToken = data.nextPageToken || '';
+          hasMore = !!pageToken;
+        }
+
+        if (allVideos.length > 0) {
+          setVideos(allVideos);
+          setSelectedVideo(allVideos[0]);
+          setLoading(false);
+          return;
+        }
+      } catch (err) {
+        console.warn('YouTube API fetch failed, falling back to RSS:', err);
+      }
+    }
+
+    // ── 2. Fallback: RSS feed (máx. 10 vídeos) ──
     try {
       const feedUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${YOUTUBE_CHANNEL_ID}`;
       const response = await fetch(
@@ -43,7 +103,7 @@ const VideosPage = () => {
               title: item.title,
               description: item.description?.replace(/<[^>]*>/g, '').substring(0, 200) || '',
               date: item.pubDate?.split(' ')[0] || '',
-              thumbnail: item.thumbnail || `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
+              thumbnail: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
             };
           });
           setVideos(fetched);

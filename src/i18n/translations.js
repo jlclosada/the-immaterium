@@ -35,6 +35,8 @@ export const translations = {
     noVideosFound: 'No se encontraron videos',
     videosCount: 'videos',
     nowPlaying: 'Reproduciendo',
+    searchVideos: 'Buscar videos...',
+    clearFilters: 'Limpiar filtros',
 
     adminAccess: 'Acceso Administrativo // Autorización Requerida',
 
