@@ -272,4 +272,130 @@ const VideosPage = () => {
                   style={{
                     position: 'relative',
                     width: '100%',
-                    paddingBottom: '56.25%'
+                    paddingBottom: '56.25%',
+                    borderRadius: '16px',
+                    overflow: 'hidden',
+                    border: '1px solid rgba(255, 0, 0, 0.2)',
+                    boxShadow: '0 8px 40px rgba(0,0,0,0.6)',
+                    background: '#000',
+                  }}
+                >
+                  <iframe
+                    src={`https://www.youtube.com/embed/${selectedVideo.id}?rel=0&modestbranding=1`}
+                    title={selectedVideo.title}
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '100%',
+                    }}
+                  />
+                </div>
+                <div style={{ marginTop: '1rem', padding: '0 0.25rem' }}>
+                  <h2
+                    style={{
+                      fontFamily: 'var(--font-display)',
+                      fontSize: 'clamp(1.1rem, 3vw, 1.5rem)',
+                      color: '#fff',
+                      letterSpacing: '1px',
+                      marginBottom: '0.5rem',
+                      lineHeight: 1.3,
+                    }}
+                  >
+                    {selectedVideo.title}
+                  </h2>
+                  {selectedVideo.date && (
+                    <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
+                      {formatDate(selectedVideo.date)}
+                    </p>
+                  )}
+                  {selectedVideo.description && (
+                    <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.95rem', lineHeight: 1.7, maxWidth: '800px' }}>
+                      {selectedVideo.description}
+                    </p>
+                  )}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Videos count */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.8rem', letterSpacing: '2px', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase' }}>
+                {videos.length} {t('videosCount')}
+              </p>
+            </div>
+
+            {/* Video Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 300px), 1fr))', gap: 'clamp(1rem, 2.5vw, 1.5rem)' }}>
+              {videos.map((video, idx) => (
+                <motion.div
+                  key={video.id + '-' + idx}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: idx * 0.05, duration: 0.4 }}
+                  whileHover={{ y: -6, scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => {
+                    setSelectedVideo(video);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  style={{
+                    cursor: 'pointer',
+                    background: selectedVideo?.id === video.id ? 'rgba(255, 0, 0, 0.08)' : 'rgba(255,255,255,0.03)',
+                    border: `1px solid ${selectedVideo?.id === video.id ? 'rgba(255, 0, 0, 0.3)' : 'rgba(255,255,255,0.07)'}`,
+                    borderRadius: '14px',
+                    overflow: 'hidden',
+                    transition: 'border-color 0.3s, box-shadow 0.3s',
+                  }}
+                >
+                  {/* Thumbnail */}
+                  <div style={{ position: 'relative', width: '100%', paddingBottom: '56.25%', background: '#111' }}>
+                    <img
+                      src={video.thumbnail || `https://img.youtube.com/vi/${video.id}/hqdefault.jpg`}
+                      alt={video.title}
+                      loading="lazy"
+                      style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                    {/* Play icon overlay */}
+                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.3)', opacity: selectedVideo?.id === video.id ? 0 : 0.8, transition: 'opacity 0.3s' }}>
+                      <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(255, 0, 0, 0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 20px rgba(255,0,0,0.4)' }}>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3" /></svg>
+                      </div>
+                    </div>
+                    {/* Now playing badge */}
+                    {selectedVideo?.id === video.id && (
+                      <div style={{ position: 'absolute', top: '8px', left: '8px', background: '#ff4444', color: '#fff', fontSize: '0.65rem', fontWeight: 700, padding: '3px 8px', borderRadius: '6px', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'var(--font-display)' }}>
+                        {t('nowPlaying')}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Info */}
+                  <div style={{ padding: 'clamp(0.75rem, 2vw, 1rem)' }}>
+                    <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(0.85rem, 2vw, 0.95rem)', color: '#fff', lineHeight: 1.4, margin: 0, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', letterSpacing: '0.5px' }}>
+                      {video.title}
+                    </h3>
+                    {video.date && (
+                      <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.78rem', marginTop: '0.5rem', marginBottom: 0 }}>
+                        {formatDate(video.date)}
+                      </p>
+                    )}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </>
+        )}
+      </section>
+
+      <Footer />
+    </div>
+  );
+};
+
+export default VideosPage;
