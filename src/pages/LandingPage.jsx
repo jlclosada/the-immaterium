@@ -71,6 +71,18 @@ const NAV_ITEMS = [
       </svg>
     ),
   },
+  {
+    to: '/videos',
+    titleKey: 'videosTitle',
+    subtitleKey: 'videosSubtitle',
+    color: '#ff4444',
+    icon: (
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <polygon points="23 7 16 12 23 17 23 7" />
+        <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+      </svg>
+    ),
+  },
 ];
 
 const LandingPage = () => {

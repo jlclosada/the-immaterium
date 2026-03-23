@@ -80,6 +80,7 @@ const Footer = () => {
                         <li><FooterLink to="/guides">Guías</FooterLink></li>
                         <li><FooterLink to="/battle-reports">Batallas</FooterLink></li>
                         <li><FooterLink to="/lore">Lore</FooterLink></li>
+                        <li><FooterLink to="/videos">Videos</FooterLink></li>
                     </ul>
                 </motion.div>
 

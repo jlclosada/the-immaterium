@@ -169,6 +169,19 @@ export const translations = {
     newsSubtitle: 'Updates & Releases',
     adminAccess: 'Administrative Access // Clearance Required',
 
+    // Videos
+    videos: 'Videos',
+    videosTitle: 'VIDEOS',
+    videosSubtitle: 'YouTube Channel',
+    videosPageTitle: 'MY VIDEOS',
+    videosSubLabel: 'YouTube Channel',
+    videosPageDescription: 'Games, painting tutorials, unboxings, and more Warhammer 40,000 content straight from my YouTube channel.',
+    visitChannel: 'Visit channel',
+    visitChannelDirectly: 'Visit channel directly on YouTube',
+    noVideosFound: 'No videos found',
+    videosCount: 'videos',
+    nowPlaying: 'Now playing',
+
     // Featured Intel
     featuredIntel: 'FEATURED INTEL',
     latestUpdates: 'Latest updates from the Sector',
