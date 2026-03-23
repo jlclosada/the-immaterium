@@ -1043,6 +1043,16 @@ img[loading="lazy"].loaded {
   .mobile-only {
     display: flex !important;
   }
+
+  .nav-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-grid {
+    grid-template-columns: 1fr !important;
+  }
 }
 
 /* Footer responsive fix */
