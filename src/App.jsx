@@ -30,6 +30,7 @@ import NewsDetailPage from './pages/NewsDetailPage';
 import NewsManager from './components/Admin/NewsManager';
 import SearchPage from './pages/SearchPage';
 import ArmyBuilderPage from './pages/ArmyBuilderPage';
+import VideosPage from './pages/VideosPage';
 
 import './styles/index.css';
 
