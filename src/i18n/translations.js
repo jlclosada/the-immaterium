@@ -21,7 +21,7 @@ export const translations = {
     loreTitle: 'LORE',
     loreSubtitle: 'Biblioteca & Historia',
     newsTitle: 'NOTICIAS',
-    newsSubtitle: 'Novedades & Actualizaciones',
+    newsSubtitle: 'Novedades & Updates',
 
     // Videos
     videos: 'Videos',
