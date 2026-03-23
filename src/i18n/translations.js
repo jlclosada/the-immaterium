@@ -195,6 +195,8 @@ export const translations = {
     noVideosFound: 'No videos found',
     videosCount: 'videos',
     nowPlaying: 'Now playing',
+    searchVideos: 'Search videos...',
+    clearFilters: 'Clear filters',
 
     // Featured Intel
     featuredIntel: 'FEATURED INTEL',

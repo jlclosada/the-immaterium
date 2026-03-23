@@ -16,6 +16,8 @@ const VideosPage = () => {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedVideo, setSelectedVideo] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeSeries, setActiveSeries] = useState('all');
 
   useEffect(() => {
     fetchYouTubeVideos();
@@ -53,6 +55,27 @@ const VideosPage = () => {
     }
     setLoading(false);
   };
+
+  /* ── Extrae la serie/juego del título (texto antes del primer "|") ── */
+  const extractSeries = (title) => {
+    const parts = title.split('|');
+    if (parts.length > 1) return parts[0].trim().toUpperCase();
+    return null;
+  };
+
+  /* ── Lista de series únicas detectadas en los vídeos ── */
+  const seriesList = [...new Set(
+    videos.map((v) => extractSeries(v.title)).filter(Boolean)
+  )];
+
+  /* ── Vídeos filtrados por búsqueda y serie ── */
+  const filteredVideos = videos.filter((video) => {
+    const matchesSearch = searchQuery.trim() === '' ||
+      video.title.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSeries = activeSeries === 'all' ||
+      extractSeries(video.title) === activeSeries;
+    return matchesSearch && matchesSeries;
+  });
 
   const formatDate = (dateStr) => {
     if (!dateStr) return '';
@@ -322,16 +345,116 @@ const VideosPage = () => {
               </motion.div>
             )}
 
-            {/* Videos count */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.75rem' }}>
-              <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.8rem', letterSpacing: '2px', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase' }}>
-                {videos.length} {t('videosCount')}
+            {/* Search & Filter Bar */}
+            <div style={{ marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {/* Search input */}
+              <div style={{ position: 'relative', maxWidth: '500px' }}>
+                <div style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.3)', pointerEvents: 'none', display: 'flex' }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+                  </svg>
+                </div>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={t('searchVideos')}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem 1rem 0.75rem 2.75rem',
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '12px',
+                    color: '#fff',
+                    fontSize: '0.9rem',
+                    outline: 'none',
+                    fontFamily: 'var(--font-body)',
+                    transition: 'border-color 0.2s',
+                    boxSizing: 'border-box',
+                  }}
+                  onFocus={(e) => e.target.style.borderColor = 'rgba(255,68,68,0.5)'}
+                  onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
+                />
+              </div>
+
+              {/* Series filter pills */}
+              {seriesList.length > 1 && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
+                  <motion.button
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setActiveSeries('all')}
+                    style={{
+                      padding: '0.4rem 1rem',
+                      borderRadius: '20px',
+                      border: `1px solid ${activeSeries === 'all' ? '#ff4444' : 'rgba(255,255,255,0.12)'}`,
+                      background: activeSeries === 'all' ? 'rgba(255,68,68,0.15)' : 'rgba(255,255,255,0.04)',
+                      color: activeSeries === 'all' ? '#ff4444' : 'rgba(255,255,255,0.5)',
+                      fontFamily: 'var(--font-display)',
+                      fontSize: '0.7rem',
+                      letterSpacing: '1px',
+                      cursor: 'pointer',
+                      textTransform: 'uppercase',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    {t('all')}
+                  </motion.button>
+                  {seriesList.map((series) => (
+                    <motion.button
+                      key={series}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setActiveSeries(series)}
+                      style={{
+                        padding: '0.4rem 1rem',
+                        borderRadius: '20px',
+                        border: `1px solid ${activeSeries === series ? '#ff4444' : 'rgba(255,255,255,0.12)'}`,
+                        background: activeSeries === series ? 'rgba(255,68,68,0.15)' : 'rgba(255,255,255,0.04)',
+                        color: activeSeries === series ? '#ff4444' : 'rgba(255,255,255,0.5)',
+                        fontFamily: 'var(--font-display)',
+                        fontSize: '0.7rem',
+                        letterSpacing: '1px',
+                        cursor: 'pointer',
+                        textTransform: 'uppercase',
+                        transition: 'all 0.2s',
+                      }}
+                    >
+                      {series}
+                    </motion.button>
+                  ))}
+                </div>
+              )}
+
+              {/* Videos count */}
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: '2px', color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase' }}>
+                {filteredVideos.length} / {videos.length} {t('videosCount')}
               </p>
             </div>
 
             {/* Video Grid */}
+            {filteredVideos.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '3rem 1rem', color: 'rgba(255,255,255,0.4)' }}>
+                <p style={{ fontSize: '1rem', marginBottom: '0.75rem' }}>{t('noVideosFound')}</p>
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => { setSearchQuery(''); setActiveSeries('all'); }}
+                  style={{
+                    padding: '0.5rem 1.25rem',
+                    borderRadius: '10px',
+                    border: '1px solid rgba(255,68,68,0.3)',
+                    background: 'rgba(255,68,68,0.1)',
+                    color: '#ff4444',
+                    fontFamily: 'var(--font-display)',
+                    fontSize: '0.8rem',
+                    letterSpacing: '1px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {t('clearFilters')}
+                </motion.button>
+              </div>
+            ) : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 300px), 1fr))', gap: 'clamp(1rem, 2.5vw, 1.5rem)' }}>
-              {videos.map((video, idx) => (
+              {filteredVideos.map((video, idx) => (
                 <motion.div
                   key={video.id + '-' + idx}
                   initial={{ opacity: 0, y: 20 }}
@@ -389,6 +512,7 @@ const VideosPage = () => {
                 </motion.div>
               ))}
             </div>
+            )}
           </>
         )}
       </section>
