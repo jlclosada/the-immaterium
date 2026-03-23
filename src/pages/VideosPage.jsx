@@ -88,8 +88,10 @@ const VideosPage = () => {
     // ── 2. Fallback: RSS feed (máx. 10 vídeos) ──
     try {
       const feedUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${YOUTUBE_CHANNEL_ID}`;
+      // Añadimos _t= para evitar caché de rss2json
+      const cacheBuster = Math.floor(Date.now() / 60000); // cambia cada minuto
       const response = await fetch(
-        `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`
+        `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}&_t=${cacheBuster}`
       );
       if (response.ok) {
         const data = await response.json();
@@ -272,6 +274,22 @@ const VideosPage = () => {
             </svg>
             {t('visitChannel')}
           </motion.a>
+          {!YOUTUBE_API_KEY && videos.length > 0 && (
+            <p style={{
+              marginTop: '1rem',
+              fontSize: '0.72rem',
+              color: 'rgba(255,255,255,0.25)',
+              letterSpacing: '0.5px',
+              maxWidth: '450px',
+              marginLeft: 'auto',
+              marginRight: 'auto',
+              lineHeight: 1.6,
+            }}>
+              {language === 'es'
+                ? '⚡ Se muestran los 10 vídeos más recientes. Los nuevos pueden tardar unos minutos en aparecer.'
+                : '⚡ Showing the 10 most recent videos. New uploads may take a few minutes to appear.'}
+            </p>
+          )}
         </motion.div>
       </section>
 
