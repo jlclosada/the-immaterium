@@ -1,7 +1,10 @@
 from django.contrib import admin
+from django import forms
+from django.utils.html import format_html
 from .models import (
     Army, ArmyImage, PaintingGuide, GuideMaterial, GuideStep,
-    BattleReport, BattleNarrative, Comment, LoreEntry, NewsArticle
+    BattleReport, BattleNarrative, Comment, LoreEntry, NewsArticle,
+    Paint,
 )
 
 
@@ -38,9 +41,65 @@ class ArmyAdmin(admin.ModelAdmin):
     inlines = [ArmyImageInline]
 
 
+# ── Color picker widget ──────────────────────────────────────────────────────
+
+class ColorInput(forms.TextInput):
+    input_type = 'color'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.attrs.setdefault('style', 'width:60px;height:36px;padding:2px;cursor:pointer;border:none;background:none;')
+
+
+class PaintAdminForm(forms.ModelForm):
+    color = forms.CharField(
+        widget=ColorInput(),
+        initial='#888888',
+        help_text='Elige el color de la pintura',
+    )
+
+    class Meta:
+        model = Paint
+        fields = '__all__'
+
+
+# ── Paint admin ──────────────────────────────────────────────────────────────
+
+@admin.register(Paint)
+class PaintAdmin(admin.ModelAdmin):
+    form = PaintAdminForm
+    list_display  = ('color_swatch', 'brand', 'range', 'name', 'code')
+    list_display_links = ('name',)
+    list_filter   = ('brand', 'range')
+    search_fields = ('name', 'code', 'range')
+    ordering      = ('brand', 'range', 'name')
+    fieldsets = (
+        ('Identificación', {
+            'fields': ('brand', 'range', 'name', 'code'),
+        }),
+        ('Color', {
+            'fields': ('color',),
+            'description': 'Usa el selector o escribe directamente el código HEX (ej. #3a6b2f)',
+        }),
+    )
+
+    @admin.display(description='Color')
+    def color_swatch(self, obj):
+        return format_html(
+            '<span style="display:inline-block;width:20px;height:20px;'
+            'background:{};border-radius:3px;border:1px solid rgba(0,0,0,.2);'
+            'vertical-align:middle;"></span>',
+            obj.color,
+        )
+
+
+# ── Guide materials inline ────────────────────────────────────────────────────
+
 class GuideMaterialInline(admin.TabularInline):
     model = GuideMaterial
     extra = 1
+    fields = ('paint', 'name', 'order')
+    autocomplete_fields = ('paint',)
 
 
 class GuideStepInline(admin.StackedInline):

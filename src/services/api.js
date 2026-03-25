@@ -128,6 +128,15 @@ export const api = {
     return response.json()
   },
 
+  // Paints catalogue
+  getPaints: async (search = '') => {
+    const params = search ? `?search=${encodeURIComponent(search)}` : ''
+    const response = await fetch(`${API_URL}/api/paints/${params}`)
+    if (!response.ok) throw new Error('Failed to fetch paints')
+    const data = await response.json()
+    return data.results || data
+  },
+
   // Battle Reports
   getBattleReports: async () => {
     const response = await fetch(`${API_URL}/api/battle-reports/`)

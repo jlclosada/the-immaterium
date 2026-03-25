@@ -231,18 +231,44 @@ const GuideDetailPage = () => {
               Materiales Necesarios
             </h2>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-              {guide.materials.map((material, i) => (
-                <li key={i} style={{
-                  display: 'flex', alignItems: 'center', gap: '0.75rem',
-                  padding: '0.7rem 0',
-                  borderBottom: i < guide.materials.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none',
-                  color: 'rgba(255,255,255,0.7)',
-                  fontSize: '0.925rem',
-                }}>
-                  <span style={{ color: 'var(--color-secondary)', fontSize: '0.9rem', flexShrink: 0 }}>✓</span>
-                  {material}
-                </li>
-              ))}
+              {guide.materials.map((material, i) => {
+                // Support both old string format and new {name, paint} format
+                const name  = typeof material === 'string' ? material : material.name
+                const paint = typeof material === 'string' ? null  : material.paint
+                return (
+                  <li key={i} style={{
+                    display: 'flex', alignItems: 'center', gap: '0.75rem',
+                    padding: '0.65rem 0',
+                    borderBottom: i < guide.materials.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none',
+                    color: 'rgba(255,255,255,0.7)',
+                    fontSize: '0.925rem',
+                  }}>
+                    {paint ? (
+                      <span style={{
+                        width: '20px', height: '20px', flexShrink: 0,
+                        borderRadius: '5px', background: paint.color,
+                        border: '1px solid rgba(255,255,255,0.18)',
+                        display: 'inline-block',
+                      }} />
+                    ) : (
+                      <span style={{ color: 'var(--color-secondary)', fontSize: '0.9rem', flexShrink: 0 }}>✓</span>
+                    )}
+                    <span style={{ flex: 1 }}>
+                      {name}
+                      {paint && (
+                        <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.35)', marginLeft: '0.5rem' }}>
+                          {paint.brand_display} · {paint.range}
+                        </span>
+                      )}
+                    </span>
+                    {paint?.code && (
+                      <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.25)', fontFamily: 'monospace' }}>
+                        {paint.code}
+                      </span>
+                    )}
+                  </li>
+                )
+              })}
             </ul>
           </motion.div>
         )}

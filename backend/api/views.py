@@ -12,12 +12,12 @@ from django.db.models import F, Q
 from .models import (
     Army, ArmyImage, PaintingGuide, GuideMaterial, GuideStep,
     BattleReport, BattleNarrative, Comment,
-    UserLike, UserFavorite, LoreEntry, NewsArticle, Game
+    UserLike, UserFavorite, LoreEntry, NewsArticle, Game, Paint,
 )
 from .serializers import (
     ArmySerializer, PaintingGuideSerializer, BattleReportSerializer,
     CommentSerializer, UserLikeSerializer, UserFavoriteSerializer,
-    LoreEntrySerializer, NewsArticleSerializer, GameSerializer
+    LoreEntrySerializer, NewsArticleSerializer, GameSerializer, PaintSerializer,
 )
 
 @api_view(['POST'])
@@ -87,6 +87,34 @@ class ArmyViewSet(viewsets.ModelViewSet):
         image.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+def _create_guide_material(guide, mat, order):
+    """Create a GuideMaterial from a string or a {name, paint_id} dict."""
+    if isinstance(mat, str):
+        GuideMaterial.objects.create(guide=guide, name=mat, order=order)
+    else:
+        paint_id = mat.get('paint_id')
+        name     = mat.get('name', '')
+        paint    = None
+        if paint_id:
+            try:
+                paint = Paint.objects.get(pk=paint_id)
+                if not name:
+                    name = f"{paint.get_brand_display()} {paint.name}"
+            except Paint.DoesNotExist:
+                pass
+        GuideMaterial.objects.create(guide=guide, name=name, paint=paint, order=order)
+
+
+class PaintViewSet(viewsets.ReadOnlyModelViewSet):
+    """Read-only endpoint for the paint catalogue. Supports ?search= on name/range/code."""
+    queryset          = Paint.objects.all()
+    serializer_class  = PaintSerializer
+    filter_backends   = [SearchFilter, OrderingFilter]
+    search_fields     = ['name', 'range', 'code', 'brand']
+    ordering_fields   = ['brand', 'range', 'name']
+    ordering          = ['brand', 'range', 'name']
+
+
 class PaintingGuideViewSet(viewsets.ModelViewSet):
     queryset = PaintingGuide.objects.all()
     serializer_class = PaintingGuideSerializer
@@ -116,9 +144,9 @@ class PaintingGuideViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         guide = serializer.save()
 
-        # Create materials
-        for i, material_name in enumerate(materials_data):
-            GuideMaterial.objects.create(guide=guide, name=material_name, order=i)
+        # Create materials — accept both plain strings and {name, paint_id} objects
+        for i, mat in enumerate(materials_data):
+            _create_guide_material(guide, mat, i)
 
         # Create steps
         for step_data in steps_data:
@@ -157,11 +185,11 @@ class PaintingGuideViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         guide = serializer.save()
 
-        # Update materials
+        # Update materials — accept both plain strings and {name, paint_id} objects
         if materials_data is not None:
             GuideMaterial.objects.filter(guide=guide).delete()
-            for i, material_name in enumerate(materials_data):
-                GuideMaterial.objects.create(guide=guide, name=material_name, order=i)
+            for i, mat in enumerate(materials_data):
+                _create_guide_material(guide, mat, i)
 
         # Update steps
         if steps_data is not None:

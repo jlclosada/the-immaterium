@@ -114,10 +114,44 @@ class PaintingGuide(models.Model):
         return self.title
 
 
+class Paint(models.Model):
+    """Catalogue of hobby paints from various brands"""
+    BRAND_CHOICES = [
+        ('citadel',      'Citadel'),
+        ('vallejo',      'Vallejo'),
+        ('army_painter', 'Army Painter'),
+        ('ak',           'AK Interactive'),
+        ('scale75',      'Scale 75'),
+        ('reaper',       'Reaper'),
+        ('ammo',         'AMMO by Mig'),
+        ('other',        'Otro'),
+    ]
+
+    brand  = models.CharField(max_length=50, choices=BRAND_CHOICES)
+    range  = models.CharField(max_length=100, help_text='Gama / tipo (ej. Model Color, Shade, Technical)')
+    name   = models.CharField(max_length=200)
+    color  = models.CharField(max_length=7, default='#888888', help_text='Color HEX, ej. #a12b3c')
+    code   = models.CharField(max_length=50, blank=True, help_text='Código de producto (opcional)')
+
+    class Meta:
+        ordering = ['brand', 'range', 'name']
+        unique_together = ['brand', 'name']
+        verbose_name = 'Pintura'
+        verbose_name_plural = 'Pinturas'
+
+    def __str__(self):
+        return f"[{self.get_brand_display()}] {self.range} – {self.name}"
+
+
 class GuideMaterial(models.Model):
     """Materials needed for a painting guide"""
     guide = models.ForeignKey(PaintingGuide, on_delete=models.CASCADE, related_name='materials')
-    name = models.CharField(max_length=300)
+    paint = models.ForeignKey(
+        Paint, null=True, blank=True,
+        on_delete=models.SET_NULL, related_name='guide_uses',
+        help_text='Pintura del catálogo (opcional)',
+    )
+    name  = models.CharField(max_length=300, help_text='Nombre del material (auto-rellenado al elegir pintura)')
     order = models.IntegerField(default=0)
 
     class Meta:

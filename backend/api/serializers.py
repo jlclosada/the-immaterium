@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import (
     Army, ArmyImage, PaintingGuide, GuideMaterial, GuideStep,
     BattleReport, BattleNarrative, Comment, UserLike, UserFavorite, LoreEntry,
-    NewsArticle, Game
+    NewsArticle, Game, Paint,
 )
 
 class GameSerializer(serializers.ModelSerializer):
@@ -103,10 +103,20 @@ class ArmySerializer(serializers.ModelSerializer):
 
         return instance
 
+class PaintSerializer(serializers.ModelSerializer):
+    brand_display = serializers.CharField(source='get_brand_display', read_only=True)
+
+    class Meta:
+        model = Paint
+        fields = ['id', 'brand', 'brand_display', 'range', 'name', 'color', 'code']
+
+
 class GuideMaterialSerializer(serializers.ModelSerializer):
+    paint = PaintSerializer(read_only=True)
+
     class Meta:
         model = GuideMaterial
-        fields = ['name']
+        fields = ['name', 'paint']
 
 class GuideStepSerializer(serializers.ModelSerializer):
     stepNumber = serializers.IntegerField(source='step_number')
@@ -144,7 +154,9 @@ class PaintingGuideSerializer(serializers.ModelSerializer):
         ]
         
     def get_materials(self, obj):
-        return [m.name for m in obj.materials.all()]
+        return GuideMaterialSerializer(
+            obj.materials.all().select_related('paint'), many=True
+        ).data
     
     def get_faction(self, obj):
         if obj.faction:

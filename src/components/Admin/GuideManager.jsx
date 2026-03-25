@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { api } from '../../services/api';
 import { useStore } from '../../stores/useStore';
@@ -21,8 +21,14 @@ const GuideManager = () => {
         tags: [],
         faction: null
     });
+    // materials = [{name, paint: {id,brand,brand_display,range,name,color,code}|null}]
     const [materials, setMaterials] = useState([]);
-    const [newMaterial, setNewMaterial] = useState('');
+    const [paintSearch, setPaintSearch] = useState('');
+    const [paintResults, setPaintResults] = useState([]);
+    const [paintSearchLoading, setPaintSearchLoading] = useState(false);
+    const [showPaintDropdown, setShowPaintDropdown] = useState(false);
+    const paintSearchRef = useRef(null);
+    const paintDebounceRef = useRef(null);
     const [steps, setSteps] = useState([]);
     const [editingStep, setEditingStep] = useState(null);
     const [newStepImages, setNewStepImages] = useState({});
@@ -61,7 +67,7 @@ const GuideManager = () => {
                 date_created: formData.dateCreated,
                 cover_image: formData.coverImage,
                 faction: formData.faction?.id || null,
-                materials: materials,
+                materials: materials.map(m => ({ name: m.name, paint_id: m.paint?.id || null })),
                 steps: steps.map(step => ({
                     step_number: step.stepNumber,
                     title: step.title,
@@ -102,7 +108,10 @@ const GuideManager = () => {
             tags: guide.tags || [],
             faction: guide.faction || null
         });
-        setMaterials(guide.materials || []);
+        // Normalize: API now returns [{name, paint}], old format is string[]
+        setMaterials((guide.materials || []).map(m =>
+            typeof m === 'string' ? { name: m, paint: null } : { name: m.name, paint: m.paint || null }
+        ));
         setSteps(guide.steps || []);
     };
 
@@ -131,21 +140,53 @@ const GuideManager = () => {
             faction: null
         });
         setMaterials([]);
+        setPaintSearch('');
+        setPaintResults([]);
+        setShowPaintDropdown(false);
         setSteps([]);
-        setNewMaterial('');
         setEditingStep(null);
         setNewStepImages({});
     };
 
-    const addMaterial = () => {
-        if (newMaterial.trim()) {
-            setMaterials([...materials, newMaterial.trim()]);
-            setNewMaterial('');
-        }
+    // Add a paint from search results
+    const addPaintMaterial = (paint) => {
+        setMaterials(prev => [...prev, { name: paint.name, paint }]);
+        setPaintSearch('');
+        setPaintResults([]);
+        setShowPaintDropdown(false);
+    };
+
+    // Add a free-text material (no paint)
+    const addTextMaterial = () => {
+        const trimmed = paintSearch.trim();
+        if (!trimmed) return;
+        setMaterials(prev => [...prev, { name: trimmed, paint: null }]);
+        setPaintSearch('');
+        setPaintResults([]);
+        setShowPaintDropdown(false);
     };
 
     const removeMaterial = (index) => {
-        setMaterials(materials.filter((_, i) => i !== index));
+        setMaterials(prev => prev.filter((_, i) => i !== index));
+    };
+
+    // Debounced paint search
+    const handlePaintSearchChange = (value) => {
+        setPaintSearch(value);
+        setShowPaintDropdown(true);
+        clearTimeout(paintDebounceRef.current);
+        if (!value.trim()) { setPaintResults([]); return; }
+        setPaintSearchLoading(true);
+        paintDebounceRef.current = setTimeout(async () => {
+            try {
+                const results = await api.getPaints(value);
+                setPaintResults(results.slice(0, 12));
+            } catch {
+                setPaintResults([]);
+            } finally {
+                setPaintSearchLoading(false);
+            }
+        }, 280);
     };
 
     const addStep = () => {
@@ -480,70 +521,162 @@ const GuideManager = () => {
                     </div>
 
                     <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1.5rem' }}>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', color: 'rgba(255,255,255,0.8)' }}>Materiales Necesarios</label>
-                        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
-                            <input
-                                placeholder="Nombre del material"
-                                value={newMaterial}
-                                onChange={e => setNewMaterial(e.target.value)}
-                                onKeyPress={e => {
-                                    if (e.key === 'Enter') {
-                                        e.preventDefault();
-                                        addMaterial();
-                                    }
-                                }}
-                                style={{
-                                    padding: '0.8rem',
-                                    background: 'rgba(255, 255, 255, 0.05)',
-                                    border: '1px solid var(--glass-border)',
-                                    borderRadius: '8px',
-                                    color: 'var(--color-light)',
-                                    fontSize: '0.9rem',
-                                    flex: 1
-                                }}
-                            />
-                            <button
-                                type="button"
-                                onClick={addMaterial}
-                                style={{
-                                    padding: '0.8rem 1.5rem',
-                                    background: 'var(--color-secondary)',
-                                    border: 'none',
-                                    borderRadius: '8px',
-                                    color: 'var(--color-light)',
-                                    cursor: 'pointer',
-                                    fontWeight: 'bold'
-                                }}
-                            >
-                                +
-                            </button>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', color: 'rgba(255,255,255,0.8)' }}>
+                            Materiales Necesarios
+                        </label>
+                        <p style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)', marginBottom: '0.75rem', marginTop: 0 }}>
+                            Escribe para buscar pinturas del catálogo, o pulsa <kbd style={{ background: 'rgba(255,255,255,0.1)', padding: '1px 5px', borderRadius: '4px' }}>Enter</kbd> para añadir texto libre.
+                        </p>
+
+                        {/* Paint search input */}
+                        <div style={{ position: 'relative', marginBottom: '0.75rem' }}>
+                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                <input
+                                    ref={paintSearchRef}
+                                    placeholder="🔍 Buscar pintura (ej. Nuln Oil, Abaddon Black…)"
+                                    value={paintSearch}
+                                    onChange={e => handlePaintSearchChange(e.target.value)}
+                                    onKeyDown={e => {
+                                        if (e.key === 'Enter') { e.preventDefault(); addTextMaterial(); }
+                                        if (e.key === 'Escape') { setShowPaintDropdown(false); }
+                                    }}
+                                    onFocus={() => paintSearch && setShowPaintDropdown(true)}
+                                    onBlur={() => setTimeout(() => setShowPaintDropdown(false), 200)}
+                                    style={{
+                                        padding: '0.8rem',
+                                        background: 'rgba(255,255,255,0.05)',
+                                        border: '1px solid var(--glass-border)',
+                                        borderRadius: '8px',
+                                        color: 'var(--color-light)',
+                                        fontSize: '0.9rem',
+                                        flex: 1,
+                                        outline: 'none',
+                                    }}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={addTextMaterial}
+                                    title="Añadir como material de texto libre"
+                                    style={{
+                                        padding: '0.8rem 1.2rem',
+                                        background: 'rgba(123,47,255,0.2)',
+                                        border: '1px solid rgba(123,47,255,0.4)',
+                                        borderRadius: '8px',
+                                        color: 'var(--color-secondary)',
+                                        cursor: 'pointer',
+                                        fontWeight: 'bold',
+                                        fontSize: '1rem',
+                                        whiteSpace: 'nowrap',
+                                    }}
+                                >
+                                    + Texto
+                                </button>
+                            </div>
+
+                            {/* Dropdown results */}
+                            {showPaintDropdown && paintSearch.trim() && (
+                                <div style={{
+                                    position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0,
+                                    background: 'rgba(14,14,30,0.98)',
+                                    border: '1px solid rgba(0,212,255,0.25)',
+                                    borderRadius: '10px',
+                                    zIndex: 200,
+                                    maxHeight: '260px',
+                                    overflowY: 'auto',
+                                    boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
+                                }}>
+                                    {paintSearchLoading ? (
+                                        <div style={{ padding: '1rem', color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem', textAlign: 'center' }}>
+                                            Buscando…
+                                        </div>
+                                    ) : paintResults.length === 0 ? (
+                                        <div style={{ padding: '1rem', color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem', textAlign: 'center' }}>
+                                            Sin resultados — pulsa Enter para añadir como texto libre
+                                        </div>
+                                    ) : (
+                                        paintResults.map(paint => (
+                                            <button
+                                                key={paint.id}
+                                                type="button"
+                                                onMouseDown={() => addPaintMaterial(paint)}
+                                                style={{
+                                                    display: 'flex', alignItems: 'center', gap: '0.75rem',
+                                                    width: '100%', padding: '0.65rem 1rem',
+                                                    background: 'transparent',
+                                                    border: 'none', borderBottom: '1px solid rgba(255,255,255,0.05)',
+                                                    color: 'rgba(255,255,255,0.85)', cursor: 'pointer',
+                                                    textAlign: 'left', fontSize: '0.87rem',
+                                                    transition: 'background 0.1s',
+                                                }}
+                                                onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,212,255,0.08)'}
+                                                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                            >
+                                                <span style={{
+                                                    width: '18px', height: '18px', flexShrink: 0,
+                                                    borderRadius: '4px', background: paint.color,
+                                                    border: '1px solid rgba(255,255,255,0.15)',
+                                                    display: 'inline-block',
+                                                }} />
+                                                <span style={{ flex: 1 }}>
+                                                    <strong>{paint.name}</strong>
+                                                    <span style={{ color: 'rgba(255,255,255,0.4)', marginLeft: '0.5rem', fontSize: '0.78rem' }}>
+                                                        {paint.brand_display} · {paint.range}
+                                                    </span>
+                                                </span>
+                                                {paint.code && (
+                                                    <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.3)', fontFamily: 'monospace' }}>
+                                                        {paint.code}
+                                                    </span>
+                                                )}
+                                            </button>
+                                        ))
+                                    )}
+                                </div>
+                            )}
                         </div>
+
+                        {/* Added materials list */}
                         {materials.length > 0 && (
-                            <div style={{ display: 'grid', gap: '0.5rem' }}>
+                            <div style={{ display: 'grid', gap: '0.4rem' }}>
                                 {materials.map((material, index) => (
                                     <div key={index} style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '1rem',
-                                        padding: '0.8rem',
+                                        display: 'flex', alignItems: 'center', gap: '0.75rem',
+                                        padding: '0.6rem 0.9rem',
                                         background: 'rgba(0,0,0,0.3)',
-                                        borderRadius: '8px'
+                                        border: '1px solid rgba(255,255,255,0.06)',
+                                        borderRadius: '8px',
                                     }}>
-                                        <span style={{ flex: 1, color: 'rgba(255,255,255,0.8)' }}>{material}</span>
+                                        {material.paint ? (
+                                            <span style={{
+                                                width: '18px', height: '18px', flexShrink: 0,
+                                                borderRadius: '4px', background: material.paint.color,
+                                                border: '1px solid rgba(255,255,255,0.15)',
+                                                display: 'inline-block',
+                                            }} />
+                                        ) : (
+                                            <span style={{ width: '18px', height: '18px', flexShrink: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', color: 'rgba(255,255,255,0.3)' }}>✦</span>
+                                        )}
+                                        <span style={{ flex: 1, color: 'rgba(255,255,255,0.85)', fontSize: '0.88rem' }}>
+                                            {material.name}
+                                            {material.paint && (
+                                                <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', marginLeft: '0.5rem' }}>
+                                                    {material.paint.brand_display} · {material.paint.range}
+                                                </span>
+                                            )}
+                                        </span>
                                         <button
                                             type="button"
                                             onClick={() => removeMaterial(index)}
                                             style={{
-                                                padding: '0.5rem 1rem',
-                                                background: 'rgba(255,0,0,0.2)',
-                                                border: '1px solid rgba(255,0,0,0.5)',
-                                                borderRadius: '8px',
+                                                padding: '0.3rem 0.7rem',
+                                                background: 'rgba(255,0,0,0.1)',
+                                                border: '1px solid rgba(255,0,0,0.3)',
+                                                borderRadius: '6px',
                                                 color: '#ff6464',
-                                                cursor: 'pointer'
+                                                cursor: 'pointer',
+                                                fontSize: '0.8rem',
                                             }}
-                                        >
-                                            ✕
-                                        </button>
+                                        >✕</button>
                                     </div>
                                 ))}
                             </div>
