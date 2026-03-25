@@ -107,22 +107,18 @@ def _create_guide_material(guide, mat, order):
 
 class PaintViewSet(viewsets.ModelViewSet):
     """Paint catalogue endpoint. Read-only publicly; write requires admin token."""
-    queryset          = Paint.objects.all()
-    serializer_class  = PaintSerializer
-    filter_backends   = [SearchFilter, OrderingFilter]
-    search_fields     = ['name', 'range', 'code', 'brand']
-    ordering_fields   = ['brand', 'range', 'name']
-    ordering          = ['brand', 'range', 'name']
+    queryset               = Paint.objects.all()
+    serializer_class       = PaintSerializer
+    authentication_classes = [TokenAuthentication]
+    filter_backends        = [SearchFilter, OrderingFilter]
+    search_fields          = ['name', 'range', 'code', 'brand']
+    ordering_fields        = ['brand', 'range', 'name']
+    ordering               = ['brand', 'range', 'name']
 
     def get_permissions(self):
         if self.action in ('list', 'retrieve'):
             return []
         return [IsAuthenticated(), IsAdminUser()]
-
-    def get_authenticators(self):
-        if self.action in ('list', 'retrieve'):
-            return []
-        return [TokenAuthentication()]
 
 
 class PaintingGuideViewSet(viewsets.ModelViewSet):
