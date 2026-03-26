@@ -11,7 +11,9 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [moreOpen, setMoreOpen] = useState(false);
   const searchInputRef = useRef(null);
+  const moreDropdownRef = useRef(null);
   const language = useStore(state => state.language);
   const t = useTranslation(language);
 
@@ -27,12 +29,25 @@ export default function Header() {
     setMobileMenuOpen(false);
     setSearchOpen(false);
     setSearchQuery('');
+    setMoreOpen(false);
   }, [location]);
 
   // Focus search input when opened
   useEffect(() => {
     if (searchOpen) searchInputRef.current?.focus();
   }, [searchOpen]);
+
+  // Close "Más" dropdown when clicking outside
+  useEffect(() => {
+    if (!moreOpen) return;
+    const handleClickOutside = (e) => {
+      if (moreDropdownRef.current && !moreDropdownRef.current.contains(e.target)) {
+        setMoreOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [moreOpen]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -51,6 +66,42 @@ export default function Header() {
     { path: '/army-builder', label: 'Army Builder', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M7 8h3m4 0h3M7 12h10"/></svg> },
     { path: '/marketplace', label: 'Mercadillo', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg> },
   ];
+
+  // Primary nav: armies, guides, battles, marketplace, army-builder
+  // Secondary nav (in "Más" dropdown): lore, news, videos
+  const primaryNavItems = [
+    menuItems[0], // armies
+    menuItems[1], // guides
+    menuItems[2], // battles
+    menuItems[7], // marketplace
+    menuItems[6], // army-builder
+  ];
+
+  // On tablet (600-900px) show only 3 primary items
+  const tabletNavItems = primaryNavItems.slice(0, 3);
+
+  const secondaryNavItems = [
+    menuItems[3], // lore
+    menuItems[4], // news
+    menuItems[5], // videos
+  ];
+
+  const navBtnStyle = (isActive) => ({
+    background: isActive ? 'rgba(0, 212, 255, 0.15)' : 'rgba(255, 255, 255, 0.05)',
+    border: `1px solid ${isActive ? 'var(--color-primary)' : 'rgba(255, 255, 255, 0.1)'}`,
+    borderRadius: '12px',
+    padding: 'clamp(0.5rem, 1.5vw, 0.65rem) clamp(0.6rem, 1.5vw, 1rem)',
+    color: isActive ? 'var(--color-primary)' : '#fff',
+    fontFamily: 'var(--font-display)',
+    fontSize: 'clamp(0.65rem, 1.2vw, 0.8rem)',
+    letterSpacing: '1px',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    fontWeight: isActive ? 'bold' : 'normal',
+    boxShadow: isActive ? '0 0 15px rgba(0, 212, 255, 0.3)' : 'none',
+    textTransform: 'uppercase',
+    whiteSpace: 'nowrap',
+  });
 
   return (
     <>
@@ -77,7 +128,7 @@ export default function Header() {
         }}
       >
         {/* Logo - Clickeable para volver al inicio */}
-        <Link to="/" style={{ textDecoration: 'none' }}>
+        <Link to="/" style={{ textDecoration: 'none', flexShrink: 0 }}>
           <motion.div
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -108,40 +159,205 @@ export default function Header() {
         {/* Desktop Navigation */}
         <nav style={{
           display: 'flex',
-          gap: 'clamp(0.5rem, 1.5vw, 1rem)',
-          alignItems: 'center'
+          gap: 'clamp(0.4rem, 1vw, 0.75rem)',
+          alignItems: 'center',
         }}>
-          {/* Desktop Menu Items */}
-          <div className="desktop-only" style={{ gap: 'clamp(0.5rem, 1.5vw, 1rem)' }}>
-            {menuItems.map((item) => (
+
+          {/* Desktop primary items (>900px) — all 5 */}
+          <div className="desktop-only" style={{ display: 'flex', gap: 'clamp(0.4rem, 1vw, 0.6rem)', alignItems: 'center' }}>
+            {primaryNavItems.map((item) => (
               <motion.button
                 key={item.path}
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => navigate(item.path)}
-                style={{
-                  background: location.pathname.includes(item.path)
-                    ? 'rgba(0, 212, 255, 0.15)'
-                    : 'rgba(255, 255, 255, 0.05)',
-                  border: `1px solid ${location.pathname.includes(item.path) ? 'var(--color-primary)' : 'rgba(255, 255, 255, 0.1)'}`,
-                  borderRadius: '12px',
-                  padding: 'clamp(0.5rem, 1.5vw, 0.75rem) clamp(0.75rem, 2vw, 1.25rem)',
-                  color: location.pathname.includes(item.path) ? 'var(--color-primary)' : '#fff',
-                  fontFamily: 'var(--font-display)',
-                  fontSize: 'clamp(0.7rem, 1.5vw, 0.85rem)',
-                  letterSpacing: '1px',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  fontWeight: location.pathname.includes(item.path) ? 'bold' : 'normal',
-                  boxShadow: location.pathname.includes(item.path)
-                    ? '0 0 15px rgba(0, 212, 255, 0.3)'
-                    : 'none',
-                  textTransform: 'uppercase'
-                }}
+                style={navBtnStyle(location.pathname.includes(item.path))}
               >
                 {item.label}
               </motion.button>
             ))}
+
+            {/* "Más ▾" dropdown — desktop */}
+            <div ref={moreDropdownRef} style={{ position: 'relative' }}>
+              <motion.button
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setMoreOpen(!moreOpen)}
+                style={{
+                  ...navBtnStyle(secondaryNavItems.some(i => location.pathname.includes(i.path))),
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.3rem',
+                }}
+              >
+                Más
+                <motion.span
+                  animate={{ rotate: moreOpen ? 180 : 0 }}
+                  transition={{ duration: 0.2 }}
+                  style={{ display: 'inline-block', fontSize: '0.6rem', lineHeight: 1 }}
+                >
+                  ▾
+                </motion.span>
+              </motion.button>
+
+              <AnimatePresence>
+                {moreOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -6, scale: 0.97 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -6, scale: 0.97 }}
+                    transition={{ duration: 0.15 }}
+                    style={{
+                      position: 'absolute',
+                      top: 'calc(100% + 0.5rem)',
+                      right: 0,
+                      minWidth: '170px',
+                      background: 'rgba(10, 10, 26, 0.97)',
+                      border: '1px solid rgba(0, 212, 255, 0.2)',
+                      borderRadius: '14px',
+                      padding: '0.5rem',
+                      boxShadow: '0 12px 40px rgba(0,0,0,0.6)',
+                      backdropFilter: 'blur(20px)',
+                      zIndex: 200,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.25rem',
+                    }}
+                  >
+                    {secondaryNavItems.map((item) => {
+                      const isActive = location.pathname.includes(item.path);
+                      return (
+                        <motion.button
+                          key={item.path}
+                          whileHover={{ x: 4 }}
+                          whileTap={{ scale: 0.97 }}
+                          onClick={() => { navigate(item.path); setMoreOpen(false); }}
+                          style={{
+                            background: isActive ? 'rgba(0, 212, 255, 0.12)' : 'transparent',
+                            border: `1px solid ${isActive ? 'rgba(0, 212, 255, 0.3)' : 'transparent'}`,
+                            borderRadius: '10px',
+                            padding: '0.6rem 0.9rem',
+                            color: isActive ? 'var(--color-primary)' : '#ccc',
+                            fontFamily: 'var(--font-display)',
+                            fontSize: '0.75rem',
+                            letterSpacing: '1px',
+                            cursor: 'pointer',
+                            textAlign: 'left',
+                            textTransform: 'uppercase',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.65rem',
+                            transition: 'all 0.15s',
+                          }}
+                        >
+                          <span style={{ opacity: 0.7, flexShrink: 0 }}>{item.icon}</span>
+                          {item.label}
+                        </motion.button>
+                      );
+                    })}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+
+          {/* Tablet primary items (600-900px) — 3 items + "Más ▾" */}
+          <div className="tablet-only" style={{ display: 'flex', gap: 'clamp(0.3rem, 1vw, 0.5rem)', alignItems: 'center' }}>
+            {tabletNavItems.map((item) => (
+              <motion.button
+                key={item.path}
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => navigate(item.path)}
+                style={navBtnStyle(location.pathname.includes(item.path))}
+              >
+                {item.label}
+              </motion.button>
+            ))}
+
+            {/* "Más ▾" dropdown — tablet (includes items 4-5 of primary + all secondary) */}
+            <div style={{ position: 'relative' }}>
+              <motion.button
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setMoreOpen(!moreOpen)}
+                style={{
+                  ...navBtnStyle([...primaryNavItems.slice(3), ...secondaryNavItems].some(i => location.pathname.includes(i.path))),
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.3rem',
+                }}
+              >
+                Más
+                <motion.span
+                  animate={{ rotate: moreOpen ? 180 : 0 }}
+                  transition={{ duration: 0.2 }}
+                  style={{ display: 'inline-block', fontSize: '0.6rem', lineHeight: 1 }}
+                >
+                  ▾
+                </motion.span>
+              </motion.button>
+
+              <AnimatePresence>
+                {moreOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -6, scale: 0.97 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -6, scale: 0.97 }}
+                    transition={{ duration: 0.15 }}
+                    onClick={() => setMoreOpen(false)}
+                    style={{
+                      position: 'absolute',
+                      top: 'calc(100% + 0.5rem)',
+                      right: 0,
+                      minWidth: '170px',
+                      background: 'rgba(10, 10, 26, 0.97)',
+                      border: '1px solid rgba(0, 212, 255, 0.2)',
+                      borderRadius: '14px',
+                      padding: '0.5rem',
+                      boxShadow: '0 12px 40px rgba(0,0,0,0.6)',
+                      backdropFilter: 'blur(20px)',
+                      zIndex: 200,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.25rem',
+                    }}
+                  >
+                    {[...primaryNavItems.slice(3), ...secondaryNavItems].map((item) => {
+                      const isActive = location.pathname.includes(item.path);
+                      return (
+                        <motion.button
+                          key={item.path}
+                          whileHover={{ x: 4 }}
+                          whileTap={{ scale: 0.97 }}
+                          onClick={() => { navigate(item.path); setMoreOpen(false); }}
+                          style={{
+                            background: isActive ? 'rgba(0, 212, 255, 0.12)' : 'transparent',
+                            border: `1px solid ${isActive ? 'rgba(0, 212, 255, 0.3)' : 'transparent'}`,
+                            borderRadius: '10px',
+                            padding: '0.6rem 0.9rem',
+                            color: isActive ? 'var(--color-primary)' : '#ccc',
+                            fontFamily: 'var(--font-display)',
+                            fontSize: '0.75rem',
+                            letterSpacing: '1px',
+                            cursor: 'pointer',
+                            textAlign: 'left',
+                            textTransform: 'uppercase',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.65rem',
+                            transition: 'all 0.15s',
+                          }}
+                        >
+                          <span style={{ opacity: 0.7, flexShrink: 0 }}>{item.icon}</span>
+                          {item.label}
+                        </motion.button>
+                      );
+                    })}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
 
           {/* Search icon button */}
@@ -161,6 +377,7 @@ export default function Header() {
               alignItems: 'center',
               justifyContent: 'center',
               transition: 'all 0.2s',
+              flexShrink: 0,
             }}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -359,7 +576,7 @@ export default function Header() {
                 </motion.button>
               </div>
 
-              {/* Menu Items */}
+              {/* Menu Items — ALL items visible in mobile menu */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', flex: 1 }}>
                 {/* Home */}
                 <motion.button

@@ -25,6 +25,7 @@ const REQUEST_STATUS_OPTIONS = [
   { value: 'pending',    label: 'Pendiente' },
   { value: 'contacted',  label: 'Contactado' },
   { value: 'confirmed',  label: 'Confirmado' },
+  { value: 'closed',     label: 'Cerrado / Vendido' },
   { value: 'cancelled',  label: 'Cancelado' },
 ]
 
@@ -47,6 +48,7 @@ const REQUEST_STATUS_META = {
   pending:   { color: '#e8d040', bg: 'rgba(220,190,30,0.15)' },
   contacted: { color: '#6ab0f5', bg: 'rgba(60,130,220,0.15)' },
   confirmed: { color: '#40c878', bg: 'rgba(40,200,100,0.15)' },
+  closed:    { color: '#b07af5', bg: 'rgba(140,80,220,0.15)' },
   cancelled: { color: '#ff6464', bg: 'rgba(255,68,102,0.15)' },
 }
 
@@ -135,105 +137,6 @@ function StatusBadge({ status, statusDisplay }) {
     }}>
       {statusDisplay || status}
     </span>
-  )
-}
-
-// ── Email Template Modal ───────────────────────────────────────────────────
-
-function EmailTemplateModal({ request, listingTitle, listingPrice, onClose }) {
-  const [copied, setCopied] = useState(false)
-
-  const template = `Asunto: Solicitud de compra — ${listingTitle}
-
-Hola ${request.name},
-
-Gracias por tu interés en "${listingTitle}" (precio: ${listingPrice}€).
-
-Hemos recibido tu solicitud con los siguientes datos:
-- Nombre: ${request.name} ${request.surname}
-- Email: ${request.email}
-- Teléfono: ${request.phone || '—'}
-- Dirección: ${request.address || '—'}
-
-${request.notes ? `Mensaje del comprador:\n${request.notes}\n` : ''}
-Para confirmar la compra, te contactaremos en los próximos días.
-(personaliza esto manualmente antes de enviar)
-
-Saludos,
-El equipo de Warhammer Galaxy`
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(template).then(() => {
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2500)
-    })
-  }
-
-  return ReactDOM.createPortal(
-    <div
-      onClick={onClose}
-      style={{
-        position: 'fixed', inset: 0,
-        background: 'rgba(0,0,0,0.75)',
-        backdropFilter: 'blur(4px)',
-        zIndex: 2000,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: '1rem',
-      }}
-    >
-      <div
-        onClick={e => e.stopPropagation()}
-        style={{
-          background: 'var(--color-dark)',
-          border: '1px solid rgba(255,255,255,0.1)',
-          borderRadius: '16px',
-          padding: '1.75rem',
-          width: '100%',
-          maxWidth: '560px',
-          maxHeight: '85vh',
-          overflowY: 'auto',
-        }}
-      >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-          <h3 style={{ margin: 0, fontFamily: 'var(--font-display)', color: '#fff', fontSize: '1rem', letterSpacing: '1px' }}>
-            Plantilla de email
-          </h3>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontSize: '1.1rem' }}>✕</button>
-        </div>
-
-        <pre style={{
-          margin: '0 0 1.25rem',
-          padding: '1rem',
-          background: 'rgba(255,255,255,0.04)',
-          border: '1px solid rgba(255,255,255,0.08)',
-          borderRadius: '10px',
-          whiteSpace: 'pre-wrap',
-          wordBreak: 'break-word',
-          fontSize: '0.82rem',
-          color: 'rgba(255,255,255,0.7)',
-          fontFamily: 'monospace',
-          lineHeight: 1.65,
-        }}>
-          {template}
-        </pre>
-
-        <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
-          <button style={btnStyle('ghost')} onClick={onClose}>Cerrar</button>
-          <button
-            style={{
-              ...btnStyle('primary'),
-              background: copied ? 'rgba(40,200,100,0.2)' : undefined,
-              color: copied ? '#40c878' : undefined,
-              border: copied ? '1px solid rgba(40,200,100,0.4)' : undefined,
-            }}
-            onClick={handleCopy}
-          >
-            {copied ? '✓ Copiado' : 'Copiar plantilla'}
-          </button>
-        </div>
-      </div>
-    </div>,
-    document.body
   )
 }
 
@@ -581,9 +484,10 @@ function PurchaseRequestsPanel({ token, listings, addToast }) {
   const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState(false)
   const [updatingId, setUpdatingId] = useState(null)
-  const [emailModal, setEmailModal] = useState(null) // { request, listing }
+  const [closingRequest, setClosingRequest] = useState(null)
+  const [saleForm, setSaleForm] = useState({ final_price: '', sale_notes: '' })
 
-  const fetchRequests = useCallback(async () => {
+  const loadRequests = useCallback(async () => {
     setLoading(true)
     try {
       const data = await api.getPurchaseRequests(token)
@@ -595,20 +499,44 @@ function PurchaseRequestsPanel({ token, listings, addToast }) {
     }
   }, [token])
 
+  // keep old name as alias for backward compat inside useEffect
+  const fetchRequests = loadRequests
+
   useEffect(() => {
     if (open) fetchRequests()
   }, [open, fetchRequests])
 
-  const handleStatusChange = async (reqId, newStatus) => {
-    setUpdatingId(reqId)
+  const handleStatusChange = async (req, newStatus) => {
+    if (newStatus === 'closed') {
+      setClosingRequest(req)
+      setSaleForm({ final_price: req.listing_price != null ? String(req.listing_price) : '', sale_notes: '' })
+      return
+    }
+    setUpdatingId(req.id)
     try {
-      await api.setPurchaseRequestStatus(reqId, newStatus, token)
-      setRequests(prev => prev.map(r => r.id === reqId ? { ...r, status: newStatus } : r))
+      await api.setPurchaseRequestStatus(req.id, newStatus, token)
+      setRequests(prev => prev.map(r => r.id === req.id ? { ...r, status: newStatus } : r))
       addToast('Estado actualizado', 'success')
     } catch (err) {
       addToast('Error al actualizar estado', 'error')
     } finally {
       setUpdatingId(null)
+    }
+  }
+
+  const handleCloseSale = async () => {
+    const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/purchase-requests/${closingRequest.id}/set-status/`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Token ${token}` },
+      body: JSON.stringify({ status: 'closed', final_price: parseFloat(saleForm.final_price) || closingRequest.listing_price, sale_notes: saleForm.sale_notes })
+    })
+    if (response.ok) {
+      setClosingRequest(null)
+      setSaleForm({ final_price: '', sale_notes: '' })
+      loadRequests()
+      addToast('Venta cerrada correctamente', 'success')
+    } else {
+      addToast('Error al cerrar la venta', 'error')
     }
   }
 
@@ -631,6 +559,7 @@ function PurchaseRequestsPanel({ token, listings, addToast }) {
   }
 
   const totalPending = requests.filter(r => r.status === 'pending').length
+  const pendingCount = totalPending
 
   return (
     <div style={{
@@ -681,6 +610,17 @@ function PurchaseRequestsPanel({ token, listings, addToast }) {
 
       {open && (
         <div style={{ padding: '1.25rem' }}>
+          {pendingCount > 0 && (
+            <div style={{
+              background: 'rgba(255,150,0,0.12)', border: '1px solid rgba(255,150,0,0.4)',
+              borderRadius: '10px', padding: '0.75rem 1.25rem',
+              display: 'flex', alignItems: 'center', gap: '0.75rem',
+              marginBottom: '1.5rem', color: '#ffa500'
+            }}>
+              <span style={{ fontSize: '1.2rem' }}>🔔</span>
+              <span><strong>{pendingCount}</strong> solicitud{pendingCount !== 1 ? 'es' : ''} pendiente{pendingCount !== 1 ? 's' : ''} de respuesta</span>
+            </div>
+          )}
           {loading ? (
             <p style={{ color: 'rgba(255,255,255,0.35)', textAlign: 'center', padding: '1.5rem' }}>Cargando...</p>
           ) : requests.length === 0 ? (
@@ -762,9 +702,9 @@ function PurchaseRequestsPanel({ token, listings, addToast }) {
 
                         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
                           <select
-                            value={req.status}
+                            value={closingRequest?.id === req.id ? 'closed' : req.status}
                             disabled={updatingId === req.id}
-                            onChange={e => handleStatusChange(req.id, e.target.value)}
+                            onChange={e => handleStatusChange(req, e.target.value)}
                             style={{
                               padding: '0.35rem 0.6rem',
                               background: 'rgba(255,255,255,0.06)',
@@ -782,26 +722,99 @@ function PurchaseRequestsPanel({ token, listings, addToast }) {
                           </select>
 
                           <button
-                            onClick={() => setEmailModal({
-                              request: req,
-                              listingTitle: getListingTitle(req.listing),
-                              listingPrice: getListingPrice(req.listing),
-                            })}
+                            onClick={() => {
+                              const subject = encodeURIComponent(`Solicitud de compra - ${req.listing_title || 'miniatura'}`)
+                              const body = encodeURIComponent(`Hola ${req.name},\n\nGracias por tu interés en "${req.listing_title}" (precio: ${req.listing_price}€).\n\nHemos recibido tu solicitud con los siguientes datos:\n- Nombre: ${req.name} ${req.surname}\n- Email: ${req.email}\n- Teléfono: ${req.phone || 'No indicado'}\n- Dirección: ${req.address || 'No indicada'}\n\n${req.notes ? 'Mensaje: ' + req.notes + '\n\n' : ''}Para confirmar la compra, nos pondremos en contacto contigo en los próximos días para coordinar el envío y el pago.\n\nSaludos,\nThe Immaterium`)
+                              const mailtoUrl = `mailto:${req.email}?subject=${subject}&body=${body}`
+                              window.location.href = mailtoUrl
+                            }}
                             style={{
                               padding: '0.35rem 0.75rem',
-                              background: 'rgba(0,212,255,0.08)',
-                              border: '1px solid rgba(0,212,255,0.2)',
+                              background: 'rgba(0,180,255,0.12)',
+                              border: '1px solid rgba(0,180,255,0.3)',
                               borderRadius: '6px',
-                              color: 'var(--color-primary)',
+                              color: '#00c8ff',
                               fontSize: '0.78rem',
                               fontFamily: 'var(--font-body)',
                               cursor: 'pointer',
                               fontWeight: 600,
                             }}
                           >
-                            Ver plantilla
+                            📧 Enviar email
                           </button>
                         </div>
+
+                        {closingRequest?.id === req.id && (
+                          <div style={{
+                            marginTop: '0.5rem',
+                            padding: '1rem',
+                            background: 'rgba(140,80,220,0.08)',
+                            border: '1px solid rgba(140,80,220,0.25)',
+                            borderRadius: '8px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '0.75rem',
+                          }}>
+                            <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#b07af5', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                              Cerrar venta
+                            </div>
+                            <div>
+                              <label style={labelStyle}>Precio final (€)</label>
+                              <input
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                value={saleForm.final_price}
+                                onChange={e => setSaleForm(f => ({ ...f, final_price: e.target.value }))}
+                                placeholder={req.listing_price != null ? String(req.listing_price) : '0.00'}
+                                style={{ ...inputStyle, maxWidth: '160px' }}
+                              />
+                            </div>
+                            <div>
+                              <label style={labelStyle}>Notas del cierre</label>
+                              <textarea
+                                value={saleForm.sale_notes}
+                                onChange={e => setSaleForm(f => ({ ...f, sale_notes: e.target.value }))}
+                                placeholder="Notas opcionales sobre el cierre de la venta..."
+                                rows={2}
+                                style={{ ...inputStyle, resize: 'vertical', minHeight: '60px' }}
+                              />
+                            </div>
+                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                              <button
+                                onClick={handleCloseSale}
+                                style={{
+                                  padding: '0.4rem 1rem',
+                                  background: 'rgba(140,80,220,0.2)',
+                                  border: '1px solid rgba(140,80,220,0.5)',
+                                  borderRadius: '7px',
+                                  color: '#b07af5',
+                                  fontSize: '0.82rem',
+                                  fontFamily: 'var(--font-body)',
+                                  fontWeight: 700,
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                Confirmar cierre
+                              </button>
+                              <button
+                                onClick={() => { setClosingRequest(null); setSaleForm({ final_price: '', sale_notes: '' }) }}
+                                style={{
+                                  padding: '0.4rem 1rem',
+                                  background: 'rgba(255,255,255,0.05)',
+                                  border: '1px solid rgba(255,255,255,0.1)',
+                                  borderRadius: '7px',
+                                  color: 'rgba(255,255,255,0.5)',
+                                  fontSize: '0.82rem',
+                                  fontFamily: 'var(--font-body)',
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                Cancelar
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )
                   })}
@@ -810,16 +823,6 @@ function PurchaseRequestsPanel({ token, listings, addToast }) {
             ))
           )}
         </div>
-      )}
-
-      {/* Email template modal */}
-      {emailModal && (
-        <EmailTemplateModal
-          request={emailModal.request}
-          listingTitle={emailModal.listingTitle}
-          listingPrice={emailModal.listingPrice}
-          onClose={() => setEmailModal(null)}
-        />
       )}
     </div>
   )

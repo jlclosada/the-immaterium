@@ -22,6 +22,10 @@ export const translations = {
     loreSubtitle: 'Biblioteca & Historia',
     newsTitle: 'NOTICIAS',
     newsSubtitle: 'Novedades & Updates',
+    marketplaceTitle: 'MERCADILLO',
+    marketplaceSubtitle: 'Compra y vende miniaturas',
+    builderTitle: 'ARMY BUILDER',
+    builderSubtitle: 'Construye tus listas de batalla',
 
     // Videos
     videos: 'Videos',
@@ -183,6 +187,10 @@ export const translations = {
     loreSubtitle: 'Library & History',
     newsTitle: 'NEWS',
     newsSubtitle: 'Updates & Releases',
+    marketplaceTitle: 'MARKETPLACE',
+    marketplaceSubtitle: 'Buy and sell miniatures',
+    builderTitle: 'ARMY BUILDER',
+    builderSubtitle: 'Build your battle lists',
     adminAccess: 'Administrative Access // Clearance Required',
 
     // Videos

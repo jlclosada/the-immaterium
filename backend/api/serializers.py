@@ -298,8 +298,9 @@ class PurchaseRequestSerializer(serializers.ModelSerializer):
             'id', 'listing', 'listing_title', 'listing_price',
             'name', 'surname', 'email', 'phone', 'address', 'notes',
             'status', 'status_display', 'created_at',
+            'final_price', 'sale_notes', 'closed_at',
         ]
-        read_only_fields = ['status', 'created_at']
+        read_only_fields = ['status', 'created_at', 'closed_at']
 
 
 class ListingSerializer(serializers.ModelSerializer):

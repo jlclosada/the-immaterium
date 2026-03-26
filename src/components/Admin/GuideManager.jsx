@@ -560,11 +560,12 @@ const GuideManager = () => {
             </motion.div>
 
             {/* ── Wizard Modal ── */}
-            <AnimatePresence>
-                {wizardOpen && ReactDOM.createPortal(
-                    <>
+            {ReactDOM.createPortal(
+                <AnimatePresence>
+                {wizardOpen && <>
                         {/* Backdrop */}
                         <motion.div
+                            key="guide-backdrop"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
@@ -583,6 +584,7 @@ const GuideManager = () => {
 
                         {/* Modal panel */}
                         <motion.div
+                            key="guide-modal"
                             initial={{ opacity: 0, y: 40, scale: 0.97 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: 20, scale: 0.97 }}
@@ -781,10 +783,10 @@ const GuideManager = () => {
                                 </div>
                             </div>
                         </motion.div>
-                    </>,
-                    document.body
-                )}
-            </AnimatePresence>
+                    </>}
+                </AnimatePresence>,
+                document.body
+            )}
         </div>
     );
 };

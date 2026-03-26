@@ -1031,19 +1031,40 @@ img[loading="lazy"].loaded {
   display: flex;
 }
 
+.tablet-only {
+  display: none;
+}
+
 .mobile-only {
   display: none;
 }
 
-@media (max-width: 768px) {
+/* Tablet: 600px – 900px */
+@media (max-width: 900px) and (min-width: 601px) {
   .desktop-only {
+    display: none !important;
+  }
+
+  .tablet-only {
+    display: flex !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .desktop-only {
+    display: none !important;
+  }
+
+  .tablet-only {
     display: none !important;
   }
 
   .mobile-only {
     display: flex !important;
   }
+}
 
+@media (max-width: 768px) {
   .nav-grid {
     grid-template-columns: repeat(2, 1fr) !important;
   }

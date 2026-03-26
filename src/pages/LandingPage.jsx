@@ -83,7 +83,49 @@ const NAV_ITEMS = [
       </svg>
     ),
   },
+  {
+    to: '/marketplace',
+    titleKey: 'marketplaceTitle',
+    subtitleKey: 'marketplaceSubtitle',
+    color: '#10b981',
+    icon: (
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <path d="M16 10a4 4 0 0 1-8 0"/>
+      </svg>
+    ),
+  },
+  {
+    to: '/army-builder',
+    titleKey: 'builderTitle',
+    subtitleKey: 'builderSubtitle',
+    color: '#6366f1',
+    icon: (
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="2" y="3" width="20" height="14" rx="2"/>
+        <path d="M8 21h8M12 17v4"/>
+        <path d="M7 8h3m4 0h3M7 12h10"/>
+      </svg>
+    ),
+  },
 ];
+
+const quickBtnStyle = (color) => ({
+  padding: '0.6rem 1.4rem',
+  borderRadius: '50px',
+  background: `${color}11`,
+  border: `1px solid ${color}44`,
+  color: color,
+  textDecoration: 'none',
+  fontSize: '0.9rem',
+  fontFamily: 'var(--font-body)',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '0.5rem',
+  transition: 'all 0.2s',
+  backdropFilter: 'blur(4px)',
+});
 
 const LandingPage = () => {
   const { fetchInitialData, language } = useStore();
@@ -201,7 +243,7 @@ const LandingPage = () => {
           style={{
             fontSize: 'clamp(0.95rem, 2vw, 1.15rem)',
             maxWidth: '640px',
-            marginBottom: 'clamp(3rem, 8vw, 5rem)',
+            marginBottom: 'clamp(2rem, 5vw, 3rem)',
             color: 'rgba(255,255,255,0.5)',
             zIndex: 1,
             lineHeight: 1.8,
@@ -210,6 +252,19 @@ const LandingPage = () => {
         >
           {t('description')}
         </motion.p>
+
+        {/* Quick action row */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.65, duration: 0.6 }}
+          style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', zIndex: 1, marginBottom: '2rem' }}
+        >
+          <Link to="/guides" style={quickBtnStyle('#00d4ff')}>🎨 Guías de Pintura</Link>
+          <Link to="/army-builder" style={quickBtnStyle('#6366f1')}>⚔️ Army Builder</Link>
+          <Link to="/marketplace" style={quickBtnStyle('#10b981')}>🏪 Mercadillo</Link>
+          <Link to="/battle-reports" style={quickBtnStyle('#ff6464')}>📊 Informes</Link>
+        </motion.div>
 
         {/* Nav grid */}
         <motion.div

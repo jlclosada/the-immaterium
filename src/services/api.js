@@ -486,13 +486,22 @@ export const api = {
     return data.results || data
   },
 
-  setPurchaseRequestStatus: async (id, reqStatus, token) => {
+  setPurchaseRequestStatus: async (id, reqStatus, token, extraData = {}) => {
     const response = await fetch(`${API_URL}/api/purchase-requests/${id}/set-status/`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', Authorization: `Token ${token}` },
-      body: JSON.stringify({ status: reqStatus }),
+      body: JSON.stringify({ status: reqStatus, ...extraData }),
     })
     if (!response.ok) throw new Error('Failed to update request status')
     return response.json()
+  },
+
+  getPendingRequestsCount: async (token) => {
+    const response = await fetch(`${API_URL}/api/purchase-requests/pending-count/`, {
+      headers: { Authorization: `Token ${token}` },
+    })
+    if (!response.ok) return 0
+    const data = await response.json()
+    return data.count || 0
   },
 }

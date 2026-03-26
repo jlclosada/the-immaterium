@@ -920,17 +920,34 @@ class PurchaseRequestViewSet(viewsets.ModelViewSet):
             authentication_classes=[TokenAuthentication],
             permission_classes=[IsAuthenticated, IsAdminUser])
     def set_status(self, request, pk=None):
+        from django.utils import timezone
         req = self.get_object()
         new_status = request.data.get('status')
         if new_status not in dict(PurchaseRequest.STATUS_CHOICES):
             return Response({'error': 'Estado inválido'}, status=status.HTTP_400_BAD_REQUEST)
         req.status = new_status
-        req.save()
-        # If cancelled and no other pending/contacted requests → back to available
-        if new_status == 'cancelled':
+        # Handle closure: save sale details and mark listing as sold
+        if new_status == 'closed':
+            req.final_price = request.data.get('final_price') or req.listing.price
+            req.sale_notes = request.data.get('sale_notes', '')
+            req.closed_at = timezone.now()
+            req.listing.status = 'sold'
+            req.listing.save()
+        # If cancelled and no other active requests → listing back to available
+        elif new_status == 'cancelled':
+            req.save()
             listing = req.listing
-            active = listing.requests.filter(status__in=['pending', 'contacted']).exists()
+            active = listing.requests.filter(status__in=['pending', 'contacted', 'confirmed']).exists()
             if not active and listing.status == 'reserved':
                 listing.status = 'available'
                 listing.save()
+            return Response(PurchaseRequestSerializer(req).data)
+        req.save()
         return Response(PurchaseRequestSerializer(req).data)
+
+    @action(detail=False, methods=['get'], url_path='pending-count',
+            authentication_classes=[TokenAuthentication],
+            permission_classes=[IsAuthenticated, IsAdminUser])
+    def pending_count(self, request):
+        count = PurchaseRequest.objects.filter(status='pending').count()
+        return Response({'count': count})

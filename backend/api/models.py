@@ -501,6 +501,7 @@ class PurchaseRequest(models.Model):
         ('pending', 'Pendiente'),
         ('contacted', 'Contactado'),
         ('confirmed', 'Confirmado'),
+        ('closed', 'Cerrado / Vendido'),
         ('cancelled', 'Cancelado'),
     ]
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name='requests')
@@ -512,6 +513,10 @@ class PurchaseRequest(models.Model):
     notes = models.TextField(blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
+    # Sale closure fields (filled when status → closed)
+    final_price = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
+    sale_notes = models.TextField(blank=True)
+    closed_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ['-created_at']
