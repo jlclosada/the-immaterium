@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../../services/api';
 import { useStore } from '../../stores/useStore';
 import { useToast } from './Toast';
+import RichTextEditor from '../UI/RichTextEditor';
 
 // ─── Shared input style ───────────────────────────────────────────────────────
 const inputStyle = {
@@ -729,6 +730,7 @@ const GuideManager = () => {
                                                 removeStepImage={removeStepImage}
                                                 addStepTip={addStepTip}
                                                 removeStepTip={removeStepTip}
+                                                token={token}
                                             />
                                         </motion.div>
                                     )}
@@ -1202,6 +1204,7 @@ function StepPasos({
     newStepTips, setNewStepTips,
     addStepImage, removeStepImage,
     addStepTip, removeStepTip,
+    token,
 }) {
     return (
         <div style={{ display: 'grid', gap: '0.75rem' }}>
@@ -1297,11 +1300,12 @@ function StepPasos({
 
                                 <div>
                                     <label style={labelStyle}>Descripción</label>
-                                    <textarea
-                                        style={{ ...inputStyle, minHeight: '100px', resize: 'vertical' }}
-                                        placeholder="Descripción detallada del paso…"
+                                    <RichTextEditor
                                         value={step.description}
-                                        onChange={e => updateStep(stepIndex, 'description', e.target.value)}
+                                        onChange={val => updateStep(stepIndex, 'description', val)}
+                                        token={token}
+                                        placeholder="Describe este paso..."
+                                        minHeight="100px"
                                     />
                                 </div>
 

@@ -4,6 +4,7 @@ import { api } from '../../services/api';
 import { useStore } from '../../stores/useStore';
 import { useToast } from './Toast';
 import { parseArmyList } from '../../utils/armyListParser';
+import RichTextEditor from '../UI/RichTextEditor';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -1504,11 +1505,12 @@ const ReportManager = () => {
                                                     </div>
                                                     <div>
                                                         <FieldLabel>Descripción</FieldLabel>
-                                                        <Textarea
-                                                            placeholder="Describe lo ocurrido en esta fase..."
+                                                        <RichTextEditor
                                                             value={newNarrative.text}
-                                                            onChange={e => setNewNarrative(n => ({ ...n, text: e.target.value }))}
-                                                            style={{ minHeight: '75px' }}
+                                                            onChange={val => setNewNarrative(n => ({ ...n, text: val }))}
+                                                            token={token}
+                                                            placeholder="Describe lo que ocurrió en este turno..."
+                                                            minHeight="75px"
                                                         />
                                                     </div>
                                                     <button
