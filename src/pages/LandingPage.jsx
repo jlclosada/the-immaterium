@@ -6,15 +6,21 @@ import { useTranslation } from '../i18n/translations';
 import { api } from '../services/api';
 import { useStore } from '../stores/useStore';
 
-const NAV_ITEMS = [
+// Row 1: Marketplace, Pintura, Batallas
+// [Featured marketplace products]
+// Row 2: Ejércitos, Videos, Noticias
+// Row 3: Army Builder, Lore
+const NAV_ROW1 = [
   {
-    to: '/armies',
-    titleKey: 'armiesTitle',
-    subtitleKey: 'armiesSubtitle',
-    color: 'var(--color-primary)',
+    to: '/marketplace',
+    titleKey: 'marketplaceTitle',
+    subtitleKey: 'marketplaceSubtitle',
+    color: '#10b981',
     icon: (
       <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <path d="M16 10a4 4 0 0 1-8 0"/>
       </svg>
     ),
   },
@@ -46,6 +52,20 @@ const NAV_ITEMS = [
       </svg>
     ),
   },
+];
+
+const NAV_ROW2 = [
+  {
+    to: '/armies',
+    titleKey: 'armiesTitle',
+    subtitleKey: 'armiesSubtitle',
+    color: 'var(--color-primary)',
+    icon: (
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+      </svg>
+    ),
+  },
   {
     to: '/videos',
     titleKey: 'videosTitle',
@@ -70,32 +90,9 @@ const NAV_ITEMS = [
       </svg>
     ),
   },
-  {
-    to: '/lore',
-    titleKey: 'loreTitle',
-    subtitleKey: 'loreSubtitle',
-    color: 'var(--color-accent)',
-    icon: (
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-        <path d="M8 7h8" /><path d="M8 11h8" /><path d="M8 15h6" />
-      </svg>
-    ),
-  },
-  {
-    to: '/marketplace',
-    titleKey: 'marketplaceTitle',
-    subtitleKey: 'marketplaceSubtitle',
-    color: '#10b981',
-    icon: (
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
-        <line x1="3" y1="6" x2="21" y2="6"/>
-        <path d="M16 10a4 4 0 0 1-8 0"/>
-      </svg>
-    ),
-  },
+];
+
+const NAV_ROW3 = [
   {
     to: '/army-builder',
     titleKey: 'builderTitle',
@@ -109,7 +106,23 @@ const NAV_ITEMS = [
       </svg>
     ),
   },
+  {
+    to: '/lore',
+    titleKey: 'loreTitle',
+    subtitleKey: 'loreSubtitle',
+    color: 'var(--color-accent)',
+    icon: (
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+        <path d="M8 7h8" /><path d="M8 11h8" /><path d="M8 15h6" />
+      </svg>
+    ),
+  },
 ];
+
+// Keep a flat list for any legacy use
+const NAV_ITEMS = [...NAV_ROW1, ...NAV_ROW2, ...NAV_ROW3];
 
 const quickBtnStyle = (color) => ({
   padding: '0.6rem 1.4rem',
@@ -130,9 +143,10 @@ const quickBtnStyle = (color) => ({
 const LandingPage = () => {
   const { fetchInitialData, language } = useStore();
   const t = useTranslation(language);
-  const [featuredNews, setFeaturedNews] = useState(null);
-  const [featuredGuide, setFeaturedGuide] = useState(null);
-  const [featuredReport, setFeaturedReport] = useState(null);
+  const [featuredNews,     setFeaturedNews]     = useState(null);
+  const [featuredGuide,    setFeaturedGuide]    = useState(null);
+  const [featuredReport,   setFeaturedReport]   = useState(null);
+  const [featuredListings, setFeaturedListings] = useState([]);
 
   useEffect(() => {
     fetchInitialData();
@@ -140,19 +154,22 @@ const LandingPage = () => {
   }, []);
 
   const loadFeaturedContent = async () => {
-    // APIs devuelven ítems ordenados por fecha descendente → [0] es siempre el más reciente
-    const [newsRes, guidesRes, reportsRes] = await Promise.allSettled([
+    const [newsRes, guidesRes, reportsRes, listingsRes] = await Promise.allSettled([
       api.getNewsArticles(),
       api.getPaintingGuides(),
       api.getBattleReports(),
+      api.getListings({ status: 'available' }),
     ]);
     const safe = (res) => (res.status === 'fulfilled' ? (Array.isArray(res.value) ? res.value : []) : []);
-    const news    = safe(newsRes);
-    const guides  = safe(guidesRes);
-    const reports = safe(reportsRes);
+    const news     = safe(newsRes);
+    const guides   = safe(guidesRes);
+    const reports  = safe(reportsRes);
+    const listings = safe(listingsRes);
     if (news.length    > 0) setFeaturedNews(news[0]);
     if (guides.length  > 0) setFeaturedGuide(guides[0]);
     if (reports.length > 0) setFeaturedReport(reports[0]);
+    // Show up to 3 available listings as featured
+    setFeaturedListings(listings.slice(0, 3));
   };
 
   return (
@@ -173,6 +190,7 @@ const LandingPage = () => {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
+        gap: 'clamp(1.5rem, 3vw, 2.5rem)',
         padding: 'clamp(5rem, 12vw, 10rem) clamp(1.5rem, 5vw, 3rem) clamp(4rem, 8vw, 6rem)',
         textAlign: 'center',
         position: 'relative',
@@ -253,7 +271,7 @@ const LandingPage = () => {
           {t('description')}
         </motion.p>
 
-        {/* Nav grid */}
+        {/* ── Row 1: Marketplace · Pintura · Batallas ── */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -268,7 +286,72 @@ const LandingPage = () => {
           }}
           className="nav-grid"
         >
-          {NAV_ITEMS.map((item) => (
+          {NAV_ROW1.map((item) => (
+            <SectionCard key={item.to} item={item} t={t} />
+          ))}
+        </motion.div>
+
+        {/* ── Featured marketplace listings (inline, below row 1) ── */}
+        {featuredListings.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.9, duration: 0.6 }}
+            style={{ width: '100%', maxWidth: '1100px', zIndex: 1 }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.65rem', letterSpacing: '4px', color: '#10b981', textTransform: 'uppercase', opacity: 0.8, margin: 0 }}>
+                🛒 En venta ahora
+              </p>
+              <Link to="/marketplace" style={{ fontFamily: 'var(--font-display)', fontSize: '0.68rem', letterSpacing: '2px', color: 'rgba(255,255,255,0.35)', textDecoration: 'none', textTransform: 'uppercase', transition: 'color 0.2s' }}
+                onMouseEnter={e => e.currentTarget.style.color = '#10b981'}
+                onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.35)'}
+              >Ver todo →</Link>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: `repeat(${featuredListings.length}, 1fr)`, gap: 'clamp(0.75rem, 2vw, 1.25rem)' }} className="mp-featured-grid">
+              {featuredListings.map(listing => (
+                <MarketplaceListingCard key={listing.id} listing={listing} />
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {/* ── Row 2: Ejércitos · Videos · Noticias ── */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.0, duration: 0.6 }}
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: 'clamp(1rem, 2.5vw, 1.5rem)',
+            width: '100%',
+            maxWidth: '1100px',
+            zIndex: 1,
+          }}
+          className="nav-grid"
+        >
+          {NAV_ROW2.map((item) => (
+            <SectionCard key={item.to} item={item} t={t} />
+          ))}
+        </motion.div>
+
+        {/* ── Row 3: Army Builder · Lore ── */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.1, duration: 0.6 }}
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: 'clamp(1rem, 2.5vw, 1.5rem)',
+            width: '100%',
+            maxWidth: '1100px',
+            zIndex: 1,
+          }}
+          className="nav-grid two-col"
+        >
+          {NAV_ROW3.map((item) => (
             <SectionCard key={item.to} item={item} t={t} />
           ))}
         </motion.div>
@@ -435,6 +518,59 @@ const SectionCard = ({ item, t }) => (
     </motion.div>
   </Link>
 );
+
+const STATE_LABEL = { sin_montar: 'Sin montar', montada: 'Montada', imprimada: 'Imprimada', pintada_parcial: 'Pintada parcial', pintada: 'Pintada', conversion: 'Conversión' };
+const STATE_COLOR = { sin_montar: '#b0b0b8', montada: '#6ab0f5', imprimada: '#f0924a', pintada_parcial: '#e8d040', pintada: '#40c878', conversion: '#c078f0' };
+
+const MarketplaceListingCard = ({ listing }) => {
+  const img = listing.images?.[0];
+  const stateColor = STATE_COLOR[listing.state] || '#aaa';
+  return (
+    <Link to="/marketplace" style={{ textDecoration: 'none' }}>
+      <motion.div
+        whileHover={{ y: -5, scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        transition={{ duration: 0.18 }}
+        style={{
+          background: 'rgba(16,185,129,0.04)',
+          border: '1px solid rgba(16,185,129,0.18)',
+          borderRadius: 'var(--radius-xl)',
+          overflow: 'hidden',
+          cursor: 'pointer',
+          position: 'relative',
+        }}
+      >
+        {/* Image */}
+        <div style={{ width: '100%', aspectRatio: '4/3', background: 'rgba(0,0,0,0.3)', overflow: 'hidden', position: 'relative' }}>
+          {img
+            ? <img src={img} alt={listing.title} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.3s' }} />
+            : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.2 }}>
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+              </div>
+          }
+          {/* Price badge */}
+          <div style={{ position: 'absolute', top: '0.5rem', right: '0.5rem', background: 'rgba(16,185,129,0.9)', color: '#fff', padding: '3px 10px', borderRadius: '20px', fontFamily: 'var(--font-display)', fontSize: '0.8rem', fontWeight: 700, letterSpacing: '0.5px' }}>
+            {listing.price ? `${listing.price} €` : 'Precio a consultar'}
+          </div>
+        </div>
+        {/* Info */}
+        <div style={{ padding: '0.85rem 1rem' }}>
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(0.82rem, 1.5vw, 0.95rem)', color: '#fff', margin: '0 0 0.4rem', letterSpacing: '0.5px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {listing.title}
+          </h3>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+            {listing.faction && <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.45)', fontFamily: 'var(--font-display)', letterSpacing: '0.5px' }}>{listing.faction}</span>}
+            <span style={{ fontSize: '0.7rem', color: stateColor, background: `${stateColor}18`, border: `1px solid ${stateColor}40`, borderRadius: '6px', padding: '1px 7px', fontFamily: 'var(--font-display)', letterSpacing: '0.5px' }}>
+              {STATE_LABEL[listing.state] || listing.state}
+            </span>
+          </div>
+        </div>
+        {/* Bottom accent */}
+        <div style={{ position: 'absolute', bottom: 0, left: '15%', right: '15%', height: '2px', background: 'linear-gradient(90deg, transparent, #10b981, transparent)', opacity: 0.6 }} />
+      </motion.div>
+    </Link>
+  );
+};
 
 const FeaturedCard = ({ to, badge, badgeColor, title, excerpt, linkLabel, linkColor, accentColor, borderColor }) => (
   <motion.div

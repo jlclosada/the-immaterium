@@ -1,5 +1,22 @@
 /* Base resets - complement styles/index.css */
 
+/* Landing page nav grid responsive */
+.nav-grid {
+  grid-template-columns: repeat(3, 1fr) !important;
+}
+.nav-grid.two-col {
+  grid-template-columns: repeat(2, 1fr) !important;
+}
+@media (max-width: 640px) {
+  .nav-grid         { grid-template-columns: 1fr !important; }
+  .nav-grid.two-col { grid-template-columns: 1fr !important; }
+  .mp-featured-grid { grid-template-columns: 1fr !important; }
+}
+@media (max-width: 900px) and (min-width: 641px) {
+  .nav-grid         { grid-template-columns: repeat(2, 1fr) !important; }
+  .nav-grid.two-col { grid-template-columns: repeat(2, 1fr) !important; }
+}
+
 /* Responsive overrides for legacy inline styles */
 .fullscreen-overlay {
   position: fixed;

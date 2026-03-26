@@ -22,7 +22,7 @@ export const translations = {
     loreSubtitle: 'Biblioteca & Historia',
     newsTitle: 'NOTICIAS',
     newsSubtitle: 'Novedades & Updates',
-    marketplaceTitle: 'MERCADILLO',
+    marketplaceTitle: 'MARKETPLACE',
     marketplaceSubtitle: 'Compra y vende miniaturas',
     builderTitle: 'ARMY BUILDER',
     builderSubtitle: 'Construye tus listas de batalla',
