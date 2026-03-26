@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import ReactDOM from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../../services/api';
 import { useStore } from '../../stores/useStore';
@@ -146,13 +145,14 @@ const GuideManager = () => {
     const [guides, setGuides] = useState([]);
     const [armies, setArmies] = useState([]);
     const [editingGuide, setEditingGuide] = useState(null);
-    const [wizardOpen, setWizardOpen] = useState(false);
+    const [panelOpen, setPanelOpen] = useState(false);
     const [wizardStep, setWizardStep] = useState(0);
     const [stepError, setStepError] = useState('');
     const [armySearch, setArmySearch] = useState('');
 
     const token = useStore(state => state.token);
     const toast = useToast();
+    const formPanelRef = useRef(null);
 
     const emptyForm = () => ({
         id: '',
@@ -187,6 +187,16 @@ const GuideManager = () => {
         loadGuides();
         loadArmies();
     }, []);
+
+    // Scroll form into view on mobile when it opens
+    useEffect(() => {
+        if (panelOpen && formPanelRef.current) {
+            const isMobile = window.innerWidth < 900;
+            if (isMobile) {
+                formPanelRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+    }, [panelOpen]);
 
     const loadGuides = async () => {
         try {
@@ -262,7 +272,7 @@ const GuideManager = () => {
         setSteps(guide.steps || []);
         setWizardStep(0);
         setStepError('');
-        setWizardOpen(true);
+        setPanelOpen(true);
     };
 
     const handleDelete = async (id) => {
@@ -278,7 +288,7 @@ const GuideManager = () => {
     };
 
     const handleCloseWizard = () => {
-        setWizardOpen(false);
+        setPanelOpen(false);
         setEditingGuide(null);
         setFormData(emptyForm());
         setMaterials([]);
@@ -307,7 +317,7 @@ const GuideManager = () => {
         setArmySearch('');
         setStepError('');
         setWizardStep(0);
-        setWizardOpen(true);
+        setPanelOpen(true);
     };
 
     // ── Validation ─────────────────────────────────────────────────────────────
@@ -435,6 +445,18 @@ const GuideManager = () => {
     // ─────────────────────────────────────────────────────────────────────────
     return (
         <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+            {/* Scoped responsive CSS */}
+            <style>{`
+                .guide-manager-layout { display: flex; gap: 1.5rem; align-items: flex-start; }
+                .guide-list-panel { transition: flex 0.3s ease; min-width: 0; }
+                .guide-form-panel { min-width: 0; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 1.5rem; position: sticky; top: 1rem; }
+                @media (max-width: 900px) {
+                    .guide-manager-layout { flex-direction: column; }
+                    .guide-list-panel { width: 100% !important; flex: unset !important; }
+                    .guide-form-panel { width: 100%; position: static; }
+                }
+            `}</style>
+
             {/* Header */}
             <motion.div
                 initial={{ y: -20, opacity: 0 }}
@@ -444,199 +466,217 @@ const GuideManager = () => {
                 <h2 style={{ fontFamily: 'var(--font-display)', color: 'var(--color-secondary)', margin: 0, fontSize: '2rem' }}>
                     Guías de Pintura
                 </h2>
-                <button
-                    onClick={handleOpenNew}
-                    style={{
-                        ...btnBase,
-                        background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
-                        color: '#000',
-                        fontFamily: 'var(--font-display)',
-                        padding: '0 1.5rem',
-                        minHeight: '46px',
-                        borderRadius: '50px',
-                        boxShadow: '0 4px 16px rgba(0,212,255,0.25)',
-                    }}
-                >
-                    + Nueva Guía
-                </button>
-            </motion.div>
-
-            {/* Guides list */}
-            <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }}>
-                {guides.length === 0 ? (
-                    <div style={{ ...cardStyle, textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.3)' }}>
-                        No hay guías todavía. Crea la primera.
-                    </div>
-                ) : (
-                    <div style={{ display: 'grid', gap: '0.75rem' }}>
-                        {guides.map((guide, index) => (
-                            <motion.div
-                                key={guide.id}
-                                initial={{ x: -20, opacity: 0 }}
-                                animate={{ x: 0, opacity: 1 }}
-                                transition={{ delay: index * 0.04 }}
-                                style={{
-                                    ...cardStyle,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '1rem',
-                                    padding: '1rem 1.25rem',
-                                    transition: 'border-color 0.2s',
-                                    cursor: 'default',
-                                }}
-                                onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(0,212,255,0.25)'}
-                                onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'}
-                            >
-                                {/* Cover thumb */}
-                                {guide.coverImage ? (
-                                    <img
-                                        src={guide.coverImage}
-                                        alt={guide.title}
-                                        style={{ width: '56px', height: '56px', objectFit: 'cover', borderRadius: '10px', flexShrink: 0 }}
-                                    />
-                                ) : (
-                                    <div style={{
-                                        width: '56px', height: '56px', borderRadius: '10px', flexShrink: 0,
-                                        background: 'rgba(255,255,255,0.05)',
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        fontSize: '1.5rem', color: 'rgba(255,255,255,0.15)',
-                                    }}>🖌</div>
-                                )}
-
-                                {/* Info */}
-                                <div style={{ flex: 1, minWidth: 0 }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
-                                        <span style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', fontWeight: '700', color: 'var(--color-light)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                            {guide.title}
-                                        </span>
-                                        <DifficultyBadge value={guide.difficulty} />
-                                    </div>
-                                    <div style={{ marginTop: '0.2rem', fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-                                        {guide.faction?.name && <span>{guide.faction.name}</span>}
-                                        {guide.author && <span>{guide.author}</span>}
-                                        {guide.estimatedTime && <span>{guide.estimatedTime}</span>}
-                                    </div>
-                                </div>
-
-                                {/* Actions */}
-                                <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
-                                    <button
-                                        onClick={() => handleEdit(guide)}
-                                        style={{
-                                            ...btnBase,
-                                            background: 'transparent',
-                                            border: '1px solid rgba(0,212,255,0.35)',
-                                            color: 'var(--color-secondary)',
-                                            padding: '0 1rem',
-                                            minHeight: '36px',
-                                            fontSize: '0.82rem',
-                                        }}
-                                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(0,212,255,0.1)'; }}
-                                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
-                                    >
-                                        Editar
-                                    </button>
-                                    <button
-                                        onClick={() => handleDelete(guide.id)}
-                                        style={{
-                                            ...btnBase,
-                                            background: 'transparent',
-                                            border: '1px solid rgba(255,100,100,0.3)',
-                                            color: '#ff6464',
-                                            padding: '0 1rem',
-                                            minHeight: '36px',
-                                            fontSize: '0.82rem',
-                                        }}
-                                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,100,100,0.1)'; }}
-                                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
-                                    >
-                                        Eliminar
-                                    </button>
-                                </div>
-                            </motion.div>
-                        ))}
-                    </div>
+                {!panelOpen && (
+                    <button
+                        onClick={handleOpenNew}
+                        style={{
+                            ...btnBase,
+                            background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+                            color: '#000',
+                            fontFamily: 'var(--font-display)',
+                            padding: '0 1.5rem',
+                            minHeight: '46px',
+                            borderRadius: '50px',
+                            boxShadow: '0 4px 16px rgba(0,212,255,0.25)',
+                        }}
+                    >
+                        + Nueva Guía
+                    </button>
                 )}
             </motion.div>
 
-            {/* ── Wizard Modal ── */}
-            {ReactDOM.createPortal(
-                <AnimatePresence>
-                {wizardOpen && <>
-                        {/* Backdrop */}
-                        <motion.div
-                            key="guide-backdrop"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            onClick={handleCloseWizard}
-                            style={{
-                                position: 'fixed', inset: 0,
-                                background: 'rgba(0,0,0,0.7)',
-                                zIndex: 1000,
-                                backdropFilter: 'blur(4px)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                padding: '1rem',
-                            }}
-                        />
+            {/* Split-panel layout */}
+            <div className="guide-manager-layout">
+                {/* ── List panel ── */}
+                <div
+                    className="guide-list-panel"
+                    style={{ flex: panelOpen ? '0 0 38%' : '1' }}
+                >
+                    {/* Nueva Guía button when panel is open (inside list panel) */}
+                    {panelOpen && (
+                        <div style={{ marginBottom: '1rem' }}>
+                            <button
+                                onClick={handleOpenNew}
+                                style={{
+                                    ...btnBase,
+                                    background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+                                    color: '#000',
+                                    fontFamily: 'var(--font-display)',
+                                    padding: '0 1.25rem',
+                                    minHeight: '40px',
+                                    borderRadius: '50px',
+                                    boxShadow: '0 4px 16px rgba(0,212,255,0.25)',
+                                    fontSize: '0.85rem',
+                                    width: '100%',
+                                }}
+                            >
+                                + Nueva Guía
+                            </button>
+                        </div>
+                    )}
 
-                        {/* Modal panel */}
-                        <motion.div
-                            key="guide-modal"
-                            initial={{ opacity: 0, y: 40, scale: 0.97 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: 20, scale: 0.97 }}
-                            transition={{ type: 'spring', stiffness: 300, damping: 28 }}
-                            style={{
-                                position: 'fixed',
-                                top: '50%', left: '50%',
-                                transform: 'translate(-50%, -50%)',
-                                width: 'min(720px, 96vw)',
-                                maxHeight: '92vh',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                background: '#0a0a1e',
-                                border: '1px solid rgba(255,255,255,0.1)',
-                                borderRadius: '20px',
-                                boxShadow: '0 32px 80px rgba(0,0,0,0.7)',
-                                zIndex: 1001,
-                                overflow: 'hidden',
-                            }}
-                        >
-                            {/* Modal header */}
-                            <div style={{
-                                padding: '1.5rem 2rem 1rem',
-                                borderBottom: '1px solid rgba(255,255,255,0.07)',
-                                flexShrink: 0,
-                            }}>
-                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
-                                    <h3 style={{ margin: 0, fontFamily: 'var(--font-display)', color: 'var(--color-secondary)', fontSize: '1.4rem' }}>
-                                        {editingGuide ? 'Editar Guía' : 'Nueva Guía'}
-                                    </h3>
-                                    <button
-                                        onClick={handleCloseWizard}
+                    <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }}>
+                        {guides.length === 0 ? (
+                            <div style={{ ...cardStyle, textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.3)' }}>
+                                No hay guías todavía. Crea la primera.
+                            </div>
+                        ) : (
+                            <div style={{ display: 'grid', gap: '0.75rem' }}>
+                                {guides.map((guide, index) => (
+                                    <motion.div
+                                        key={guide.id}
+                                        initial={{ x: -20, opacity: 0 }}
+                                        animate={{ x: 0, opacity: 1 }}
+                                        transition={{ delay: index * 0.04 }}
                                         style={{
-                                            ...btnBase,
-                                            background: 'rgba(255,255,255,0.06)',
-                                            color: 'rgba(255,255,255,0.5)',
-                                            minHeight: '36px',
-                                            width: '36px',
-                                            padding: 0,
-                                            borderRadius: '50%',
-                                            fontSize: '1.2rem',
+                                            ...cardStyle,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '1rem',
+                                            padding: panelOpen ? '0.75rem 1rem' : '1rem 1.25rem',
+                                            transition: 'border-color 0.2s',
+                                            cursor: 'default',
+                                            borderColor: editingGuide?.id === guide.id ? 'rgba(0,212,255,0.4)' : 'rgba(255,255,255,0.07)',
                                         }}
-                                        aria-label="Cerrar"
+                                        onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(0,212,255,0.25)'}
+                                        onMouseLeave={e => e.currentTarget.style.borderColor = editingGuide?.id === guide.id ? 'rgba(0,212,255,0.4)' : 'rgba(255,255,255,0.07)'}
                                     >
-                                        ×
-                                    </button>
-                                </div>
-                                <WizardProgress current={wizardStep} />
+                                        {/* Cover thumb — hide when panel is compressed */}
+                                        {!panelOpen && (
+                                            guide.coverImage ? (
+                                                <img
+                                                    src={guide.coverImage}
+                                                    alt={guide.title}
+                                                    style={{ width: '56px', height: '56px', objectFit: 'cover', borderRadius: '10px', flexShrink: 0 }}
+                                                />
+                                            ) : (
+                                                <div style={{
+                                                    width: '56px', height: '56px', borderRadius: '10px', flexShrink: 0,
+                                                    background: 'rgba(255,255,255,0.05)',
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                    fontSize: '1.5rem', color: 'rgba(255,255,255,0.15)',
+                                                }}>🖌</div>
+                                            )
+                                        )}
+
+                                        {/* Info */}
+                                        <div style={{ flex: 1, minWidth: 0 }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                                                <span style={{ fontFamily: 'var(--font-display)', fontSize: panelOpen ? '0.88rem' : '1rem', fontWeight: '700', color: 'var(--color-light)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                    {guide.title}
+                                                </span>
+                                                {!panelOpen && <DifficultyBadge value={guide.difficulty} />}
+                                            </div>
+                                            {!panelOpen && (
+                                                <div style={{ marginTop: '0.2rem', fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                                                    {guide.faction?.name && <span>{guide.faction.name}</span>}
+                                                    {guide.author && <span>{guide.author}</span>}
+                                                    {guide.estimatedTime && <span>{guide.estimatedTime}</span>}
+                                                </div>
+                                            )}
+                                            {panelOpen && (
+                                                <div style={{ marginTop: '0.15rem', fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)' }}>
+                                                    {guide.difficulty}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Actions */}
+                                        <div style={{ display: 'flex', gap: '0.4rem', flexShrink: 0 }}>
+                                            <button
+                                                onClick={() => handleEdit(guide)}
+                                                style={{
+                                                    ...btnBase,
+                                                    background: 'transparent',
+                                                    border: '1px solid rgba(0,212,255,0.35)',
+                                                    color: 'var(--color-secondary)',
+                                                    padding: '0 0.75rem',
+                                                    minHeight: '32px',
+                                                    fontSize: '0.78rem',
+                                                }}
+                                                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(0,212,255,0.1)'; }}
+                                                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+                                            >
+                                                {panelOpen ? '✏️' : 'Editar'}
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(guide.id)}
+                                                style={{
+                                                    ...btnBase,
+                                                    background: 'transparent',
+                                                    border: '1px solid rgba(255,100,100,0.3)',
+                                                    color: '#ff6464',
+                                                    padding: '0 0.75rem',
+                                                    minHeight: '32px',
+                                                    fontSize: '0.78rem',
+                                                }}
+                                                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,100,100,0.1)'; }}
+                                                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+                                            >
+                                                {panelOpen ? '🗑️' : 'Eliminar'}
+                                            </button>
+                                        </div>
+                                    </motion.div>
+                                ))}
+                            </div>
+                        )}
+                    </motion.div>
+                </div>
+
+                {/* ── Form panel ── */}
+                <AnimatePresence>
+                    {panelOpen && (
+                        <motion.div
+                            key="guide-form-panel"
+                            ref={formPanelRef}
+                            className="guide-form-panel"
+                            style={{ flex: '1' }}
+                            initial={{ opacity: 0, x: 24 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: 24 }}
+                            transition={{ duration: 0.25, ease: 'easeOut' }}
+                        >
+                            {/* Panel header */}
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'flex-start',
+                                justifyContent: 'space-between',
+                                marginBottom: '1.25rem',
+                                gap: '1rem',
+                            }}>
+                                <h3 style={{
+                                    margin: 0,
+                                    fontFamily: 'var(--font-display)',
+                                    color: 'var(--color-secondary)',
+                                    fontSize: '1.3rem',
+                                    lineHeight: 1.2,
+                                }}>
+                                    {editingGuide ? `Editando: ${editingGuide.title}` : 'Nueva Guía'}
+                                </h3>
+                                <button
+                                    onClick={handleCloseWizard}
+                                    style={{
+                                        ...btnBase,
+                                        background: 'rgba(255,255,255,0.06)',
+                                        color: 'rgba(255,255,255,0.5)',
+                                        minHeight: '34px',
+                                        width: '34px',
+                                        padding: 0,
+                                        borderRadius: '50%',
+                                        fontSize: '1.2rem',
+                                        flexShrink: 0,
+                                    }}
+                                    aria-label="Cerrar"
+                                >
+                                    ✕
+                                </button>
                             </div>
 
-                            {/* Modal body — scrollable */}
-                            <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem 2rem' }}>
+                            {/* Step progress */}
+                            <WizardProgress current={wizardStep} />
+
+                            {/* Step content — scrollable */}
+                            <div style={{ maxHeight: 'calc(100vh - 22rem)', overflowY: 'auto', paddingRight: '4px' }}>
                                 <AnimatePresence mode="wait">
                                     {wizardStep === 0 && (
                                         <motion.div key="step0" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.2 }}>
@@ -695,11 +735,11 @@ const GuideManager = () => {
                                 </AnimatePresence>
                             </div>
 
-                            {/* Modal footer — navigation */}
+                            {/* Navigation footer */}
                             <div style={{
-                                padding: '1rem 2rem 1.5rem',
                                 borderTop: '1px solid rgba(255,255,255,0.07)',
-                                flexShrink: 0,
+                                paddingTop: '1rem',
+                                marginTop: '1.25rem',
                                 display: 'flex',
                                 flexDirection: 'column',
                                 gap: '0.5rem',
@@ -783,10 +823,9 @@ const GuideManager = () => {
                                 </div>
                             </div>
                         </motion.div>
-                    </>}
-                </AnimatePresence>,
-                document.body
-            )}
+                    )}
+                </AnimatePresence>
+            </div>
         </div>
     );
 };
@@ -1002,7 +1041,7 @@ function StepMateriales({
                     Busca pinturas del catálogo o pulsa <kbd style={{ background: 'rgba(255,255,255,0.1)', padding: '1px 5px', borderRadius: '4px' }}>Enter</kbd> para añadir texto libre.
                 </p>
 
-                {/* Paint search widget — preserved as-is */}
+                {/* Paint search widget */}
                 <div style={{ position: 'relative', marginBottom: '0.75rem' }}>
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
                         <input

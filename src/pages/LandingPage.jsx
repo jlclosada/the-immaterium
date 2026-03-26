@@ -253,19 +253,6 @@ const LandingPage = () => {
           {t('description')}
         </motion.p>
 
-        {/* Quick action row */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.65, duration: 0.6 }}
-          style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', zIndex: 1, marginBottom: '2rem' }}
-        >
-          <Link to="/guides" style={quickBtnStyle('#00d4ff')}>🎨 Guías de Pintura</Link>
-          <Link to="/army-builder" style={quickBtnStyle('#6366f1')}>⚔️ Army Builder</Link>
-          <Link to="/marketplace" style={quickBtnStyle('#10b981')}>🏪 Mercadillo</Link>
-          <Link to="/battle-reports" style={quickBtnStyle('#ff6464')}>📊 Informes</Link>
-        </motion.div>
-
         {/* Nav grid */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}

@@ -562,6 +562,7 @@ function PurchaseRequestsPanel({ token, listings, addToast }) {
   const pendingCount = totalPending
 
   return (
+    <>
     <div style={{
       marginTop: '2rem',
       border: '1px solid rgba(255,255,255,0.08)',
@@ -825,6 +826,156 @@ function PurchaseRequestsPanel({ token, listings, addToast }) {
         </div>
       )}
     </div>
+    <SalesHistoryPanel requests={requests} />
+    </>
+  )
+}
+
+// ── Sales History Panel ────────────────────────────────────────────────────
+
+function SalesHistoryPanel({ requests }) {
+  const [open, setOpen] = useState(false)
+
+  const closedRequests = requests.filter(r => r.status === 'closed')
+  const totalRevenue = closedRequests.reduce((sum, r) => sum + parseFloat(r.final_price || r.listing_price || 0), 0)
+  const uniqueBuyers = new Set(closedRequests.map(r => r.email)).size
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '—'
+    const d = new Date(dateStr)
+    return d.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })
+  }
+
+  return (
+    <div style={{
+      marginTop: '1rem',
+      border: '1px solid rgba(255,255,255,0.08)',
+      borderRadius: '14px',
+      overflow: 'hidden',
+    }}>
+      {/* Header toggle */}
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          width: '100%',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '1rem 1.25rem',
+          background: 'rgba(255,255,255,0.03)',
+          border: 'none',
+          borderBottom: open ? '1px solid rgba(255,255,255,0.07)' : 'none',
+          color: '#fff',
+          cursor: 'pointer',
+          fontFamily: 'var(--font-display)',
+          fontSize: '0.88rem',
+          letterSpacing: '1px',
+          textTransform: 'uppercase',
+          textAlign: 'left',
+        }}
+      >
+        <span style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+          Historial de Ventas
+          {closedRequests.length > 0 && (
+            <span style={{
+              background: 'rgba(16,185,129,0.85)',
+              color: '#000',
+              borderRadius: '20px',
+              padding: '0.1rem 0.55rem',
+              fontSize: '0.72rem',
+              fontWeight: 700,
+            }}>
+              {closedRequests.length}
+            </span>
+          )}
+        </span>
+        <span style={{ fontSize: '0.75rem', opacity: 0.5, transition: 'transform 0.2s', transform: open ? 'rotate(180deg)' : 'none' }}>▼</span>
+      </button>
+
+      {open && (
+        <div style={{ padding: '1.25rem' }}>
+          {/* Summary banner */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+            <div style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: '12px', padding: '1rem', textAlign: 'center' }}>
+              <div style={{ fontSize: '2rem', fontWeight: 700, color: '#10b981' }}>{closedRequests.length}</div>
+              <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>Ventas cerradas</div>
+            </div>
+            <div style={{ background: 'rgba(0,212,255,0.1)', border: '1px solid rgba(0,212,255,0.3)', borderRadius: '12px', padding: '1rem', textAlign: 'center' }}>
+              <div style={{ fontSize: '2rem', fontWeight: 700, color: '#00d4ff' }}>{totalRevenue.toFixed(2)} €</div>
+              <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>Ingresos totales</div>
+            </div>
+            <div style={{ background: 'rgba(139,92,246,0.1)', border: '1px solid rgba(139,92,246,0.3)', borderRadius: '12px', padding: '1rem', textAlign: 'center' }}>
+              <div style={{ fontSize: '2rem', fontWeight: 700, color: '#8b5cf6' }}>{uniqueBuyers}</div>
+              <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>Compradores únicos</div>
+            </div>
+          </div>
+
+          {/* Sales list */}
+          {closedRequests.length === 0 ? (
+            <p style={{ color: 'rgba(255,255,255,0.3)', textAlign: 'center', padding: '1.5rem', fontSize: '0.88rem' }}>
+              No hay ventas cerradas todavía.
+            </p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
+              {closedRequests.map((req, idx) => (
+                <div
+                  key={req.id}
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '2fr 2fr auto auto',
+                    gap: '0.75rem',
+                    alignItems: 'start',
+                    padding: '0.8rem 1rem',
+                    background: idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent',
+                    borderRadius: '8px',
+                  }}
+                >
+                  {/* Listing title */}
+                  <div>
+                    <div style={{ fontWeight: 700, color: '#fff', fontSize: '0.88rem', marginBottom: '0.15rem' }}>
+                      {req.listing_title || `Anuncio #${req.listing}`}
+                    </div>
+                    {req.sale_notes && (
+                      <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.35)', fontStyle: 'italic' }}>
+                        {req.sale_notes}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Buyer info */}
+                  <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.55)' }}>
+                    <div style={{ color: 'rgba(255,255,255,0.8)', fontWeight: 600 }}>
+                      {req.name} {req.surname}
+                    </div>
+                    <div>
+                      <a href={`mailto:${req.email}`} style={{ color: 'var(--color-primary)', textDecoration: 'none' }}>
+                        {req.email}
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* Sale price */}
+                  <div style={{
+                    fontWeight: 800,
+                    fontSize: '0.95rem',
+                    color: '#10b981',
+                    whiteSpace: 'nowrap',
+                  }}>
+                    {parseFloat(req.final_price || req.listing_price || 0).toFixed(2)} €
+                  </div>
+
+                  {/* Date */}
+                  <div style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.35)', whiteSpace: 'nowrap' }}>
+                    {formatDate(req.closed_at || req.updated_at)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -928,8 +1079,12 @@ export default function MarketplaceManager() {
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-          {listings.map(listing => {
+          {[...listings].sort((a, b) => {
+            const order = { available: 0, reserved: 1, sold: 2 }
+            return (order[a.status] ?? 3) - (order[b.status] ?? 3)
+          }).map(listing => {
             const img = listing.images && listing.images.length > 0 ? listing.images[0] : null
+            const isSold = listing.status === 'sold'
             return (
               <div
                 key={listing.id}
@@ -940,6 +1095,8 @@ export default function MarketplaceManager() {
                   borderRadius: '12px',
                   padding: '0.85rem 1.1rem',
                   flexWrap: 'wrap',
+                  opacity: isSold ? 0.5 : 1,
+                  transition: 'opacity 0.2s',
                 }}
               >
                 {/* Thumbnail */}
@@ -969,6 +1126,19 @@ export default function MarketplaceManager() {
                     </span>
                     <StateBadge state={listing.state} stateDisplay={listing.state_display} />
                     <StatusBadge status={listing.status} statusDisplay={listing.status_display} />
+                    {isSold && (
+                      <span style={{
+                        padding: '0.15rem 0.55rem', borderRadius: '6px',
+                        fontSize: '0.72rem', fontWeight: 900,
+                        background: 'rgba(100,100,110,0.9)',
+                        color: '#e0e0e8',
+                        border: '1px solid rgba(180,180,190,0.35)',
+                        letterSpacing: '1px',
+                        textTransform: 'uppercase',
+                      }}>
+                        VENDIDO
+                      </span>
+                    )}
                     {listing.requests_count > 0 && (
                       <span style={{
                         background: 'rgba(255,140,30,0.85)',

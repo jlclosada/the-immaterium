@@ -69,18 +69,22 @@ function StateBadge({ state }) {
 }
 
 function StatusBadge({ status }) {
-  const meta = STATUS_META[status] || STATUS_META.available;
+  // Don't show any badge for available listings — it's the default
+  if (!status || status === 'available') return null;
+  const meta = STATUS_META[status] || STATUS_META.sold;
   return (
     <span style={{
       display: 'inline-block',
-      padding: '0.2rem 0.55rem',
+      padding: '0.25rem 0.65rem',
       borderRadius: '6px',
-      fontSize: '0.72rem',
-      fontWeight: 700,
-      letterSpacing: '0.5px',
-      background: meta.bg,
-      color: meta.color,
-      border: `1px solid ${meta.border}`,
+      fontSize: '0.75rem',
+      fontWeight: 800,
+      letterSpacing: '0.6px',
+      textTransform: 'uppercase',
+      background: status === 'reserved' ? 'rgba(232,170,0,0.85)' : 'rgba(100,100,110,0.85)',
+      color: status === 'reserved' ? '#1a1200' : '#e0e0e8',
+      border: `1px solid ${status === 'reserved' ? 'rgba(232,200,0,0.6)' : 'rgba(180,180,190,0.3)'}`,
+      boxShadow: status === 'reserved' ? '0 1px 8px rgba(232,170,0,0.35)' : 'none',
     }}>
       {meta.label}
     </span>
@@ -136,6 +140,7 @@ function ListingCard({ listing, onClick }) {
       <div style={{ position: 'relative', overflow: 'hidden' }}>
         {img ? (
           <img
+            className="mp-card-img"
             src={img}
             alt={listing.title}
             style={{
@@ -180,7 +185,7 @@ function ListingCard({ listing, onClick }) {
         )}
 
         {/* Badges overlay */}
-        <div style={{
+        <div className="mp-card-badges" style={{
           position: 'absolute', top: '0.6rem', left: '0.6rem', right: '0.6rem',
           display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.4rem',
           pointerEvents: 'none',
@@ -191,8 +196,8 @@ function ListingCard({ listing, onClick }) {
       </div>
 
       {/* Body */}
-      <div style={{ padding: '0.9rem 1rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.35rem', flex: 1 }}>
-        <h3 style={{
+      <div className="mp-card-body" style={{ padding: '0.9rem 1rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.35rem', flex: 1 }}>
+        <h3 className="mp-card-title" style={{
           margin: 0,
           fontFamily: 'var(--font-display)',
           fontSize: '0.98rem',
@@ -210,7 +215,7 @@ function ListingCard({ listing, onClick }) {
           </p>
         )}
 
-        <p style={{
+        <p className="mp-card-price" style={{
           margin: '0.2rem 0 0',
           fontSize: '1.1rem',
           fontWeight: 800,
@@ -239,7 +244,7 @@ function ListingCard({ listing, onClick }) {
         )}
 
         <div style={{ marginTop: 'auto', paddingTop: '0.75rem' }}>
-          <button style={{
+          <button className="mp-card-btn" style={{
             background: 'transparent',
             border: `1px solid rgba(0,212,255,${hovered ? '0.5' : '0.25'})`,
             borderRadius: '8px',
@@ -251,6 +256,9 @@ function ListingCard({ listing, onClick }) {
             cursor: 'pointer',
             transition: 'all 0.2s',
             letterSpacing: '0.3px',
+            minHeight: '44px',
+            width: '100%',
+            textAlign: 'center',
           }}>
             Ver detalles →
           </button>
@@ -971,7 +979,7 @@ const MarketplacePage = () => {
             </p>
           </motion.div>
         ) : (
-          <div style={{
+          <div className="mp-grid" style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(3, 1fr)',
             gap: '1.25rem',
@@ -979,6 +987,16 @@ const MarketplacePage = () => {
             <style>{`
               @media (max-width: 900px) { .mp-grid { grid-template-columns: repeat(2, 1fr) !important; } }
               @media (max-width: 560px) { .mp-grid { grid-template-columns: 1fr !important; } }
+
+              /* Mobile card improvements */
+              @media (max-width: 560px) {
+                .mp-card-img { aspect-ratio: 16/9 !important; }
+                .mp-card-body { padding: 0.75rem 0.9rem 0.9rem !important; gap: 0.25rem !important; }
+                .mp-card-title { font-size: 0.95rem !important; }
+                .mp-card-price { font-size: 1.15rem !important; }
+                .mp-card-badges { gap: 0.3rem !important; }
+                .mp-card-btn { min-height: 44px !important; font-size: 0.9rem !important; padding: 0.6rem 1rem !important; }
+              }
             `}</style>
             {listings.map(listing => (
               <ListingCard
