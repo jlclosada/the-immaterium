@@ -13,11 +13,13 @@ from .models import (
     Army, ArmyImage, PaintingGuide, GuideMaterial, GuideStep,
     BattleReport, BattleNarrative, Comment,
     UserLike, UserFavorite, LoreEntry, NewsArticle, Game, Paint,
+    Listing, PurchaseRequest,
 )
 from .serializers import (
     ArmySerializer, PaintingGuideSerializer, BattleReportSerializer,
     CommentSerializer, UserLikeSerializer, UserFavoriteSerializer,
     LoreEntrySerializer, NewsArticleSerializer, GameSerializer, PaintSerializer,
+    ListingSerializer, ListingDetailSerializer, PurchaseRequestSerializer,
 )
 
 @api_view(['POST'])
@@ -825,3 +827,110 @@ def user_toggle_active(request, user_id):
     user.is_active = not user.is_active
     user.save()
     return Response({'id': user.id, 'isActive': user.is_active})
+
+
+# ────────────────────────────────────────
+# Marketplace
+# ────────────────────────────────────────
+
+class ListingViewSet(viewsets.ModelViewSet):
+    queryset = Listing.objects.all()
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ['title', 'faction', 'game', 'tags', 'description']
+    ordering_fields = ['created_at', 'price', 'status']
+
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return ListingDetailSerializer
+        return ListingSerializer
+
+    def get_authenticators(self):
+        # Public reads, auth required for write
+        try:
+            if self.action in ('list', 'retrieve'):
+                return []
+        except AttributeError:
+            pass
+        from rest_framework.authentication import TokenAuthentication
+        return [TokenAuthentication()]
+
+    def get_permissions(self):
+        if self.action in ('list', 'retrieve'):
+            return []
+        return [IsAuthenticated(), IsAdminUser()]
+
+    def get_queryset(self):
+        qs = Listing.objects.all()
+        status_filter = self.request.query_params.get('status')
+        faction_filter = self.request.query_params.get('faction')
+        if status_filter:
+            qs = qs.filter(status=status_filter)
+        if faction_filter:
+            qs = qs.filter(faction__icontains=faction_filter)
+        return qs
+
+    @action(detail=True, methods=['patch'], url_path='set-status',
+            authentication_classes=[TokenAuthentication],
+            permission_classes=[IsAuthenticated, IsAdminUser])
+    def set_status(self, request, pk=None):
+        listing = self.get_object()
+        new_status = request.data.get('status')
+        if new_status not in dict(Listing.STATUS_CHOICES):
+            return Response({'error': 'Estado inválido'}, status=status.HTTP_400_BAD_REQUEST)
+        listing.status = new_status
+        listing.save()
+        return Response(ListingSerializer(listing).data)
+
+    @action(detail=True, methods=['get'], url_path='requests',
+            authentication_classes=[TokenAuthentication],
+            permission_classes=[IsAuthenticated, IsAdminUser])
+    def get_requests(self, request, pk=None):
+        listing = self.get_object()
+        requests = listing.requests.all()
+        return Response(PurchaseRequestSerializer(requests, many=True).data)
+
+
+class PurchaseRequestViewSet(viewsets.ModelViewSet):
+    queryset = PurchaseRequest.objects.all()
+    serializer_class = PurchaseRequestSerializer
+
+    def get_authenticators(self):
+        try:
+            if self.action == 'create':
+                return []
+        except AttributeError:
+            pass
+        from rest_framework.authentication import TokenAuthentication
+        return [TokenAuthentication()]
+
+    def get_permissions(self):
+        if self.action == 'create':
+            return []
+        return [IsAuthenticated(), IsAdminUser()]
+
+    def perform_create(self, serializer):
+        request_obj = serializer.save()
+        # Auto-mark listing as reserved when first request arrives
+        listing = request_obj.listing
+        if listing.status == 'available':
+            listing.status = 'reserved'
+            listing.save()
+
+    @action(detail=True, methods=['patch'], url_path='set-status',
+            authentication_classes=[TokenAuthentication],
+            permission_classes=[IsAuthenticated, IsAdminUser])
+    def set_status(self, request, pk=None):
+        req = self.get_object()
+        new_status = request.data.get('status')
+        if new_status not in dict(PurchaseRequest.STATUS_CHOICES):
+            return Response({'error': 'Estado inválido'}, status=status.HTTP_400_BAD_REQUEST)
+        req.status = new_status
+        req.save()
+        # If cancelled and no other pending/contacted requests → back to available
+        if new_status == 'cancelled':
+            listing = req.listing
+            active = listing.requests.filter(status__in=['pending', 'contacted']).exists()
+            if not active and listing.status == 'reserved':
+                listing.status = 'available'
+                listing.save()
+        return Response(PurchaseRequestSerializer(req).data)

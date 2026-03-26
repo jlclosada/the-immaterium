@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import { motion } from 'framer-motion';
 import { api } from '../../services/api';
 import { useStore } from '../../stores/useStore';
@@ -17,6 +18,7 @@ const inputStyle = {
 const NewsManager = () => {
     const [articles, setArticles] = useState([]);
     const [editing, setEditing] = useState(null);
+    const [modalOpen, setModalOpen] = useState(false);
     const token = useStore(state => state.token);
     const toast = useToast();
     const [newTagInput, setNewTagInput] = useState('');
@@ -72,6 +74,15 @@ const NewsManager = () => {
             tags: article.tags || [],
             isPublished: article.isPublished !== false,
         });
+        setModalOpen(true);
+    };
+
+    const handleOpenNew = () => {
+        setEditing(null);
+        setFormData({ id: '', title: '', content: '', coverImage: '', images: [], author: 'Administratum', tags: [], isPublished: true });
+        setNewTagInput('');
+        setNewImageUrl('');
+        setModalOpen(true);
     };
 
     const handleDelete = async (id) => {
@@ -89,6 +100,7 @@ const NewsManager = () => {
         setFormData({ id: '', title: '', content: '', coverImage: '', images: [], author: 'Administratum', tags: [], isPublished: true });
         setNewTagInput('');
         setNewImageUrl('');
+        setModalOpen(false);
     };
 
     const addTag = () => {
@@ -108,20 +120,77 @@ const NewsManager = () => {
 
     return (
         <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
-            <motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
-                <h2 style={{ fontFamily: 'var(--font-display)', color: 'var(--color-primary)', marginBottom: '2rem', fontSize: '2.5rem' }}>
+            <motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}
+            >
+                <h2 style={{ fontFamily: 'var(--font-display)', color: 'var(--color-primary)', margin: 0, fontSize: '2.5rem' }}>
                     Gestión de Noticias
                 </h2>
+                <button
+                    onClick={handleOpenNew}
+                    style={{
+                        padding: '0 1.5rem',
+                        minHeight: '46px',
+                        background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+                        border: 'none',
+                        borderRadius: '50px',
+                        color: '#000',
+                        fontFamily: 'var(--font-display)',
+                        cursor: 'pointer',
+                        fontSize: '0.9rem',
+                        letterSpacing: '1px',
+                        boxShadow: '0 4px 16px rgba(0,212,255,0.25)',
+                    }}
+                >
+                    + Nuevo Artículo
+                </button>
             </motion.div>
 
-            {/* Form */}
-            <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }}
-                className="glass-panel"
-                style={{ padding: '2rem', marginBottom: '2rem', maxHeight: '85vh', overflowY: 'auto' }}
-            >
-                <h3 style={{ marginTop: 0, marginBottom: '1.5rem', fontFamily: 'var(--font-display)', color: 'var(--color-primary)', fontSize: '1.4rem' }}>
-                    {editing ? 'Editar Artículo' : 'Nuevo Artículo'}
-                </h3>
+            {/* Form Modal */}
+            {modalOpen && ReactDOM.createPortal(
+                <div
+                    onClick={e => { if (e.target === e.currentTarget) handleCancel(); }}
+                    style={{
+                        position: 'fixed', inset: 0,
+                        background: 'rgba(0,0,0,0.7)',
+                        backdropFilter: 'blur(4px)',
+                        zIndex: 1000,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '1rem',
+                    }}
+                >
+                    <div style={{
+                        background: '#0a0a1e',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        borderRadius: '16px',
+                        width: 'min(640px, 96vw)',
+                        maxHeight: '90vh',
+                        overflowY: 'auto',
+                        padding: '2rem',
+                        position: 'relative',
+                    }}>
+                        <button
+                            type="button"
+                            onClick={handleCancel}
+                            style={{
+                                position: 'absolute', top: '1rem', right: '1rem',
+                                background: 'rgba(255,255,255,0.06)',
+                                border: 'none',
+                                borderRadius: '50%',
+                                width: '36px', height: '36px',
+                                color: 'rgba(255,255,255,0.5)',
+                                cursor: 'pointer',
+                                fontSize: '1.2rem',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            }}
+                            aria-label="Cerrar"
+                        >×</button>
+
+                        <h3 style={{ marginTop: 0, marginBottom: '1.5rem', fontFamily: 'var(--font-display)', color: 'var(--color-primary)', fontSize: '1.4rem' }}>
+                            {editing ? 'Editar Artículo' : 'Nuevo Artículo'}
+                        </h3>
                 <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '1.25rem' }}>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 3fr', gap: '1rem' }}>
                         <div>
@@ -223,7 +292,10 @@ const NewsManager = () => {
                         )}
                     </div>
                 </form>
-            </motion.div>
+                    </div>
+                </div>,
+                document.body
+            )}
 
             {/* List */}
             <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }} className="glass-panel" style={{ padding: '2rem' }}>

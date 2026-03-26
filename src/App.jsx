@@ -17,6 +17,7 @@ import LoreManager from './components/Admin/LoreManager';
 import UserManager from './components/Admin/UserManager';
 import NewRecruitManager from './components/Admin/NewRecruitManager'
 import PaintManager from './components/Admin/PaintManager';
+import MarketplaceManager from './components/Admin/MarketplaceManager';
 
 import ArmiesPage from './pages/ArmiesPage';
 import ArmyDetailPage from './pages/ArmyDetailPage';
@@ -32,6 +33,7 @@ import NewsManager from './components/Admin/NewsManager';
 import SearchPage from './pages/SearchPage';
 import ArmyBuilderPage from './pages/ArmyBuilderPage';
 import VideosPage from './pages/VideosPage';
+import MarketplacePage from './pages/MarketplacePage';
 
 import './styles/index.css';
 
@@ -79,6 +81,7 @@ function App() {
           <Route path="/videos" element={<AnimatedPage><VideosPage /></AnimatedPage>} />
           <Route path="/army-builder" element={<AnimatedPage><ArmyBuilderPage /></AnimatedPage>} />
           <Route path="/army-builder/:listId" element={<AnimatedPage><ArmyBuilderPage /></AnimatedPage>} />
+          <Route path="/marketplace" element={<AnimatedPage><MarketplacePage /></AnimatedPage>} />
 
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminLayout />}>
@@ -91,6 +94,7 @@ function App() {
             <Route path="users" element={<UserManager />} />
             <Route path="new-recruit" element={<NewRecruitManager />} />
             <Route path="paints" element={<PaintManager />} />
+            <Route path="marketplace" element={<MarketplaceManager />} />
           </Route>
 
           {/* Fallback */}

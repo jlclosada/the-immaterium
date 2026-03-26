@@ -201,17 +201,25 @@ const ScoreStepper = ({ value, onChange, accentColor }) => {
                     transition: 'background 0.15s',
                 }}
             >−</button>
-            <span style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: '2.5rem',
-                fontWeight: 700,
-                color: accentColor,
-                minWidth: '3ch',
-                textAlign: 'center',
-                lineHeight: 1,
-            }}>
-                {value}
-            </span>
+            <input
+                type="number"
+                min={0}
+                max={999}
+                value={value}
+                onChange={e => onChange(parseInt(e.target.value) || 0)}
+                style={{
+                    fontFamily: 'var(--font-display)',
+                    fontSize: '2.5rem',
+                    fontWeight: 700,
+                    color: accentColor,
+                    width: '70px',
+                    textAlign: 'center',
+                    background: 'transparent',
+                    border: 'none',
+                    outline: 'none',
+                    lineHeight: 1,
+                }}
+            />
             <button
                 type="button"
                 onClick={() => onChange(value + 1)}

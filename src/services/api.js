@@ -407,11 +407,92 @@ export const api = {
   deleteLoreEntry: async (id, token) => {
     const response = await fetch(`${API_URL}/api/lore/${id}/`, {
       method: 'DELETE',
-      headers: {
-        Authorization: `Token ${token}`,
-      },
+      headers: { Authorization: `Token ${token}` },
     })
     if (!response.ok) throw new Error('Failed to delete lore entry')
     return true
+  },
+
+  // ── Marketplace ─────────────────────────────────────
+  getListings: async (params = {}) => {
+    const qs = new URLSearchParams(params).toString()
+    const response = await fetch(`${API_URL}/api/listings/${qs ? '?' + qs : ''}`)
+    if (!response.ok) throw new Error('Failed to fetch listings')
+    const data = await response.json()
+    return data.results || data
+  },
+
+  getListing: async (id) => {
+    const response = await fetch(`${API_URL}/api/listings/${id}/`)
+    if (!response.ok) throw new Error('Failed to fetch listing')
+    return response.json()
+  },
+
+  createListing: async (data, token) => {
+    const response = await fetch(`${API_URL}/api/listings/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Token ${token}` },
+      body: JSON.stringify(data),
+    })
+    if (!response.ok) throw new Error('Failed to create listing')
+    return response.json()
+  },
+
+  updateListing: async (id, data, token) => {
+    const response = await fetch(`${API_URL}/api/listings/${id}/`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Authorization: `Token ${token}` },
+      body: JSON.stringify(data),
+    })
+    if (!response.ok) throw new Error('Failed to update listing')
+    return response.json()
+  },
+
+  deleteListing: async (id, token) => {
+    const response = await fetch(`${API_URL}/api/listings/${id}/`, {
+      method: 'DELETE',
+      headers: { Authorization: `Token ${token}` },
+    })
+    if (!response.ok) throw new Error('Failed to delete listing')
+    return true
+  },
+
+  setListingStatus: async (id, listingStatus, token) => {
+    const response = await fetch(`${API_URL}/api/listings/${id}/set-status/`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Token ${token}` },
+      body: JSON.stringify({ status: listingStatus }),
+    })
+    if (!response.ok) throw new Error('Failed to update listing status')
+    return response.json()
+  },
+
+  createPurchaseRequest: async (data) => {
+    const response = await fetch(`${API_URL}/api/purchase-requests/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+    if (!response.ok) throw new Error('Failed to create purchase request')
+    return response.json()
+  },
+
+  getPurchaseRequests: async (token) => {
+    const response = await fetch(`${API_URL}/api/purchase-requests/`, {
+      headers: { Authorization: `Token ${token}` },
+    })
+    if (!response.ok) throw new Error('Failed to fetch purchase requests')
+    const data = await response.json()
+    return data.results || data
+  },
+
+  setPurchaseRequestStatus: async (id, reqStatus, token) => {
+    const response = await fetch(`${API_URL}/api/purchase-requests/${id}/set-status/`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Token ${token}` },
+      body: JSON.stringify({ status: reqStatus }),
+    })
+    if (!response.ok) throw new Error('Failed to update request status')
+    return response.json()
   },
 }

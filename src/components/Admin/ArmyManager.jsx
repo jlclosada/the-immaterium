@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import ReactDOM from 'react-dom'
 import { motion } from 'framer-motion'
 import { api } from '../../services/api'
 import { useStore } from '../../stores/useStore'
@@ -59,6 +60,7 @@ const ArmyManager = () => {
   const [armies, setArmies] = useState([])
   const [games, setGames] = useState([])
   const [editingArmy, setEditingArmy] = useState(null)
+  const [modalOpen, setModalOpen] = useState(false)
   const [formData, setFormData] = useState(emptyForm)
   const [images, setImages] = useState([])
   const [newImageUrl, setNewImageUrl] = useState('')
@@ -147,7 +149,16 @@ const ArmyManager = () => {
       gameId: army.gameId || '',
     })
     setImages(army.images || [])
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    setModalOpen(true)
+  }
+
+  const handleOpenNew = () => {
+    setEditingArmy(null)
+    setFormData(emptyForm)
+    setImages([])
+    setNewImageUrl('')
+    setNewImageName('')
+    setModalOpen(true)
   }
 
   const handleDelete = async (id) => {
@@ -171,6 +182,7 @@ const ArmyManager = () => {
     setImages([])
     setNewImageUrl('')
     setNewImageName('')
+    setModalOpen(false)
   }
 
   const addImage = () => {
@@ -208,29 +220,82 @@ const ArmyManager = () => {
 
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-      <motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
-        <h2 style={{ fontFamily: 'var(--font-display)', color: 'var(--color-primary)', marginBottom: '0.5rem', fontSize: '2rem' }}>
-          Gestión de Ejércitos
-        </h2>
-        <p style={{ color: 'rgba(255,255,255,0.4)', marginBottom: '2rem', fontSize: '0.9rem' }}>
-          {armies.length} ejército{armies.length !== 1 ? 's' : ''} registrado{armies.length !== 1 ? 's' : ''}
-        </p>
+      <motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
+        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}
+      >
+        <div>
+          <h2 style={{ fontFamily: 'var(--font-display)', color: 'var(--color-primary)', marginBottom: '0.5rem', fontSize: '2rem' }}>
+            Gestión de Ejércitos
+          </h2>
+          <p style={{ color: 'rgba(255,255,255,0.4)', margin: 0, fontSize: '0.9rem' }}>
+            {armies.length} ejército{armies.length !== 1 ? 's' : ''} registrado{armies.length !== 1 ? 's' : ''}
+          </p>
+        </div>
+        <button
+          onClick={handleOpenNew}
+          style={{
+            background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+            border: 'none',
+            padding: '0 1.5rem',
+            minHeight: '46px',
+            borderRadius: '50px',
+            color: '#000',
+            fontFamily: 'var(--font-display)',
+            cursor: 'pointer',
+            fontSize: '0.9rem',
+            letterSpacing: '1px',
+            boxShadow: '0 4px 16px rgba(0,212,255,0.25)',
+          }}
+        >
+          + Nuevo Ejército
+        </button>
       </motion.div>
 
-      {/* FORM */}
-      <motion.div
-        initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }}
-        style={{
-          background: 'rgba(255,255,255,0.03)',
-          border: '1px solid rgba(255,255,255,0.08)',
-          borderRadius: '16px',
-          padding: '2rem',
-          marginBottom: '2.5rem',
-        }}
-      >
-        <h3 style={{ fontFamily: 'var(--font-display)', color: editingArmy ? 'var(--color-accent)' : 'var(--color-secondary)', marginBottom: '1.75rem', fontSize: '1.2rem' }}>
-          {editingArmy ? `Editando: ${editingArmy.name}` : 'Nuevo Ejército'}
-        </h3>
+      {/* FORM MODAL */}
+      {modalOpen && ReactDOM.createPortal(
+        <div
+          onClick={e => { if (e.target === e.currentTarget) handleCancel() }}
+          style={{
+            position: 'fixed', inset: 0,
+            background: 'rgba(0,0,0,0.7)',
+            backdropFilter: 'blur(4px)',
+            zIndex: 1000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1rem',
+          }}
+        >
+          <div style={{
+            background: '#0a0a1e',
+            border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: '16px',
+            width: 'min(640px, 96vw)',
+            maxHeight: '90vh',
+            overflowY: 'auto',
+            padding: '2rem',
+            position: 'relative',
+          }}>
+            <button
+              type="button"
+              onClick={handleCancel}
+              style={{
+                position: 'absolute', top: '1rem', right: '1rem',
+                background: 'rgba(255,255,255,0.06)',
+                border: 'none',
+                borderRadius: '50%',
+                width: '36px', height: '36px',
+                color: 'rgba(255,255,255,0.5)',
+                cursor: 'pointer',
+                fontSize: '1.2rem',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}
+              aria-label="Cerrar"
+            >×</button>
+
+            <h3 style={{ fontFamily: 'var(--font-display)', color: editingArmy ? 'var(--color-accent)' : 'var(--color-secondary)', marginBottom: '1.75rem', fontSize: '1.2rem', marginTop: 0 }}>
+              {editingArmy ? `Editando: ${editingArmy.name}` : 'Nuevo Ejército'}
+            </h3>
 
         <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '1.5rem' }}>
           {/* Identificación */}
@@ -565,14 +630,17 @@ const ArmyManager = () => {
             )}
           </div>
         </form>
-      </motion.div>
+          </div>
+        </div>,
+        document.body
+      )}
 
       {/* Confirm delete modal */}
-      {confirmDelete && (
+      {confirmDelete && ReactDOM.createPortal(
         <div style={{
           position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          zIndex: 1000, backdropFilter: 'blur(4px)',
+          zIndex: 1100, backdropFilter: 'blur(4px)',
         }}>
           <motion.div
             initial={{ scale: 0.85, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
@@ -615,7 +683,8 @@ const ArmyManager = () => {
               </button>
             </div>
           </motion.div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Army list */}

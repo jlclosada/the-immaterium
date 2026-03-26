@@ -4,7 +4,7 @@ from django.utils.html import format_html
 from .models import (
     Army, ArmyImage, PaintingGuide, GuideMaterial, GuideStep,
     BattleReport, BattleNarrative, Comment, LoreEntry, NewsArticle,
-    Paint,
+    Paint, Listing, PurchaseRequest,
 )
 
 
@@ -167,3 +167,39 @@ class NewsArticleAdmin(admin.ModelAdmin):
     search_fields = ('title', 'content', 'author')
     list_editable = ('is_published',)
     readonly_fields = ('published_at', 'created_at', 'updated_at', 'slug')
+
+
+class PurchaseRequestInline(admin.TabularInline):
+    model = PurchaseRequest
+    extra = 0
+    readonly_fields = ('name', 'surname', 'email', 'phone', 'address', 'notes', 'created_at')
+    fields = ('status', 'name', 'surname', 'email', 'phone', 'created_at')
+    can_delete = False
+
+
+@admin.register(Listing)
+class ListingAdmin(admin.ModelAdmin):
+    list_display = ('title', 'faction', 'state', 'price_display', 'status', 'requests_count', 'created_at')
+    list_filter = ('status', 'state', 'faction', 'game')
+    search_fields = ('title', 'description', 'faction')
+    list_editable = ('status',)
+    readonly_fields = ('created_at', 'updated_at')
+    inlines = [PurchaseRequestInline]
+
+    @admin.display(description='Precio')
+    def price_display(self, obj):
+        return f'{obj.price} €'
+
+    @admin.display(description='Solicitudes')
+    def requests_count(self, obj):
+        n = obj.requests.filter(status__in=['pending', 'contacted']).count()
+        return format_html('<strong style="color:#00d4ff">{}</strong>', n) if n else '0'
+
+
+@admin.register(PurchaseRequest)
+class PurchaseRequestAdmin(admin.ModelAdmin):
+    list_display = ('listing', 'name', 'surname', 'email', 'phone', 'status', 'created_at')
+    list_filter = ('status', 'created_at')
+    search_fields = ('name', 'surname', 'email', 'listing__title')
+    list_editable = ('status',)
+    readonly_fields = ('created_at', 'listing', 'name', 'surname', 'email', 'phone', 'address', 'notes')

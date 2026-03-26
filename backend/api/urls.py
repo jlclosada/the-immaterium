@@ -12,6 +12,8 @@ router.register(r'paints', views.PaintViewSet, basename='paint')
 router.register(r'battle-reports', views.BattleReportViewSet, basename='battlereport')
 router.register(r'lore', views.LoreEntryViewSet, basename='lore')
 router.register(r'news', views.NewsArticleViewSet, basename='news')
+router.register(r'listings', views.ListingViewSet, basename='listing')
+router.register(r'purchase-requests', views.PurchaseRequestViewSet, basename='purchaserequest')
 
 builder_router = DefaultRouter()
 builder_router.register(r'factions', builder_views.BuilderFactionViewSet, basename='builder-faction')

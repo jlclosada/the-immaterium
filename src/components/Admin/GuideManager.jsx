@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import ReactDOM from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../../services/api';
 import { useStore } from '../../stores/useStore';
@@ -560,7 +561,7 @@ const GuideManager = () => {
 
             {/* ── Wizard Modal ── */}
             <AnimatePresence>
-                {wizardOpen && (
+                {wizardOpen && ReactDOM.createPortal(
                     <>
                         {/* Backdrop */}
                         <motion.div
@@ -570,9 +571,13 @@ const GuideManager = () => {
                             onClick={handleCloseWizard}
                             style={{
                                 position: 'fixed', inset: 0,
-                                background: 'rgba(0,0,0,0.75)',
-                                zIndex: 900,
+                                background: 'rgba(0,0,0,0.7)',
+                                zIndex: 1000,
                                 backdropFilter: 'blur(4px)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                padding: '1rem',
                             }}
                         />
 
@@ -590,11 +595,11 @@ const GuideManager = () => {
                                 maxHeight: '92vh',
                                 display: 'flex',
                                 flexDirection: 'column',
-                                background: 'var(--color-darker, #0a0a1a)',
+                                background: '#0a0a1e',
                                 border: '1px solid rgba(255,255,255,0.1)',
                                 borderRadius: '20px',
                                 boxShadow: '0 32px 80px rgba(0,0,0,0.7)',
-                                zIndex: 901,
+                                zIndex: 1001,
                                 overflow: 'hidden',
                             }}
                         >
@@ -776,7 +781,8 @@ const GuideManager = () => {
                                 </div>
                             </div>
                         </motion.div>
-                    </>
+                    </>,
+                    document.body
                 )}
             </AnimatePresence>
         </div>

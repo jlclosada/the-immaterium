@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import (
     Army, ArmyImage, PaintingGuide, GuideMaterial, GuideStep,
     BattleReport, BattleNarrative, Comment, UserLike, UserFavorite, LoreEntry,
-    NewsArticle, Game, Paint,
+    NewsArticle, Game, Paint, Listing, PurchaseRequest,
 )
 
 class GameSerializer(serializers.ModelSerializer):
@@ -285,3 +285,43 @@ class NewsArticleSerializer(serializers.ModelSerializer):
             'coverImage', 'images', 'author', 'tags',
             'isPublished', 'publishedAt'
         ]
+
+
+class PurchaseRequestSerializer(serializers.ModelSerializer):
+    listing_title = serializers.CharField(source='listing.title', read_only=True)
+    listing_price = serializers.DecimalField(source='listing.price', max_digits=8, decimal_places=2, read_only=True)
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+
+    class Meta:
+        model = PurchaseRequest
+        fields = [
+            'id', 'listing', 'listing_title', 'listing_price',
+            'name', 'surname', 'email', 'phone', 'address', 'notes',
+            'status', 'status_display', 'created_at',
+        ]
+        read_only_fields = ['status', 'created_at']
+
+
+class ListingSerializer(serializers.ModelSerializer):
+    state_display = serializers.CharField(source='get_state_display', read_only=True)
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+    requests_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Listing
+        fields = [
+            'id', 'title', 'description', 'state', 'state_display',
+            'price', 'faction', 'game', 'tags', 'images',
+            'status', 'status_display', 'created_at', 'updated_at',
+            'requests_count',
+        ]
+
+    def get_requests_count(self, obj):
+        return obj.requests.filter(status__in=['pending', 'contacted']).count()
+
+
+class ListingDetailSerializer(ListingSerializer):
+    requests = PurchaseRequestSerializer(many=True, read_only=True)
+
+    class Meta(ListingSerializer.Meta):
+        fields = ListingSerializer.Meta.fields + ['requests']

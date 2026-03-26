@@ -456,3 +456,68 @@ class BuilderArmyList(models.Model):
             self.id = str(uuid.uuid4())
         super().save(*args, **kwargs)
 
+
+# ────────────────────────────────────────
+# Marketplace
+# ────────────────────────────────────────
+
+class Listing(models.Model):
+    STATE_CHOICES = [
+        ('sin_montar', 'Sin montar / En caja'),
+        ('montada', 'Montada'),
+        ('imprimada', 'Imprimada'),
+        ('pintada_parcial', 'Pintada parcialmente'),
+        ('pintada', 'Pintada completamente'),
+        ('conversion', 'Conversión / Custom'),
+    ]
+    STATUS_CHOICES = [
+        ('available', 'Disponible'),
+        ('reserved', 'Reservado'),
+        ('sold', 'Vendido'),
+    ]
+    title = models.CharField(max_length=300)
+    description = models.TextField(blank=True)
+    state = models.CharField(max_length=30, choices=STATE_CHOICES)
+    price = models.DecimalField(max_digits=8, decimal_places=2)
+    faction = models.CharField(max_length=200, blank=True)
+    game = models.CharField(max_length=100, blank=True)
+    tags = ArrayField(models.CharField(max_length=100), default=list, blank=True)
+    images = ArrayField(models.URLField(max_length=500), default=list, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='available')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Anuncio'
+        verbose_name_plural = 'Anuncios'
+
+    def __str__(self):
+        return f'{self.title} ({self.get_state_display()}) — {self.price}€'
+
+
+class PurchaseRequest(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pendiente'),
+        ('contacted', 'Contactado'),
+        ('confirmed', 'Confirmado'),
+        ('cancelled', 'Cancelado'),
+    ]
+    listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name='requests')
+    name = models.CharField(max_length=200)
+    surname = models.CharField(max_length=200)
+    email = models.EmailField()
+    phone = models.CharField(max_length=50, blank=True)
+    address = models.TextField(blank=True)
+    notes = models.TextField(blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Solicitud de compra'
+        verbose_name_plural = 'Solicitudes de compra'
+
+    def __str__(self):
+        return f'{self.name} {self.surname} → {self.listing.title}'
+
