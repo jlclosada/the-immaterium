@@ -324,15 +324,17 @@ const GuideDetailPage = () => {
               </h3>
             </div>
 
-            <p style={{
-              color: 'rgba(255,255,255,0.7)',
-              lineHeight: 1.8,
-              fontSize: '0.95rem',
-              marginLeft: '0.5rem',
-              marginBottom: step.images?.length > 0 || step.tips?.length > 0 ? '1.25rem' : 0,
-            }}>
-              {step.description}
-            </p>
+            <div
+              dangerouslySetInnerHTML={{ __html: step.description }}
+              style={{
+                color: 'rgba(255,255,255,0.7)',
+                lineHeight: 1.8,
+                fontSize: '0.95rem',
+                marginLeft: '0.5rem',
+                marginBottom: step.images?.length > 0 || step.tips?.length > 0 ? '1.25rem' : 0,
+              }}
+              className="rich-content"
+            />
 
             {/* Step images */}
             {step.images?.length > 0 && (

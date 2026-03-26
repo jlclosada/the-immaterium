@@ -313,14 +313,16 @@ const BattleReportDetailPage = () => {
                       Turno {entry.turn} — {entry.phase}
                     </span>
                   </div>
-                  <p style={{
-                    color: 'rgba(255,255,255,0.7)',
-                    lineHeight: 1.8,
-                    fontSize: '0.95rem',
-                    margin: 0,
-                  }}>
-                    {entry.text}
-                  </p>
+                  <div
+                    dangerouslySetInnerHTML={{ __html: entry.text }}
+                    className="rich-content"
+                    style={{
+                      color: 'rgba(255,255,255,0.7)',
+                      lineHeight: 1.8,
+                      fontSize: '0.95rem',
+                      margin: 0,
+                    }}
+                  />
                 </div>
               ))}
             </div>

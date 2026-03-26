@@ -17,6 +17,50 @@
   .nav-grid.two-col { grid-template-columns: repeat(2, 1fr) !important; }
 }
 
+/* ── Rich text content (rendered HTML from RichTextEditor) ── */
+.rich-content {
+  word-break: break-word;
+}
+.rich-content p,
+.rich-content div {
+  margin: 0 0 0.4em;
+}
+.rich-content b,
+.rich-content strong {
+  color: rgba(255,255,255,0.92);
+  font-weight: 700;
+}
+.rich-content em,
+.rich-content i {
+  font-style: italic;
+  color: rgba(255,255,255,0.75);
+}
+.rich-content ul {
+  margin: 0.25em 0 0.5em 1.4em;
+  padding: 0;
+}
+.rich-content li {
+  margin-bottom: 0.2em;
+}
+
+/* Paint chips inside rich content */
+.rich-content .paint-chip,
+.paint-chip {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  border-radius: 6px !important;
+  padding: 2px 8px !important;
+  font-size: 0.82em !important;
+  white-space: nowrap !important;
+  cursor: default !important;
+  user-select: none !important;
+  vertical-align: middle !important;
+  font-family: var(--font-body, sans-serif) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.3px !important;
+}
+
 /* Responsive overrides for legacy inline styles */
 .fullscreen-overlay {
   position: fixed;
