@@ -3,6 +3,31 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useStore } from '../../stores/useStore';
 import { useTranslation } from '../../i18n/translations';
+import { useTheme } from '../../hooks/useTheme';
+
+// ─── Sun/Moon icon ────────────────────────────────────────────────────────────
+function SunIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="5"/>
+      <line x1="12" y1="1" x2="12" y2="3"/>
+      <line x1="12" y1="21" x2="12" y2="23"/>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+      <line x1="1" y1="12" x2="3" y2="12"/>
+      <line x1="21" y1="12" x2="23" y2="12"/>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+    </svg>
+  );
+}
+function MoonIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+    </svg>
+  );
+}
 
 // ─── CSS responsive (inyectado una sola vez) ─────────────────────────────────
 const HEADER_CSS = `
@@ -21,11 +46,11 @@ const HEADER_CSS = `
 
 // ─── navBtnStyle — module-level, no closure over component state ─────────────
 const navBtnStyle = (active) => ({
-  background: active ? 'rgba(0,212,255,0.15)' : 'rgba(255,255,255,0.05)',
-  border: `1px solid ${active ? 'var(--color-primary)' : 'rgba(255,255,255,0.1)'}`,
+  background: active ? 'rgba(0,212,255,0.15)' : 'var(--glass-bg)',
+  border: `1px solid ${active ? 'var(--color-primary)' : 'var(--glass-border)'}`,
   borderRadius: '12px',
   padding: '0.5rem 0.85rem',
-  color: active ? 'var(--color-primary)' : '#fff',
+  color: active ? 'var(--color-primary)' : 'var(--text-primary)',
   fontFamily: 'var(--font-display)',
   fontSize: '0.72rem',
   letterSpacing: '1px',
@@ -87,7 +112,7 @@ function MoreBtn({ items, currentPath, navigate }) {
               top: 'calc(100% + 0.5rem)',
               right: 0,
               minWidth: '185px',
-              background: 'rgba(8,8,22,0.98)',
+              background: 'var(--surface-header)',
               border: '1px solid rgba(0,212,255,0.2)',
               borderRadius: '14px',
               padding: '0.5rem',
@@ -149,6 +174,7 @@ export default function Header() {
   const language = useStore(state => state.language);
   const t = useTranslation(language);
   const currentPath = location.pathname;
+  const { theme, toggleTheme, isLight } = useTheme();
 
   // Inject responsive CSS once
   useEffect(() => {
@@ -251,8 +277,8 @@ export default function Header() {
           zIndex: 100,
           padding: 'clamp(0.65rem, 1.5vw, 1.2rem) clamp(1rem, 4vw, 3rem)',
           background: scrolled
-            ? 'rgba(10,10,26,0.97)'
-            : 'linear-gradient(180deg, rgba(10,10,26,0.8) 0%, transparent 100%)',
+            ? 'var(--surface-header)'
+            : `linear-gradient(180deg, var(--surface-header-gradient) 0%, transparent 100%)`,
           backdropFilter: scrolled ? 'blur(20px)' : 'blur(10px)',
           borderBottom: scrolled ? '1px solid rgba(0,212,255,0.08)' : 'none',
           transition: 'all 0.3s ease',
@@ -337,6 +363,32 @@ export default function Header() {
             </svg>
           </motion.button>
 
+          {/* Theme toggle */}
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={toggleTheme}
+            title={isLight ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro'}
+            style={{
+              background: 'rgba(255,255,255,0.07)',
+              border: '1px solid rgba(255,255,255,0.15)',
+              borderRadius: '10px', padding: '0.5rem', cursor: 'pointer',
+              color: isLight ? '#f59e0b' : '#a5b4fc',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'all 0.2s', flexShrink: 0,
+            }}
+          >
+            <motion.div
+              key={theme}
+              initial={{ rotate: -30, opacity: 0 }}
+              animate={{ rotate: 0, opacity: 1 }}
+              transition={{ duration: 0.25 }}
+              style={{ display: 'flex' }}
+            >
+              {isLight ? <SunIcon /> : <MoonIcon />}
+            </motion.div>
+          </motion.button>
+
           {/* Mobile hamburger (<580px) */}
           <motion.button
             whileTap={{ scale: 0.9 }}
@@ -384,8 +436,8 @@ export default function Header() {
                   placeholder="Buscar en The Immaterium..."
                   style={{
                     width: '100%', padding: '0.75rem 1rem 0.75rem 2.75rem',
-                    background: 'rgba(10,10,26,0.97)', border: '1px solid rgba(0,212,255,0.4)',
-                    borderRadius: '12px', color: '#fff', fontSize: '0.95rem', outline: 'none',
+                    background: 'var(--surface-header)', border: '1px solid rgba(0,212,255,0.4)',
+                    borderRadius: '12px', color: 'var(--text-primary)', fontSize: '0.95rem', outline: 'none',
                     fontFamily: 'var(--font-body)', boxSizing: 'border-box',
                     boxShadow: '0 8px 32px rgba(0,0,0,0.5)', backdropFilter: 'blur(20px)',
                   }}
@@ -409,7 +461,7 @@ export default function Header() {
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setMobileMenuOpen(false)}
-              style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(5px)', zIndex: 150 }}
+              style={{ position: 'fixed', inset: 0, background: 'var(--surface-overlay)', backdropFilter: 'blur(5px)', zIndex: 150 }}
             />
             <motion.div
               initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
@@ -417,7 +469,7 @@ export default function Header() {
               style={{
                 position: 'fixed', top: 0, right: 0, bottom: 0,
                 width: 'min(85vw, 320px)',
-                background: 'linear-gradient(135deg, rgba(10,10,26,0.99) 0%, rgba(20,5,30,0.99) 100%)',
+                background: 'var(--surface-sidebar)',
                 backdropFilter: 'blur(20px)',
                 borderLeft: '1px solid rgba(0,212,255,0.2)',
                 boxShadow: '-10px 0 50px rgba(0,0,0,0.5)',
@@ -440,10 +492,10 @@ export default function Header() {
                       whileTap={{ scale: 0.98 }}
                       onClick={() => navigate(item.path)}
                       style={{
-                        background: active ? 'rgba(0,212,255,0.12)' : 'rgba(255,255,255,0.04)',
-                        border: `1px solid ${active ? 'var(--color-primary)' : 'rgba(255,255,255,0.08)'}`,
+                        background: active ? 'rgba(0,212,255,0.12)' : 'var(--glass-bg)',
+                        border: `1px solid ${active ? 'var(--color-primary)' : 'var(--glass-border)'}`,
                         borderRadius: '12px', padding: '0.85rem 1rem',
-                        color: active ? 'var(--color-primary)' : '#e0e0e8',
+                        color: active ? 'var(--color-primary)' : 'var(--text-primary)',
                         fontSize: '0.95rem', textAlign: 'left', cursor: 'pointer',
                         transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '0.85rem',
                         fontFamily: 'var(--font-display)', letterSpacing: '1px',

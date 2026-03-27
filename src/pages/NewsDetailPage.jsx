@@ -4,23 +4,7 @@ import { motion } from 'framer-motion';
 import { api } from '../services/api';
 import Header from '../components/UI/Header';
 import Footer from '../components/UI/Footer';
-
-// Minimal markdown-to-HTML renderer (headings, bold, italic, code, links, paragraphs)
-const renderMarkdown = (md) => {
-  if (!md) return '';
-  return md
-    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-    .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    .replace(/`(.+?)`/g, '<code>$1</code>')
-    .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
-    .replace(/^---$/gm, '<hr/>')
-    .replace(/\n\n/g, '</p><p>')
-    .replace(/\n/g, '<br/>')
-    .replace(/^(.+)$/, '<p>$1</p>');
-};
+import { renderMarkdown } from '../utils/renderMarkdown';
 
 const NewsDetailPage = () => {
   const { id } = useParams();
@@ -147,11 +131,7 @@ const NewsDetailPage = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          style={{
-            color: 'rgba(255,255,255,0.75)',
-            lineHeight: 1.85,
-            fontSize: 'clamp(0.95rem, 2vw, 1.05rem)',
-          }}
+          className="md-content"
           dangerouslySetInnerHTML={{ __html: renderMarkdown(article.content) }}
         />
 

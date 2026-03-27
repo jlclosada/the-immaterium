@@ -79,3 +79,162 @@
     padding: 5rem 1rem 1rem !important;
   }
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Markdown content (.md-content wrapper)
+   Applied in NewsDetailPage, LoreDetailPage
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.md-content {
+  word-break: break-word;
+  font-size: clamp(0.95rem, 2vw, 1.05rem);
+  line-height: 1.85;
+  color: var(--text-secondary);
+}
+
+/* Paragraphs */
+.md-content .md-p {
+  margin: 0 0 1.1em;
+  color: var(--text-secondary);
+}
+
+/* Headings */
+.md-content .md-h {
+  font-family: var(--font-display);
+  color: var(--text-primary);
+  letter-spacing: 0.5px;
+  margin: 1.75em 0 0.65em;
+  line-height: 1.25;
+}
+.md-content .md-h1 { font-size: clamp(1.5rem, 4vw, 2rem);   }
+.md-content .md-h2 { font-size: clamp(1.2rem, 3vw, 1.55rem); }
+.md-content .md-h3 { font-size: clamp(1rem,  2.5vw, 1.25rem); color: var(--color-secondary); }
+.md-content .md-h4 { font-size: 1rem; color: var(--color-primary); }
+
+/* Horizontal rule */
+.md-content .md-hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-primary), var(--color-secondary), transparent);
+  margin: 2em 0;
+  opacity: 0.5;
+}
+
+/* Bold & Italic inside paragraphs */
+.md-content strong {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+.md-content em {
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
+/* Blockquote */
+.md-content .md-blockquote {
+  margin: 1.25em 0;
+  padding: 0.75em 1.25em;
+  border-left: 3px solid var(--color-primary);
+  background: rgba(0,212,255,0.05);
+  border-radius: 0 var(--radius-md, 10px) var(--radius-md, 10px) 0;
+  color: var(--text-dim);
+  font-style: italic;
+}
+
+/* Lists */
+.md-content .md-ul,
+.md-content .md-ol {
+  margin: 0.75em 0 1.1em 1.5em;
+  padding: 0;
+  color: var(--text-secondary);
+}
+.md-content .md-ul li,
+.md-content .md-ol li {
+  margin-bottom: 0.35em;
+  line-height: 1.7;
+}
+.md-content .md-ul li::marker { color: var(--color-primary); }
+.md-content .md-ol li::marker { color: var(--color-secondary); font-weight: 700; }
+
+/* Inline code */
+.md-content .md-code {
+  background: rgba(0,212,255,0.08);
+  border: 1px solid rgba(0,212,255,0.2);
+  border-radius: 5px;
+  padding: 1px 6px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.88em;
+  color: var(--color-primary);
+  white-space: nowrap;
+}
+
+/* Code block */
+.md-content .md-pre {
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius-lg, 14px);
+  padding: 1.1em 1.25em;
+  overflow-x: auto;
+  margin: 1.25em 0;
+}
+.md-content .md-pre code {
+  font-family: 'Courier New', monospace;
+  font-size: 0.88em;
+  color: rgba(255,255,255,0.85);
+  white-space: pre;
+}
+
+/* Links */
+.md-content .md-link {
+  color: var(--color-primary);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s, opacity 0.2s;
+}
+.md-content .md-link:hover {
+  border-bottom-color: var(--color-primary);
+  opacity: 0.85;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Light theme global overrides
+   ══════════════════════════════════════════════════════════════════════════ */
+
+[data-theme="light"] html,
+[data-theme="light"] body,
+[data-theme="light"] #root {
+  background: var(--color-darker);
+  color: var(--text-primary);
+}
+
+/* Rich text in light mode */
+[data-theme="light"] .rich-content b,
+[data-theme="light"] .rich-content strong {
+  color: rgba(0,0,20,0.92);
+}
+[data-theme="light"] .rich-content em,
+[data-theme="light"] .rich-content i {
+  color: rgba(0,0,20,0.72);
+}
+
+/* Glass panels in light mode */
+[data-theme="light"] .glass-panel {
+  background: var(--glass-bg);
+  border-color: var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+/* Code block in light mode */
+[data-theme="light"] .md-content .md-pre {
+  background: rgba(0,0,0,0.05);
+  border-color: rgba(0,0,0,0.12);
+}
+[data-theme="light"] .md-content .md-pre code {
+  color: rgba(0,0,20,0.85);
+}
+[data-theme="light"] .md-content .md-blockquote {
+  background: rgba(0,212,255,0.07);
+}
+[data-theme="light"] .md-content .md-code {
+  background: rgba(0,212,255,0.06);
+}

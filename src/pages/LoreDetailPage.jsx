@@ -6,6 +6,7 @@ import { useStore } from '../stores/useStore';
 import { useTranslation } from '../i18n/translations';
 import Header from '../components/UI/Header';
 import Footer from '../components/UI/Footer';
+import { renderMarkdown } from '../utils/renderMarkdown';
 
 const CATEGORY_COLORS = {
   historia: '#a78bfa',
@@ -197,15 +198,10 @@ const LoreDetailPage = () => {
             marginBottom: '1.5rem',
           }}
         >
-          <div style={{
-            color: 'rgba(255,255,255,0.75)',
-            lineHeight: 2,
-            fontSize: 'clamp(0.95rem, 2.5vw, 1.05rem)',
-            whiteSpace: 'pre-wrap',
-            fontFamily: 'var(--font-body)',
-          }}>
-            {lore.content}
-          </div>
+          <div
+            className="md-content"
+            dangerouslySetInnerHTML={{ __html: renderMarkdown(lore.content) }}
+          />
         </motion.div>
 
         {/* Related faction */}
