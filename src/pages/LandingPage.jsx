@@ -1,11 +1,11 @@
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Footer from '../components/UI/Footer';
+import { useTheme } from '../hooks/useTheme';
 import { useTranslation } from '../i18n/translations';
 import { api } from '../services/api';
 import { useStore } from '../stores/useStore';
-import { useTheme } from '../hooks/useTheme';
 
 // Row 1: Marketplace, Pintura, Batallas
 // [Featured marketplace products]
@@ -259,12 +259,16 @@ const LandingPage = () => {
             fontFamily: 'var(--font-display)',
             fontSize: 'clamp(2.2rem, 9vw, 6.5rem)',
             letterSpacing: 'clamp(0.1rem, 2vw, 0.6rem)',
-            background: isLight
+            backgroundImage: isLight
               ? 'linear-gradient(180deg, #0d1333 0%, #2a4080 60%, #0099cc 100%)'
               : 'linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.6) 100%)',
+
             WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
+
+            WebkitTextFillColor: 'transparent',
+            color: 'transparent', // 🔥 ESTA LÍNEA ES LA CLAVE
+
             lineHeight: 1.1,
             marginBottom: '1.5rem',
             textShadow: 'none',
@@ -855,20 +859,22 @@ const SectionCard = ({ item, t, isLight }) => (
       <h2 style={{
         fontFamily: 'var(--font-display)',
         fontSize: 'clamp(1rem, 2.5vw, 1.3rem)',
-        color: isLight ? 'var(--text-primary)' : '#fff',
+        color: 'var(--text-primary)',
         letterSpacing: '2px',
         marginBottom: '0.5rem',
         textTransform: 'uppercase',
+        fontWeight: 700,
       }}>
         {t(item.titleKey)}
       </h2>
 
       <span style={{
-        color: isLight ? 'var(--text-secondary)' : 'rgba(255,255,255,0.55)',
+        color: 'var(--text-secondary)',
         fontSize: 'clamp(0.75rem, 1.5vw, 0.82rem)',
         textTransform: 'uppercase',
         letterSpacing: '1.5px',
         fontFamily: 'var(--font-display)',
+        fontWeight: 600,
       }}>
         {t(item.subtitleKey)}
       </span>

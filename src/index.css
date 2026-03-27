@@ -356,9 +356,9 @@
   color: var(--text-secondary) !important;
 }
 
-/* Spans that carry plain text (no border-radius = not a badge/chip/pill).
-   Badge spans have borderRadius in their style; text spans don't. */
-[data-theme="light"] span:not([style*="border-radius"]):not([class]) {
+/* Spans that carry plain text (no border-radius = not a badge/chip/pill,
+   no explicit color = not already overridden). */
+[data-theme="light"] span:not([style*="border-radius"]):not([class]):not([style*="color:"]) {
   color: var(--text-dim) !important;
 }
 
@@ -381,10 +381,11 @@
    We target by the CSS variable references used for border-radius.
    ═══════════════════════════════════════════════════════════════════════ */
 
-/* Divs that use our design-system border-radius variables = card-like */
-[data-theme="light"] div[style*="--radius-xl"],
-[data-theme="light"] div[style*="--radius-lg"] {
-  background: rgba(255,255,255,0.80) !important;
+/* Divs that use our design-system border-radius variables = card-like.
+   Excludes .section-card-inner which manages its own solid background. */
+[data-theme="light"] div[style*="--radius-xl"]:not(.section-card-inner),
+[data-theme="light"] div[style*="--radius-lg"]:not(.section-card-inner) {
+  background: rgba(255,255,255,0.92) !important;
   border-color: rgba(0,153,204,0.14) !important;
   box-shadow: 0 2px 16px rgba(13,19,51,0.06) !important;
 }
