@@ -29,7 +29,7 @@ const NAV_ROW1 = [
     to: '/guides',
     titleKey: 'paintingTitle',
     subtitleKey: 'paintingSubtitle',
-    color: isLight ? '#4b5563' : 'var(--text-secondary)',
+    color: 'var(--color-secondary)',
     icon: (
       <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M12 19l7-7 3 3-7 7-3-3z" />
@@ -820,8 +820,8 @@ const SectionCard = ({ item, t, isLight }) => (
         flexDirection: 'column',
         alignItems: 'center',
         textAlign: 'center',
-        background: isLight ? '#ffffff' : 'rgba(10,12,32,0.82)',
-        border: isLight ? `1.5px solid ${item.color}55` : `1px solid ${item.color}35`,
+        background: isLight ? 'rgba(255,255,255,0.75)' : 'rgba(10,12,32,0.82)',
+        border: isLight ? `1px solid ${item.color}33` : `1px solid ${item.color}35`,
         borderRadius: 'var(--radius-xl)',
         cursor: 'pointer',
         position: 'relative',
@@ -829,7 +829,7 @@ const SectionCard = ({ item, t, isLight }) => (
         backdropFilter: 'blur(20px)',
         transition: 'border-color 0.25s, box-shadow 0.25s, background 0.25s, transform 0.22s',
         boxShadow: isLight
-          ? `0 6px 28px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.9)`
+          ? `0 4px 20px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.05)`
           : `0 4px 32px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.05)`,
       }}
     >
@@ -859,7 +859,7 @@ const SectionCard = ({ item, t, isLight }) => (
       <h2 style={{
         fontFamily: 'var(--font-display)',
         fontSize: 'clamp(1rem, 2.5vw, 1.3rem)',
-        color: isLight ? '#0d1333' : 'var(--text-primary)',
+        color: 'var(--text-primary)',
         letterSpacing: '2px',
         marginBottom: '0.5rem',
         textTransform: 'uppercase',
@@ -869,7 +869,7 @@ const SectionCard = ({ item, t, isLight }) => (
       </h2>
 
       <span style={{
-        color: isLight ? '#4b5563' : 'var(--text-secondary)',
+        color: 'var(--text-secondary)',
         fontSize: 'clamp(0.75rem, 1.5vw, 0.82rem)',
         textTransform: 'uppercase',
         letterSpacing: '1.5px',
@@ -994,7 +994,7 @@ const FeaturedCard = ({ to, badge, badgeColor, title, excerpt, linkLabel, linkCo
     </h3>
     {excerpt && (
       <p style={{
-        color: isLight ? '#4b5563' : 'var(--text-secondary)',
+        color: 'var(--text-secondary)',
         fontSize: '0.9rem',
         lineHeight: 1.7,
         margin: 0,
