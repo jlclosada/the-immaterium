@@ -199,6 +199,10 @@
 /* ══════════════════════════════════════════════════════════════════════════
    Light theme — Tesla Futuristic  (data-theme="light")
    Palette: arctic white base · deep-space-blue text · electric-cyan accent
+
+   KEY TECHNIQUE: CSS !important beats React inline styles.
+   React cannot set !important via style objects, so our CSS wins over
+   all the hardcoded rgba(255,255,255,...) and #fff inline colors.
    ══════════════════════════════════════════════════════════════════════════ */
 
 /* ── Root / page background ─────────────────────────────────────────────── */
@@ -221,83 +225,202 @@
   z-index: 0;
 }
 
-/* ── Glass panels ───────────────────────────────────────────────────────── */
+/* ══ TEXT CONTRAST — override ALL white/light inline colors ═══════════════
+
+   h1-h6, p, li all receive !important dark colors, overriding every
+   color: '#fff' and color: 'rgba(255,255,255,X)' inline style.
+
+   Gradient headings are safe: -webkit-text-fill-color: transparent
+   takes rendering precedence over `color` in Chromium/Safari.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+[data-theme="light"] h1,
+[data-theme="light"] h2,
+[data-theme="light"] h3,
+[data-theme="light"] h4,
+[data-theme="light"] h5,
+[data-theme="light"] h6 {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="light"] p {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="light"] li {
+  color: var(--text-secondary) !important;
+}
+
+/* Spans that carry plain text (no border-radius = not a badge/chip/pill).
+   Badge spans have borderRadius in their style; text spans don't. */
+[data-theme="light"] span:not([style*="border-radius"]):not([class]) {
+  color: var(--text-dim) !important;
+}
+
+/* Spans inside headings should inherit the heading's dark color */
+[data-theme="light"] h1 span,
+[data-theme="light"] h2 span,
+[data-theme="light"] h3 span,
+[data-theme="light"] h4 span {
+  color: inherit !important;
+}
+
+/* SVG icons used as decorative inline elements should adapt */
+[data-theme="light"] svg {
+  color: inherit;
+}
+
+/* ══ CARD / SURFACE VISIBILITY ═══════════════════════════════════════════
+   Cards use rgba(255,255,255,0.025) bg + rgba(255,255,255,0.07) border
+   — both nearly invisible on our light page color.
+   We target by the CSS variable references used for border-radius.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Divs that use our design-system border-radius variables = card-like */
+[data-theme="light"] div[style*="--radius-xl"],
+[data-theme="light"] div[style*="--radius-lg"] {
+  background: rgba(255,255,255,0.80) !important;
+  border-color: rgba(0,153,204,0.14) !important;
+  box-shadow: 0 2px 16px rgba(13,19,51,0.06) !important;
+}
+
+/* Don't turn image containers into white boxes */
+[data-theme="light"] div[style*="--radius-xl"] img,
+[data-theme="light"] div[style*="--radius-lg"] img {
+  /* images are fine as-is */
+}
+
+/* ── Glass panels (css class) ───────────────────────────────────────────── */
 [data-theme="light"] .glass-panel {
-  background: var(--glass-bg);
-  border-color: var(--glass-border);
-  box-shadow: var(--glass-shadow);
+  background: rgba(255,255,255,0.80) !important;
+  border-color: rgba(0,153,204,0.15) !important;
+  box-shadow: 0 4px 24px rgba(13,19,51,0.07) !important;
 }
 
 /* ── Rich text content ──────────────────────────────────────────────────── */
 [data-theme="light"] .rich-content {
-  color: var(--text-secondary);
+  color: var(--text-secondary) !important;
 }
 [data-theme="light"] .rich-content b,
 [data-theme="light"] .rich-content strong {
-  color: var(--text-primary);
+  color: var(--text-primary) !important;
 }
 [data-theme="light"] .rich-content em,
 [data-theme="light"] .rich-content i {
-  color: var(--text-secondary);
+  color: var(--text-secondary) !important;
 }
 
 /* ── Markdown content ───────────────────────────────────────────────────── */
 [data-theme="light"] .md-content .md-pre {
-  background: rgba(13,19,51,0.05);
-  border-color: rgba(0,153,204,0.2);
+  background: rgba(13,19,51,0.05) !important;
+  border-color: rgba(0,153,204,0.2) !important;
 }
 [data-theme="light"] .md-content .md-pre code {
-  color: var(--text-primary);
+  color: var(--text-primary) !important;
 }
 [data-theme="light"] .md-content .md-blockquote {
-  background: rgba(0,153,204,0.06);
-  border-left-color: var(--color-primary);
-  color: var(--text-dim);
+  background: rgba(0,153,204,0.06) !important;
+  border-left-color: var(--color-primary) !important;
+  color: var(--text-dim) !important;
 }
 [data-theme="light"] .md-content .md-code {
-  background: rgba(0,153,204,0.08);
-  border-color: rgba(0,153,204,0.25);
-  color: var(--color-primary);
+  background: rgba(0,153,204,0.08) !important;
+  border-color: rgba(0,153,204,0.25) !important;
+  color: var(--color-primary) !important;
 }
 [data-theme="light"] .md-content .md-hr {
-  background: linear-gradient(90deg, transparent, rgba(0,153,204,0.4), rgba(153,0,204,0.4), transparent);
+  background: linear-gradient(90deg, transparent, rgba(0,153,204,0.4),
+    rgba(153,0,204,0.4), transparent) !important;
+  opacity: 0.7 !important;
 }
 
 /* ── Loading spinner ────────────────────────────────────────────────────── */
 [data-theme="light"] .loading-spinner {
-  border-color: rgba(0,153,204,0.15);
-  border-top-color: var(--color-primary);
+  border-color: rgba(0,153,204,0.15) !important;
+  border-top-color: var(--color-primary) !important;
 }
 
-/* ── Common page structures ─────────────────────────────────────────────── */
-/* Headings that use inline rgba(255,255,255,...) — override via class */
-[data-theme="light"] h1,
-[data-theme="light"] h2,
-[data-theme="light"] h3 {
-  color: var(--text-primary);
-}
-
-/* Nav grid section cards (landing page) */
-[data-theme="light"] .section-card-inner {
-  background: rgba(255,255,255,0.75);
-  border-color: rgba(0,153,204,0.15);
-  box-shadow: 0 4px 24px rgba(13,19,51,0.06);
-}
-
-/* News / Battle report list cards */
-[data-theme="light"] .content-card {
-  background: rgba(255,255,255,0.8);
-  border-color: rgba(0,153,204,0.12);
-}
-
-/* Search bar */
-[data-theme="light"] .search-bar {
-  background: rgba(255,255,255,0.85) !important;
+/* ── Inputs / textareas / selects ───────────────────────────────────────── */
+[data-theme="light"] input,
+[data-theme="light"] textarea,
+[data-theme="light"] select {
   color: var(--text-primary) !important;
+  background: rgba(255,255,255,0.85) !important;
   border-color: rgba(0,153,204,0.25) !important;
+}
+[data-theme="light"] input::placeholder,
+[data-theme="light"] textarea::placeholder {
+  color: var(--text-faint) !important;
+}
+
+/* ── Search bar ─────────────────────────────────────────────────────────── */
+[data-theme="light"] .search-bar {
+  background: rgba(255,255,255,0.9) !important;
+  color: var(--text-primary) !important;
+  border-color: rgba(0,153,204,0.3) !important;
 }
 [data-theme="light"] .search-bar::placeholder {
   color: var(--text-faint) !important;
+}
+
+/* ── Links (← back, Leer →, etc.) ──────────────────────────────────────── */
+[data-theme="light"] a:not([class]):not([style*="color: var(--color"]) {
+  color: var(--text-dim) !important;
+}
+[data-theme="light"] a:not([class]):not([style*="color: var(--color"]):hover {
+  color: var(--color-primary) !important;
+}
+
+/* ── Ghost / transparent buttons ───────────────────────────────────────── */
+/* Target buttons whose style contains rgba(255 (transparent white bg/border)
+   These are "ghost" utility buttons that need dark text in light mode */
+[data-theme="light"] button[style*="rgba(255,255,255"] {
+  color: var(--text-secondary) !important;
+  border-color: rgba(0,153,204,0.22) !important;
+}
+/* But keep their background very subtly blue-tinted (not fully transparent) */
+
+/* ── Horizontal dividers ────────────────────────────────────────────────── */
+[data-theme="light"] hr {
+  border-color: rgba(0,153,204,0.15) !important;
+}
+
+/* ── Footer ─────────────────────────────────────────────────────────────── */
+/* Footer.jsx already uses CSS variables — this is a safety net */
+[data-theme="light"] footer {
+  background: var(--surface-header) !important;
+  border-top-color: rgba(0,153,204,0.12) !important;
+}
+
+/* ── Accent colors — restore them after broad overrides ─────────────────── */
+/* Primary color text must stay primary (tags, prices, links) */
+[data-theme="light"] [style*="color: var(--color-primary)"],
+[data-theme="light"] [style*="color: var(--color-secondary)"],
+[data-theme="light"] [style*="color: var(--color-accent)"] {
+  color: var(--color-primary) !important;
+}
+[data-theme="light"] [style*="color: var(--color-secondary)"] {
+  color: var(--color-secondary) !important;
+}
+
+/* Specific semantic accent colors used in badges/indicators */
+[data-theme="light"] [style*="color: #50c878"],
+[data-theme="light"] [style*="color: #10b981"] { color: #059669 !important; }
+[data-theme="light"] [style*="color: #ff6464"],
+[data-theme="light"] [style*="color: #ff4466"] { color: #dc2626 !important; }
+[data-theme="light"] [style*="color: #f59e0b"],
+[data-theme="light"] [style*="color: #ffb432"],
+[data-theme="light"] [style*="color: #ffd700"],
+[data-theme="light"] [style*="color: #f9cb28"] { color: #b45309 !important; }
+[data-theme="light"] [style*="color: #a78bfa"] { color: #7c3aed !important; }
+[data-theme="light"] [style*="color: #6ab0f5"] { color: #1d6fa5 !important; }
+[data-theme="light"] [style*="color: #c078f0"] { color: #7e22ce !important; }
+
+/* ── Nav grid section cards (landing page) ──────────────────────────────── */
+[data-theme="light"] .section-card-inner {
+  background: rgba(255,255,255,0.80) !important;
+  border-color: rgba(0,153,204,0.15) !important;
+  box-shadow: 0 4px 24px rgba(13,19,51,0.07) !important;
 }
 
 /* ── Theme toggle pill ──────────────────────────────────────────────────── */

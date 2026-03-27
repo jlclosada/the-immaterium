@@ -7,7 +7,7 @@ const Footer = () => {
 
     return (
         <footer style={{
-            background: 'linear-gradient(to top, rgba(5, 5, 16, 1) 0%, rgba(10, 10, 26, 0.98) 100%)',
+            background: 'var(--surface-header)',
             borderTop: '1px solid rgba(0, 212, 255, 0.1)',
             padding: 'clamp(2rem, 6vw, 4rem) clamp(1rem, 4vw, 2rem) clamp(1.5rem, 4vw, 2rem)',
             marginTop: 'auto',
@@ -50,7 +50,7 @@ const Footer = () => {
                         THE IMMATERIUM
                     </h3>
                     <p style={{
-                        color: '#888',
+                        color: 'var(--text-dim)',
                         lineHeight: '1.7',
                         fontSize: 'clamp(0.85rem, 2vw, 0.95rem)'
                     }}>
@@ -66,7 +66,7 @@ const Footer = () => {
                     transition={{ delay: 0.2 }}
                 >
                     <h4 style={{
-                        color: '#fff',
+                        color: 'var(--text-primary)',
                         marginBottom: '1.2rem',
                         fontFamily: 'var(--font-display)',
                         letterSpacing: '1px',
@@ -92,7 +92,7 @@ const Footer = () => {
                     transition={{ delay: 0.3 }}
                 >
                     <h4 style={{
-                        color: '#fff',
+                        color: 'var(--text-primary)',
                         marginBottom: '1.2rem',
                         fontFamily: 'var(--font-display)',
                         letterSpacing: '1px',
@@ -108,7 +108,7 @@ const Footer = () => {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 style={{
-                                    color: '#aaa',
+                                    color: 'var(--text-dim)',
                                     textDecoration: 'none',
                                     transition: 'all 0.2s',
                                     fontSize: 'clamp(0.85rem, 2vw, 0.95rem)',
@@ -116,14 +116,8 @@ const Footer = () => {
                                     alignItems: 'center',
                                     gap: '0.5rem'
                                 }}
-                                onMouseEnter={(e) => {
-                                    e.target.style.color = 'var(--color-primary)';
-                                    e.target.style.paddingLeft = '5px';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.target.style.color = '#aaa';
-                                    e.target.style.paddingLeft = '0';
-                                }}
+                                onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--color-primary)'; e.currentTarget.style.paddingLeft = '5px'; }}
+                                onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-dim)'; e.currentTarget.style.paddingLeft = '0'; }}
                             >
                                 Warhammer Community ↗
                             </a>
@@ -139,7 +133,7 @@ const Footer = () => {
                     transition={{ delay: 0.4 }}
                 >
                     <blockquote style={{
-                        color: '#666',
+                        color: 'var(--text-dim)',
                         fontStyle: 'italic',
                         fontSize: 'clamp(0.8rem, 2vw, 0.9rem)',
                         lineHeight: '1.6',
@@ -154,15 +148,14 @@ const Footer = () => {
 
             {/* Bottom Bar */}
             <div style={{
-                borderTop: '1px solid rgba(255, 255, 255, 0.05)',
+                borderTop: '1px solid var(--glass-border)',
                 paddingTop: 'clamp(1.5rem, 3vw, 2rem)',
                 display: 'flex',
-                flexDirection: window.innerWidth < 640 ? 'column' : 'row',
                 flexWrap: 'wrap',
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 gap: '1rem',
-                color: '#555',
+                color: 'var(--text-faint)',
                 fontSize: 'clamp(0.75rem, 2vw, 0.85rem)',
                 textAlign: 'center'
             }}>
@@ -181,7 +174,7 @@ const FooterLink = ({ to, children }) => (
     <Link
         to={to}
         style={{
-            color: '#aaa',
+            color: 'var(--text-dim)',
             textDecoration: 'none',
             transition: 'all 0.2s',
             fontSize: 'clamp(0.85rem, 2vw, 0.95rem)',
@@ -189,18 +182,11 @@ const FooterLink = ({ to, children }) => (
             alignItems: 'center',
             gap: '0.5rem'
         }}
-        onMouseEnter={(e) => {
-            e.target.style.color = 'var(--color-primary)';
-            e.target.style.paddingLeft = '5px';
-        }}
-        onMouseLeave={(e) => {
-            e.target.style.color = '#aaa';
-            e.target.style.paddingLeft = '0';
-        }}
+        onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--color-primary)'; e.currentTarget.style.paddingLeft = '5px'; }}
+        onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-dim)'; e.currentTarget.style.paddingLeft = '0'; }}
     >
         {children}
     </Link>
 );
 
 export default Footer;
-
