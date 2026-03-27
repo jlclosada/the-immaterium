@@ -821,7 +821,9 @@ const SectionCard = ({ item, t, isLight }) => (
         alignItems: 'center',
         textAlign: 'center',
         background: isLight ? 'rgba(255,255,255,0.75)' : 'rgba(10,12,32,0.82)',
-        border: isLight ? `1px solid ${item.color}33` : `1px solid ${item.color}35`,
+        border: isLight
+          ? `1px solid ${item.color.startsWith('var(') ? item.color : item.color + '33'}`
+          : `1px solid ${item.color.startsWith('var(') ? item.color : item.color + '35'}`,
         borderRadius: 'var(--radius-xl)',
         cursor: 'pointer',
         position: 'relative',
@@ -836,21 +838,27 @@ const SectionCard = ({ item, t, isLight }) => (
       {/* Top gradient shimmer */}
       <div style={{
         position: 'absolute', top: 0, left: 0, right: 0, height: '1px',
-        background: `linear-gradient(90deg, transparent, ${item.color}80, transparent)`,
+        background: item.color.startsWith('var(')
+          ? `linear-gradient(90deg, transparent, ${item.color}, transparent)`
+          : `linear-gradient(90deg, transparent, ${item.color}80, transparent)`,
         opacity: isLight ? 0.7 : 0.4,
       }} />
 
       {/* Glow on hover */}
       <div style={{
         position: 'absolute', inset: 0, borderRadius: 'var(--radius-xl)',
-        background: `radial-gradient(circle at 50% 0%, ${item.color}18 0%, transparent 60%)`,
+        background: item.color.startsWith('var(')
+          ? `radial-gradient(circle at 50% 0%, ${item.color} 0%, transparent 60%)`
+          : `radial-gradient(circle at 50% 0%, ${item.color}18 0%, transparent 60%)`,
         pointerEvents: 'none',
       }} className="card-glow" />
 
       <div style={{
         color: item.color,
         marginBottom: '1.25rem',
-        filter: `drop-shadow(0 0 14px ${item.color}66)`,
+        filter: item.color.startsWith('var(')
+          ? `drop-shadow(0 0 12px ${item.color})`
+          : `drop-shadow(0 0 12px ${item.color}88)`,
         transition: 'transform 0.3s',
       }}>
         {item.icon}

@@ -498,15 +498,15 @@
   border-top-color: rgba(0,153,204,0.12) !important;
 }
 
-/* ── Accent colors — restore them after broad overrides ─────────────────── */
-/* Primary color text must stay primary (tags, prices, links) */
-[data-theme="light"] [style*="color: var(--color-primary)"],
-[data-theme="light"] [style*="color: var(--color-secondary)"],
-[data-theme="light"] [style*="color: var(--color-accent)"] {
+/* ── Accent colors — restore each to its own value after broad overrides ──── */
+[data-theme="light"] [style*="color: var(--color-primary)"] {
   color: var(--color-primary) !important;
 }
 [data-theme="light"] [style*="color: var(--color-secondary)"] {
   color: var(--color-secondary) !important;
+}
+[data-theme="light"] [style*="color: var(--color-accent)"] {
+  color: var(--color-accent) !important;
 }
 
 /* Specific semantic accent colors used in badges/indicators */
