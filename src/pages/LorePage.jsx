@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { api } from '../services/api';
 import Header from '../components/UI/Header';
 import Footer from '../components/UI/Footer';
+import { useTheme } from '../hooks/useTheme';
 
 const CATEGORIES = [
   { value: 'all', label: 'Todas', color: 'var(--color-primary)' },
@@ -22,6 +23,7 @@ const getCategoryColor = (value) => {
 };
 
 const LorePage = () => {
+  const { isLight } = useTheme();
   const [loreEntries, setLoreEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -98,7 +100,7 @@ const LorePage = () => {
           }}>
             Biblioteca de Lore
           </h1>
-          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem', lineHeight: 1.6 }}>
+          <p style={{ color: isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.4)', fontSize: '0.9rem', lineHeight: 1.6 }}>
             {loreEntries.length > 0 ? `${loreEntries.length} entradas en los archivos` : 'Los archivos aguardan...'}
           </p>
         </motion.div>
@@ -109,8 +111,8 @@ const LorePage = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
           style={{
-            background: 'rgba(255,255,255,0.025)',
-            border: '1px solid rgba(255,255,255,0.07)',
+            background: isLight ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.025)',
+            border: `1px solid ${isLight ? 'rgba(0,120,200,0.15)' : 'rgba(255,255,255,0.07)'}`,
             borderRadius: 'var(--radius-xl)',
             padding: 'clamp(1rem, 3vw, 1.5rem)',
             marginBottom: '2rem',
@@ -145,9 +147,9 @@ const LorePage = () => {
                   style={{
                     padding: '0.4rem 0.9rem',
                     borderRadius: 'var(--radius-full)',
-                    border: active ? `1px solid ${cat.color}` : '1px solid rgba(255,255,255,0.1)',
-                    background: active ? `${cat.color}22` : 'rgba(255,255,255,0.04)',
-                    color: active ? cat.color : 'rgba(255,255,255,0.45)',
+                    border: active ? `1px solid ${cat.color}` : `1px solid ${isLight ? 'rgba(0,120,200,0.15)' : 'rgba(255,255,255,0.1)'}`,
+                    background: active ? `${cat.color}22` : (isLight ? 'rgba(0,0,0,0.04)' : 'rgba(255,255,255,0.04)'),
+                    color: active ? cat.color : (isLight ? 'var(--text-secondary)' : 'rgba(255,255,255,0.45)'),
                     fontSize: '0.78rem',
                     fontWeight: active ? 700 : 400,
                     cursor: 'pointer',
@@ -165,7 +167,7 @@ const LorePage = () => {
 
         {/* Results count */}
         {searchTerm || selectedCategory !== 'all' ? (
-          <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.82rem', marginBottom: '1.25rem', letterSpacing: '0.5px' }}>
+          <p style={{ color: isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.3)', fontSize: '0.82rem', marginBottom: '1.25rem', letterSpacing: '0.5px' }}>
             {filteredEntries.length} {filteredEntries.length === 1 ? 'resultado' : 'resultados'}
             {selectedCategory !== 'all' && ` en "${CATEGORIES.find(c => c.value === selectedCategory)?.label}"`}
           </p>
@@ -201,6 +203,7 @@ const LorePage = () => {
 };
 
 const LoreCard = ({ entry, index }) => {
+  const { isLight } = useTheme();
   const categoryColor = getCategoryColor(entry.category);
 
   return (
@@ -211,14 +214,14 @@ const LoreCard = ({ entry, index }) => {
         transition={{ delay: index * 0.06, duration: 0.35 }}
         whileHover={{ y: -3, boxShadow: '0 8px 30px rgba(0,212,255,0.15)' }}
         style={{
-          background: 'rgba(255,255,255,0.025)',
-          border: '1px solid rgba(255,255,255,0.07)',
+          background: isLight ? 'rgba(255,255,255,0.97)' : 'rgba(255,255,255,0.025)',
+          border: `1px solid ${isLight ? 'rgba(0,120,200,0.15)' : 'rgba(255,255,255,0.07)'}`,
           borderRadius: 'var(--radius-xl)',
           padding: 'clamp(1.25rem, 3vw, 1.75rem)',
           position: 'relative',
           overflow: 'hidden',
           transition: 'border-color 0.3s, box-shadow 0.3s',
-          borderLeft: entry.isFeatured ? `3px solid var(--color-accent)` : '1px solid rgba(255,255,255,0.07)',
+          borderLeft: entry.isFeatured ? `3px solid var(--color-accent)` : `1px solid ${isLight ? 'rgba(0,120,200,0.15)' : 'rgba(255,255,255,0.07)'}`,
         }}
       >
         {/* Featured badge */}
@@ -279,7 +282,7 @@ const LoreCard = ({ entry, index }) => {
         <h2 style={{
           fontFamily: 'var(--font-display)',
           fontSize: 'clamp(1.1rem, 3vw, 1.5rem)',
-          color: '#fff',
+          color: isLight ? 'var(--text-primary)' : '#fff',
           marginBottom: '0.75rem',
           lineHeight: 1.25,
           letterSpacing: '0.5px',

@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../services/api';
 import Header from '../components/UI/Header';
 import Footer from '../components/UI/Footer';
+import { useTheme } from '../hooks/useTheme';
 
 // ── Constants ──────────────────────────────────────────────────────────────
 
@@ -24,29 +25,29 @@ const STATUS_META = {
 
 const EMPTY_FORM = { name: '', surname: '', email: '', phone: '', address: '', notes: '' };
 
-// ── Shared styles ──────────────────────────────────────────────────────────
+// ── Shared styles (theme-aware via CSS variables) ──────────────────────────
 
-const inputStyle = {
+const getInputStyle = (isLight) => ({
   width: '100%',
   padding: '0.65rem 0.9rem',
-  background: 'rgba(255,255,255,0.06)',
-  border: '1px solid rgba(255,255,255,0.12)',
+  background: isLight ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.06)',
+  border: isLight ? '1px solid rgba(0,120,200,0.22)' : '1px solid rgba(255,255,255,0.12)',
   borderRadius: '8px',
-  color: '#fff',
+  color: isLight ? 'var(--text-primary)' : '#fff',
   fontSize: '0.9rem',
   fontFamily: 'var(--font-body)',
   outline: 'none',
   boxSizing: 'border-box',
-};
+});
 
-const labelStyle = {
+const getLabelStyle = (isLight) => ({
   display: 'block',
   fontSize: '0.78rem',
   letterSpacing: '0.5px',
-  color: 'rgba(255,255,255,0.45)',
+  color: isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.45)',
   marginBottom: '0.35rem',
   textTransform: 'uppercase',
-};
+});
 
 // ── Sub-components ─────────────────────────────────────────────────────────
 
@@ -113,6 +114,7 @@ function ImagePlaceholder() {
 
 function ListingCard({ listing, onClick }) {
   const [hovered, setHovered] = useState(false);
+  const { isLight } = useTheme();
   const img = listing.images && listing.images.length > 0 ? listing.images[0] : null;
   const isSold = listing.status === 'sold';
 
@@ -125,13 +127,15 @@ function ListingCard({ listing, onClick }) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        background: 'rgba(255,255,255,0.025)',
-        border: `1px solid ${hovered ? 'rgba(0,212,255,0.25)' : 'rgba(255,255,255,0.07)'}`,
+        background: isLight ? 'rgba(255,255,255,0.97)' : 'rgba(255,255,255,0.025)',
+        border: `1px solid ${hovered ? 'rgba(0,212,255,0.35)' : (isLight ? 'rgba(0,120,200,0.15)' : 'rgba(255,255,255,0.07)')}`,
         borderRadius: '14px',
         overflow: 'hidden',
         cursor: 'pointer',
         transition: 'border-color 0.2s, box-shadow 0.2s',
-        boxShadow: hovered ? '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(0,212,255,0.12)' : 'none',
+        boxShadow: hovered
+          ? (isLight ? '0 8px 32px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,120,200,0.2)' : '0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(0,212,255,0.12)')
+          : (isLight ? '0 2px 12px rgba(0,0,0,0.07)' : 'none'),
         position: 'relative',
         display: 'flex',
         flexDirection: 'column',
@@ -272,6 +276,9 @@ function ListingCard({ listing, onClick }) {
 // ── Purchase Form ──────────────────────────────────────────────────────────
 
 function PurchaseForm({ listing, onSuccess }) {
+  const { isLight } = useTheme();
+  const inputStyle = getInputStyle(isLight);
+  const labelStyle = getLabelStyle(isLight);
   const [form, setForm] = useState(EMPTY_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');

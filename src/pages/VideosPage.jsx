@@ -4,6 +4,7 @@ import Header from '../components/UI/Header';
 import Footer from '../components/UI/Footer';
 import { useStore } from '../stores/useStore';
 import { useTranslation } from '../i18n/translations';
+import { useTheme } from '../hooks/useTheme';
 
 // ─── CONFIG ──────────────────────────────────────────────────────────
 const YOUTUBE_CHANNEL_URL = 'https://www.youtube.com/@itsmrjoss';
@@ -15,6 +16,7 @@ const YOUTUBE_API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY || '';
 // ─────────────────────────────────────────────────────────────────────
 
 const VideosPage = () => {
+  const { isLight } = useTheme();
   const language = useStore((s) => s.language);
   const t = useTranslation(language);
   const [videos, setVideos] = useState([]);
@@ -156,7 +158,7 @@ const VideosPage = () => {
     <div
       style={{
         color: 'white',
-        background: 'radial-gradient(ellipse at 50% 0%, #1a1a2e 0%, #050510 60%)',
+        background: isLight ? 'var(--color-darker)' : 'radial-gradient(ellipse at 50% 0%, #1a1a2e 0%, #050510 60%)',
         minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
@@ -212,7 +214,7 @@ const VideosPage = () => {
               fontFamily: 'var(--font-display)',
               fontSize: 'clamp(1.8rem, 6vw, 3.5rem)',
               letterSpacing: 'clamp(2px, 0.5vw, 6px)',
-              background: 'linear-gradient(180deg, #fff 0%, rgba(255,255,255,0.6) 100%)',
+              background: isLight ? 'linear-gradient(180deg, #0d1333 0%, #2a4080 100%)' : 'linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.6) 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
@@ -443,7 +445,7 @@ const VideosPage = () => {
                     background: 'rgba(255,255,255,0.05)',
                     border: '1px solid rgba(255,255,255,0.1)',
                     borderRadius: '12px',
-                    color: '#fff',
+                    color: isLight ? 'var(--text-primary)' : '#fff',
                     fontSize: '0.9rem',
                     outline: 'none',
                     fontFamily: 'var(--font-body)',
@@ -465,7 +467,7 @@ const VideosPage = () => {
                       padding: '0.4rem 1rem',
                       borderRadius: '20px',
                       border: `1px solid ${activeSeries === 'all' ? '#ff4444' : 'rgba(255,255,255,0.12)'}`,
-                      background: activeSeries === 'all' ? 'rgba(255,68,68,0.15)' : 'rgba(255,255,255,0.04)',
+                      background: activeSeries === 'all' ? 'rgba(255,68,68,0.15)' : (isLight ? 'rgba(0,0,0,0.04)' : 'rgba(255,255,255,0.04)'),
                       color: activeSeries === 'all' ? '#ff4444' : 'rgba(255,255,255,0.5)',
                       fontFamily: 'var(--font-display)',
                       fontSize: '0.7rem',
@@ -546,7 +548,7 @@ const VideosPage = () => {
                   }}
                   style={{
                     cursor: 'pointer',
-                    background: selectedVideo?.id === video.id ? 'rgba(255, 0, 0, 0.08)' : 'rgba(255,255,255,0.03)',
+                    background: selectedVideo?.id === video.id ? 'rgba(255, 0, 0, 0.08)' : (isLight ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.03)'),
                     border: `1px solid ${selectedVideo?.id === video.id ? 'rgba(255, 0, 0, 0.3)' : 'rgba(255,255,255,0.07)'}`,
                     borderRadius: '14px',
                     overflow: 'hidden',
@@ -554,7 +556,7 @@ const VideosPage = () => {
                   }}
                 >
                   {/* Thumbnail */}
-                  <div style={{ position: 'relative', width: '100%', paddingBottom: '56.25%', background: '#111' }}>
+                  <div style={{ position: 'relative', width: '100%', paddingBottom: '56.25%', background: isLight ? 'var(--color-dark)' : '#111' }}>
                     <img
                       src={`https://img.youtube.com/vi/${video.id}/hqdefault.jpg`}
                       alt={video.title}

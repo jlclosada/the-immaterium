@@ -590,3 +590,133 @@
     height: 18px !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   COMPREHENSIVE LIGHT MODE OVERRIDES
+   Fixes all pages' inline-style white text & invisible cards
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Page root backgrounds ────────────────────────────────────────────────── */
+[data-theme="light"] .page-root {
+  background: var(--color-darker) !important;
+}
+
+/* ── Text: all common text elements get dark colors ──────────────────────── */
+[data-theme="light"] label { color: var(--text-secondary) !important; }
+[data-theme="light"] button { color: var(--text-primary) !important; }
+[data-theme="light"] a:not([class]) { color: var(--color-primary) !important; }
+
+/* ── Cards: near-zero opacity backgrounds → visible white ────────────────── */
+/* These selectors catch the most common card background pattern in React pages */
+[data-theme="light"] div[style*="border-radius"][style*="rgba(255, 255, 255, 0.0"],
+[data-theme="light"] div[style*="border-radius"][style*="rgba(255, 255, 255, 0.02"],
+[data-theme="light"] div[style*="border-radius"][style*="rgba(255, 255, 255, 0.03"],
+[data-theme="light"] div[style*="border-radius"][style*="rgba(255, 255, 255, 0.04"],
+[data-theme="light"] div[style*="border-radius"][style*="rgba(255, 255, 255, 0.05"],
+[data-theme="light"] div[style*="border-radius"][style*="rgba(255, 255, 255, 0.06"],
+[data-theme="light"] div[style*="border-radius"][style*="rgba(255, 255, 255, 0.07"],
+[data-theme="light"] div[style*="border-radius"][style*="rgba(255, 255, 255, 0.08"] {
+  background: rgba(255, 255, 255, 0.97) !important;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07) !important;
+}
+
+/* ── Borders: invisible rgba(255,255,255,<0.15) → subtle blue ─────────────── */
+[data-theme="light"] [style*="border: 1px solid rgba(255, 255, 255, 0.0"],
+[data-theme="light"] [style*="border: 1px solid rgba(255, 255, 255, 0.1"],
+[data-theme="light"] [style*="border-bottom: 1px solid rgba(255, 255, 255, 0.0"],
+[data-theme="light"] [style*="border-bottom: 1px solid rgba(255, 255, 255, 0.1"],
+[data-theme="light"] [style*="border-top: 1px solid rgba(255, 255, 255, 0.0"],
+[data-theme="light"] [style*="border-top: 1px solid rgba(255, 255, 255, 0.1"] {
+  border-color: rgba(0, 120, 200, 0.13) !important;
+}
+
+/* ── Input fields ─────────────────────────────────────────────────────────── */
+[data-theme="light"] input[style],
+[data-theme="light"] textarea[style] {
+  background: rgba(255, 255, 255, 0.92) !important;
+  color: var(--text-primary) !important;
+  border-color: rgba(0, 120, 200, 0.22) !important;
+}
+[data-theme="light"] input::placeholder,
+[data-theme="light"] textarea::placeholder {
+  color: var(--text-dim) !important;
+  opacity: 0.7 !important;
+}
+
+/* ── SVG strokes: white strokes → dark ───────────────────────────────────── */
+[data-theme="light"] svg[style*="stroke: rgba(255, 255, 255"],
+[data-theme="light"] svg[style*="stroke: rgb(255, 255, 255"] {
+  stroke: var(--text-secondary) !important;
+}
+
+/* ── Specific page back-links (common pattern across detail pages) ────────── */
+[data-theme="light"] .back-link,
+[data-theme="light"] [style*="color: rgba(255, 255, 255, 0.4)"] {
+  color: var(--color-primary) !important;
+}
+
+/* ── Separator/divider lines ─────────────────────────────────────────────── */
+[data-theme="light"] hr[style],
+[data-theme="light"] [style*="background: rgba(255, 255, 255, 0.0"][style*="height: 1px"],
+[data-theme="light"] [style*="background: rgba(255, 255, 255, 0.0"][style*="height: 2px"] {
+  background: rgba(0, 120, 200, 0.12) !important;
+  opacity: 1 !important;
+}
+
+/* ── Spinner/loader ───────────────────────────────────────────────────────── */
+[data-theme="light"] [style*="border: 3px solid rgba(255, 255, 255, 0.1"],
+[data-theme="light"] [style*="border: 2px solid rgba(255, 255, 255, 0.1"] {
+  border-color: rgba(0, 120, 200, 0.15) !important;
+  border-top-color: var(--color-primary) !important;
+}
+
+/* ── Disabled/muted overlay backgrounds ──────────────────────────────────── */
+[data-theme="light"] [style*="background: rgba(0, 0, 0, 0.2"],
+[data-theme="light"] [style*="background: rgba(0, 0, 0, 0.3"],
+[data-theme="light"] [style*="background: rgba(0, 0, 0, 0.4"],
+[data-theme="light"] [style*="background: rgba(0, 0, 0, 0.5"] {
+  background: rgba(0, 50, 120, 0.06) !important;
+}
+
+/* ── BROAD TEXT FIX: cualquier texto blanco rgba → oscuro ────────────────── */
+/* Captura TODOS los color: rgba(255, 255, 255, X) en estilos inline          */
+[data-theme="light"] [style*="color: rgba(255, 255, 255"] {
+  color: var(--text-secondary) !important;
+}
+/* Captura color: #fff → normalizado como rgb(255, 255, 255) en el DOM        */
+[data-theme="light"] [style*="color: rgb(255, 255, 255"] {
+  color: var(--text-primary) !important;
+}
+/* Excepción: botones con gradiente (color usado como fondo recortado)         */
+[data-theme="light"] [style*="WebkitTextFillColor: transparent"] {
+  /* No cambiar color en elementos con clip de texto */
+  color: unset !important;
+}
+
+/* ── Marketplace inputStyle/labelStyle ───────────────────────────────────── */
+[data-theme="light"] [style*="background: rgba(255, 255, 255, 0.06)"] {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(0, 120, 200, 0.22) !important;
+}
+
+/* ── Video cards en modo claro ────────────────────────────────────────────── */
+[data-theme="light"] [style*="background: rgba(255, 255, 255, 0.03)"] {
+  background: rgba(255, 255, 255, 0.96) !important;
+}
+
+/* ── Fondos oscuros de páginas de vídeos y similares ─────────────────────── */
+[data-theme="light"] [style*="background: radial-gradient(ellipse at 50% 0%, rgb(26, 26, 46)"],
+[data-theme="light"] [style*="background: radial-gradient(ellipse at 50% 0%, #1a1a2e"] {
+  background: var(--color-darker) !important;
+}
+
+/* ── Thumbnail/image placeholder oscuro ──────────────────────────────────── */
+[data-theme="light"] [style*="background: rgb(17, 17, 17)"],
+[data-theme="light"] [style*="background: #111"] {
+  background: var(--color-dark) !important;
+}
+
+/* ── Asegurar que titles con gradient clip siguen visibles en claro ────────── */
+[data-theme="light"] [style*="-webkit-text-fill-color: transparent"] {
+  color: unset !important;
+}

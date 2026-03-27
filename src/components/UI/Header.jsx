@@ -63,6 +63,7 @@ const HEADER_CSS = `
     .hdr-tablet  { display: flex; }
   }
   @media (max-width: 580px) {
+    .hdr-hide-mobile { display: none !important; }
     .hdr-tablet  { display: none !important; }
     .hdr-mobile  { display: flex !important; }
 
@@ -317,9 +318,9 @@ export default function Header() {
   return (
     <>
       <motion.header
-        initial={{ y: -16, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0, duration: 0.22, ease: 'easeOut' }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.18, ease: 'easeOut' }}
         style={{
           position: 'fixed',
           top: 0, left: 0, right: 0,
@@ -412,8 +413,10 @@ export default function Header() {
             </svg>
           </motion.button>
 
-          {/* Theme toggle pill */}
-          <ThemeTogglePill isLight={isLight} onToggle={toggleTheme} />
+          {/* Theme toggle pill — desktop/tablet only */}
+          <div className="hdr-hide-mobile">
+            <ThemeTogglePill isLight={isLight} onToggle={toggleTheme} />
+          </div>
 
           {/* Mobile hamburger (<580px) */}
           <motion.button
@@ -535,8 +538,17 @@ export default function Header() {
                 })}
               </div>
 
-              <div style={{ marginTop: 'auto', paddingTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.08)', fontSize: '0.75rem', color: '#555', textAlign: 'center' }}>
-                © 2026 The Immaterium
+              <div style={{ marginTop: 'auto', paddingTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.12)', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+                {/* Theme toggle row */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.7rem', letterSpacing: '2px', color: 'var(--text-dim)', textTransform: 'uppercase' }}>
+                    {isLight ? 'Modo claro' : 'Modo oscuro'}
+                  </span>
+                  <ThemeTogglePill isLight={isLight} onToggle={toggleTheme} />
+                </div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-faint)', textAlign: 'center', fontFamily: 'var(--font-display)', letterSpacing: '1px' }}>
+                  © 2026 The Immaterium
+                </div>
               </div>
             </motion.div>
           </>

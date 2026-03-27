@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import Header from '../components/UI/Header';
 import Footer from '../components/UI/Footer';
+import { useTheme } from '../hooks/useTheme';
 
 const DIFFICULTY_COLORS = {
   beginner: { bg: 'rgba(80,200,120,0.15)', border: 'rgba(80,200,120,0.35)', color: '#50c878', label: 'Principiante' },
@@ -17,6 +18,7 @@ const getDifficultyStyle = (difficulty) => {
 };
 
 const GuidesPage = () => {
+  const { isLight } = useTheme();
   const navigate = useNavigate();
   const [guides, setGuides] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -86,7 +88,7 @@ const GuidesPage = () => {
           }}>
             Painting Guides
           </h1>
-          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem', letterSpacing: '1px' }}>
+          <p style={{ color: isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.4)', fontSize: '0.9rem', letterSpacing: '1px' }}>
             {guides.length > 0 ? `${guides.length} guías disponibles` : ''}
           </p>
         </motion.div>
@@ -140,6 +142,7 @@ const GuidesPage = () => {
 };
 
 const GuideCard = ({ guide, index, onClick }) => {
+  const { isLight } = useTheme();
   const diffStyle = getDifficultyStyle(guide.difficulty);
 
   return (
@@ -150,8 +153,8 @@ const GuideCard = ({ guide, index, onClick }) => {
       onClick={onClick}
       whileHover={{ y: -6 }}
       style={{
-        background: 'rgba(255,255,255,0.025)',
-        border: '1px solid rgba(255,255,255,0.07)',
+        background: isLight ? 'rgba(255,255,255,0.97)' : 'rgba(255,255,255,0.025)',
+        border: `1px solid ${isLight ? 'rgba(0,120,200,0.15)' : 'rgba(255,255,255,0.07)'}`,
         borderRadius: 'var(--radius-xl)',
         overflow: 'hidden',
         cursor: 'pointer',
@@ -191,7 +194,7 @@ const GuideCard = ({ guide, index, onClick }) => {
         <div style={{
           position: 'absolute', bottom: 0, left: 0, right: 0,
           height: '60%',
-          background: 'linear-gradient(to top, rgba(10,10,20,0.9) 0%, transparent 100%)',
+          background: isLight ? 'linear-gradient(to top, rgba(255,255,255,0.0) 0%, transparent 100%)' : 'linear-gradient(to top, rgba(10,10,20,0.9) 0%, transparent 100%)',
         }} />
         {/* Faction badge */}
         {guide.faction && (
@@ -203,7 +206,7 @@ const GuideCard = ({ guide, index, onClick }) => {
               <img src={guide.faction.iconUrl} alt={guide.faction.name}
                 style={{ width: '18px', height: '18px', objectFit: 'contain', filter: 'brightness(1.3)' }} />
             )}
-            <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.8)', fontWeight: 600 }}>
+            <span style={{ fontSize: '0.75rem', color: isLight ? 'var(--text-secondary)' : 'rgba(255,255,255,0.8)', fontWeight: 600 }}>
               {guide.faction.name}
             </span>
           </div>
@@ -218,7 +221,7 @@ const GuideCard = ({ guide, index, onClick }) => {
         <h2 style={{
           fontFamily: 'var(--font-display)',
           fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
-          color: '#fff',
+          color: isLight ? 'var(--text-primary)' : '#fff',
           lineHeight: 1.25,
           letterSpacing: '0.5px',
         }}>
@@ -240,7 +243,7 @@ const GuideCard = ({ guide, index, onClick }) => {
             {diffStyle.label}
           </span>
           {guide.estimatedTime && (
-            <span style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+            <span style={{ fontSize: '0.78rem', color: isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
               ⏱️ {guide.estimatedTime}
             </span>
           )}
@@ -252,7 +255,7 @@ const GuideCard = ({ guide, index, onClick }) => {
             {guide.tags.slice(0, 3).map(tag => (
               <span key={tag} style={{
                 fontSize: '0.72rem',
-                color: 'rgba(255,255,255,0.3)',
+                color: isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.3)',
                 fontStyle: 'italic',
               }}>
                 #{tag}

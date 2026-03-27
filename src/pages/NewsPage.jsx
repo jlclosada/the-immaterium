@@ -4,8 +4,10 @@ import { Link } from 'react-router-dom';
 import { api } from '../services/api';
 import Header from '../components/UI/Header';
 import Footer from '../components/UI/Footer';
+import { useTheme } from '../hooks/useTheme';
 
 const NewsPage = () => {
+  const { isLight } = useTheme();
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -57,7 +59,7 @@ const NewsPage = () => {
           }}>
             Noticias
           </h1>
-          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem' }}>
+          <p style={{ color: isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.4)', fontSize: '0.9rem' }}>
             {articles.length > 0 ? `${articles.length} artículos publicados` : ''}
           </p>
         </motion.div>
