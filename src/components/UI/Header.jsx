@@ -4,7 +4,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useStore } from '../../stores/useStore';
 import { useTranslation } from '../../i18n/translations';
 
-// ─── CSS injected once so media queries work ────────────────────────────────
+// ─── CSS responsive (inyectado una sola vez) ─────────────────────────────────
 const HEADER_CSS = `
   .hdr-desktop { display: flex; }
   .hdr-tablet  { display: none; }
@@ -19,20 +19,138 @@ const HEADER_CSS = `
   }
 `;
 
+// ─── navBtnStyle — module-level, no closure over component state ─────────────
+const navBtnStyle = (active) => ({
+  background: active ? 'rgba(0,212,255,0.15)' : 'rgba(255,255,255,0.05)',
+  border: `1px solid ${active ? 'var(--color-primary)' : 'rgba(255,255,255,0.1)'}`,
+  borderRadius: '12px',
+  padding: '0.5rem 0.85rem',
+  color: active ? 'var(--color-primary)' : '#fff',
+  fontFamily: 'var(--font-display)',
+  fontSize: '0.72rem',
+  letterSpacing: '1px',
+  cursor: 'pointer',
+  transition: 'all 0.2s',
+  fontWeight: active ? 'bold' : 'normal',
+  boxShadow: active ? '0 0 12px rgba(0,212,255,0.25)' : 'none',
+  textTransform: 'uppercase',
+  whiteSpace: 'nowrap',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '0.35rem',
+});
+
+// ─── MoreBtn — module-level so React never remounts it on parent re-render ───
+function MoreBtn({ items, currentPath, navigate }) {
+  const [open, setOpen]   = useState(false);
+  const wrapRef           = useRef(null);
+  const anyActive         = items.some(i => currentPath.startsWith(i.path));
+
+  // Close on outside mousedown
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+
+  // Close on route change
+  useEffect(() => { setOpen(false); }, [currentPath]);
+
+  return (
+    <div ref={wrapRef} style={{ position: 'relative' }}>
+      <motion.button
+        whileHover={{ scale: 1.05, y: -2 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => setOpen(v => !v)}
+        style={{ ...navBtnStyle(anyActive), gap: '0.25rem' }}
+      >
+        Más
+        <motion.span
+          animate={{ rotate: open ? 180 : 0 }}
+          transition={{ duration: 0.18 }}
+          style={{ display: 'inline-block', fontSize: '0.55rem', lineHeight: 1 }}
+        >▾</motion.span>
+      </motion.button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: -6, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -6, scale: 0.97 }}
+            transition={{ duration: 0.15 }}
+            style={{
+              position: 'absolute',
+              top: 'calc(100% + 0.5rem)',
+              right: 0,
+              minWidth: '185px',
+              background: 'rgba(8,8,22,0.98)',
+              border: '1px solid rgba(0,212,255,0.2)',
+              borderRadius: '14px',
+              padding: '0.5rem',
+              boxShadow: '0 16px 48px rgba(0,0,0,0.7)',
+              backdropFilter: 'blur(24px)',
+              zIndex: 300,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.2rem',
+            }}
+          >
+            {items.map((item) => {
+              const active = currentPath.startsWith(item.path);
+              return (
+                <motion.button
+                  key={item.path}
+                  whileHover={{ x: 4 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => { navigate(item.path); setOpen(false); }}
+                  style={{
+                    background: active ? 'rgba(0,212,255,0.12)' : 'transparent',
+                    border: `1px solid ${active ? 'rgba(0,212,255,0.3)' : 'transparent'}`,
+                    borderRadius: '10px',
+                    padding: '0.6rem 0.9rem',
+                    color: active ? 'var(--color-primary)' : '#ccc',
+                    fontFamily: 'var(--font-display)',
+                    fontSize: '0.75rem',
+                    letterSpacing: '1px',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    textTransform: 'uppercase',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.65rem',
+                    transition: 'all 0.15s',
+                  }}
+                >
+                  <span style={{ opacity: 0.7, flexShrink: 0, display: 'flex' }}>{item.icon}</span>
+                  {item.label}
+                </motion.button>
+              );
+            })}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// ─── Header ──────────────────────────────────────────────────────────────────
 export default function Header() {
-  const navigate   = useNavigate();
-  const location   = useLocation();
+  const navigate  = useNavigate();
+  const location  = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled,       setScrolled]       = useState(false);
   const [searchOpen,     setSearchOpen]     = useState(false);
   const [searchQuery,    setSearchQuery]    = useState('');
-  const [moreOpen,       setMoreOpen]       = useState(false);
-  const searchInputRef   = useRef(null);
-  const moreDropdownRef  = useRef(null);
+  const searchInputRef = useRef(null);
   const language = useStore(state => state.language);
   const t = useTranslation(language);
+  const currentPath = location.pathname;
 
-  // Inject CSS once
+  // Inject responsive CSS once
   useEffect(() => {
     if (document.getElementById('header-responsive-css')) return;
     const el = document.createElement('style');
@@ -51,22 +169,11 @@ export default function Header() {
     setMobileMenuOpen(false);
     setSearchOpen(false);
     setSearchQuery('');
-    setMoreOpen(false);
-  }, [location]);
+  }, [currentPath]);
 
   useEffect(() => {
     if (searchOpen) searchInputRef.current?.focus();
   }, [searchOpen]);
-
-  useEffect(() => {
-    if (!moreOpen) return;
-    const handler = (e) => {
-      if (moreDropdownRef.current && !moreDropdownRef.current.contains(e.target))
-        setMoreOpen(false);
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [moreOpen]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -74,7 +181,7 @@ export default function Header() {
       navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
   };
 
-  // ─── Nav items ──────────────────────────────────────────────────────────────
+  // ─── Nav items ───────────────────────────────────────────────────────────────
   const allItems = [
     {
       path: '/marketplace',
@@ -121,138 +228,16 @@ export default function Header() {
     },
   ];
 
-  // Tablet shows only first 3 main items, rest go into "Más"
+  // Tablet: first 3 primary + expanded "Más"
   const tabletPrimary = allItems.slice(0, 3);
   const tabletMore    = [...allItems.slice(3), ...moreItems];
 
-  // ─── Helpers ─────────────────────────────────────────────────────────────────
-  const isActive = (path) => location.pathname.startsWith(path);
-
-  const navBtnStyle = (active) => ({
-    background: active ? 'rgba(0,212,255,0.15)' : 'rgba(255,255,255,0.05)',
-    border: `1px solid ${active ? 'var(--color-primary)' : 'rgba(255,255,255,0.1)'}`,
-    borderRadius: '12px',
-    padding: '0.5rem 0.85rem',
-    color: active ? 'var(--color-primary)' : '#fff',
-    fontFamily: 'var(--font-display)',
-    fontSize: '0.72rem',
-    letterSpacing: '1px',
-    cursor: 'pointer',
-    transition: 'all 0.2s',
-    fontWeight: active ? 'bold' : 'normal',
-    boxShadow: active ? '0 0 12px rgba(0,212,255,0.25)' : 'none',
-    textTransform: 'uppercase',
-    whiteSpace: 'nowrap',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.35rem',
-  });
-
-  const MoreBtn = ({ items }) => {
-    const anyActive = items.some(i => isActive(i.path));
-    return (
-      <div ref={moreDropdownRef} style={{ position: 'relative' }}>
-        <motion.button
-          whileHover={{ scale: 1.05, y: -2 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => setMoreOpen(v => !v)}
-          style={{ ...navBtnStyle(anyActive), gap: '0.25rem' }}
-        >
-          Más
-          <motion.span
-            animate={{ rotate: moreOpen ? 180 : 0 }}
-            transition={{ duration: 0.18 }}
-            style={{ display: 'inline-block', fontSize: '0.55rem', lineHeight: 1 }}
-          >▾</motion.span>
-        </motion.button>
-
-        <AnimatePresence>
-          {moreOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: -6, scale: 0.97 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -6, scale: 0.97 }}
-              transition={{ duration: 0.15 }}
-              style={{
-                position: 'absolute',
-                top: 'calc(100% + 0.5rem)',
-                right: 0,
-                minWidth: '185px',
-                background: 'rgba(8,8,22,0.98)',
-                border: '1px solid rgba(0,212,255,0.2)',
-                borderRadius: '14px',
-                padding: '0.5rem',
-                boxShadow: '0 16px 48px rgba(0,0,0,0.7)',
-                backdropFilter: 'blur(24px)',
-                zIndex: 300,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.2rem',
-              }}
-            >
-              {items.map((item) => {
-                const active = isActive(item.path);
-                return (
-                  <motion.button
-                    key={item.path}
-                    whileHover={{ x: 4 }}
-                    whileTap={{ scale: 0.97 }}
-                    onClick={() => { navigate(item.path); setMoreOpen(false); }}
-                    style={{
-                      background: active ? 'rgba(0,212,255,0.12)' : 'transparent',
-                      border: `1px solid ${active ? 'rgba(0,212,255,0.3)' : 'transparent'}`,
-                      borderRadius: '10px',
-                      padding: '0.6rem 0.9rem',
-                      color: active ? 'var(--color-primary)' : '#ccc',
-                      fontFamily: 'var(--font-display)',
-                      fontSize: '0.75rem',
-                      letterSpacing: '1px',
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                      textTransform: 'uppercase',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.65rem',
-                      transition: 'all 0.15s',
-                    }}
-                  >
-                    <span style={{ opacity: 0.7, flexShrink: 0, display: 'flex' }}>{item.icon}</span>
-                    {item.label}
-                  </motion.button>
-                );
-              })}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    );
-  };
-
-  const SearchBtn = () => (
-    <motion.button
-      whileHover={{ scale: 1.1 }}
-      whileTap={{ scale: 0.9 }}
-      onClick={() => setSearchOpen(v => !v)}
-      title="Buscar"
-      style={{
-        background: searchOpen ? 'rgba(0,212,255,0.15)' : 'rgba(255,255,255,0.07)',
-        border: `1px solid ${searchOpen ? 'var(--color-primary)' : 'rgba(255,255,255,0.15)'}`,
-        borderRadius: '10px',
-        padding: '0.5rem',
-        cursor: 'pointer',
-        color: searchOpen ? 'var(--color-primary)' : '#ccc',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        transition: 'all 0.2s',
-        flexShrink: 0,
-      }}
-    >
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-      </svg>
-    </motion.button>
-  );
+  // Mobile items: home + all
+  const mobileAll = [
+    { path: '/', label: t('home'), icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> },
+    ...allItems,
+    ...moreItems,
+  ];
 
   return (
     <>
@@ -294,7 +279,6 @@ export default function Header() {
             <span style={{
               background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
               WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-              textShadow: 'none',
             }}>IMMATERIUM</span>
           </motion.div>
         </Link>
@@ -307,12 +291,12 @@ export default function Header() {
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => navigate(item.path)}
-              style={navBtnStyle(isActive(item.path))}
+              style={navBtnStyle(currentPath.startsWith(item.path))}
             >
               {item.label}
             </motion.button>
           ))}
-          <MoreBtn items={moreItems} />
+          <MoreBtn items={moreItems} currentPath={currentPath} navigate={navigate} />
         </nav>
 
         {/* ── Tablet nav (600–900px) ── */}
@@ -323,17 +307,35 @@ export default function Header() {
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => navigate(item.path)}
-              style={navBtnStyle(isActive(item.path))}
+              style={navBtnStyle(currentPath.startsWith(item.path))}
             >
               {item.label}
             </motion.button>
           ))}
-          <MoreBtn items={tabletMore} />
+          <MoreBtn items={tabletMore} currentPath={currentPath} navigate={navigate} />
         </nav>
 
         {/* ── Right controls ── */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
-          <SearchBtn />
+          {/* Search button */}
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setSearchOpen(v => !v)}
+            title="Buscar"
+            style={{
+              background: searchOpen ? 'rgba(0,212,255,0.15)' : 'rgba(255,255,255,0.07)',
+              border: `1px solid ${searchOpen ? 'var(--color-primary)' : 'rgba(255,255,255,0.15)'}`,
+              borderRadius: '10px', padding: '0.5rem', cursor: 'pointer',
+              color: searchOpen ? 'var(--color-primary)' : '#ccc',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'all 0.2s', flexShrink: 0,
+            }}
+          >
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+          </motion.button>
 
           {/* Mobile hamburger (<580px) */}
           <motion.button
@@ -429,8 +431,8 @@ export default function Header() {
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', flex: 1 }}>
-                {[{ path: '/', label: t('home'), icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> }, ...allItems, ...moreItems].map(item => {
-                  const active = item.path === '/' ? location.pathname === '/' : isActive(item.path);
+                {mobileAll.map(item => {
+                  const active = item.path === '/' ? currentPath === '/' : currentPath.startsWith(item.path);
                   return (
                     <motion.button
                       key={item.path}

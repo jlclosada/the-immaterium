@@ -308,7 +308,7 @@ const LandingPage = () => {
                 onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.35)'}
               >Ver todo →</Link>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: `repeat(${featuredListings.length}, 1fr)`, gap: 'clamp(0.75rem, 2vw, 1.25rem)' }} className="mp-featured-grid">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 'clamp(0.75rem, 2vw, 1.25rem)', maxWidth: `${featuredListings.length * 280}px` }} className="mp-featured-grid">
               {featuredListings.map(listing => (
                 <MarketplaceListingCard key={listing.id} listing={listing} />
               ))}
@@ -528,45 +528,45 @@ const MarketplaceListingCard = ({ listing }) => {
   return (
     <Link to="/marketplace" style={{ textDecoration: 'none' }}>
       <motion.div
-        whileHover={{ y: -5, scale: 1.02 }}
+        whileHover={{ y: -4, scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         transition={{ duration: 0.18 }}
         style={{
           background: 'rgba(16,185,129,0.04)',
-          border: '1px solid rgba(16,185,129,0.18)',
-          borderRadius: 'var(--radius-xl)',
+          border: '1px solid rgba(16,185,129,0.15)',
+          borderRadius: '14px',
           overflow: 'hidden',
           cursor: 'pointer',
           position: 'relative',
         }}
       >
-        {/* Image */}
-        <div style={{ width: '100%', aspectRatio: '4/3', background: 'rgba(0,0,0,0.3)', overflow: 'hidden', position: 'relative' }}>
+        {/* Image — compact 16/9 */}
+        <div style={{ width: '100%', aspectRatio: '16/9', background: 'rgba(0,0,0,0.3)', overflow: 'hidden', position: 'relative' }}>
           {img
             ? <img src={img} alt={listing.title} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.3s' }} />
-            : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.2 }}>
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.15 }}>
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
               </div>
           }
           {/* Price badge */}
-          <div style={{ position: 'absolute', top: '0.5rem', right: '0.5rem', background: 'rgba(16,185,129,0.9)', color: '#fff', padding: '3px 10px', borderRadius: '20px', fontFamily: 'var(--font-display)', fontSize: '0.8rem', fontWeight: 700, letterSpacing: '0.5px' }}>
-            {listing.price ? `${listing.price} €` : 'Precio a consultar'}
+          <div style={{ position: 'absolute', top: '0.4rem', right: '0.4rem', background: 'rgba(10,185,100,0.92)', color: '#fff', padding: '2px 8px', borderRadius: '20px', fontFamily: 'var(--font-display)', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.5px', backdropFilter: 'blur(4px)' }}>
+            {listing.price ? `${listing.price} €` : 'Consultar'}
           </div>
         </div>
-        {/* Info */}
-        <div style={{ padding: '0.85rem 1rem' }}>
-          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(0.82rem, 1.5vw, 0.95rem)', color: '#fff', margin: '0 0 0.4rem', letterSpacing: '0.5px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        {/* Info — compact */}
+        <div style={{ padding: '0.6rem 0.75rem 0.7rem' }}>
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '0.82rem', color: 'rgba(255,255,255,0.9)', margin: '0 0 0.3rem', letterSpacing: '0.3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {listing.title}
           </h3>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-            {listing.faction && <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.45)', fontFamily: 'var(--font-display)', letterSpacing: '0.5px' }}>{listing.faction}</span>}
-            <span style={{ fontSize: '0.7rem', color: stateColor, background: `${stateColor}18`, border: `1px solid ${stateColor}40`, borderRadius: '6px', padding: '1px 7px', fontFamily: 'var(--font-display)', letterSpacing: '0.5px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+            {listing.faction && <span style={{ fontSize: '0.67rem', color: 'rgba(255,255,255,0.38)', fontFamily: 'var(--font-display)', letterSpacing: '0.3px' }}>{listing.faction}</span>}
+            <span style={{ fontSize: '0.65rem', color: stateColor, background: `${stateColor}15`, border: `1px solid ${stateColor}35`, borderRadius: '5px', padding: '1px 6px', fontFamily: 'var(--font-display)', letterSpacing: '0.3px' }}>
               {STATE_LABEL[listing.state] || listing.state}
             </span>
           </div>
         </div>
         {/* Bottom accent */}
-        <div style={{ position: 'absolute', bottom: 0, left: '15%', right: '15%', height: '2px', background: 'linear-gradient(90deg, transparent, #10b981, transparent)', opacity: 0.6 }} />
+        <div style={{ position: 'absolute', bottom: 0, left: '20%', right: '20%', height: '1.5px', background: 'linear-gradient(90deg, transparent, #10b981, transparent)', opacity: 0.5 }} />
       </motion.div>
     </Link>
   );
