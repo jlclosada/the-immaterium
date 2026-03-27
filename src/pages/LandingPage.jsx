@@ -29,7 +29,7 @@ const NAV_ROW1 = [
     to: '/guides',
     titleKey: 'paintingTitle',
     subtitleKey: 'paintingSubtitle',
-    color: 'var(--color-secondary)',
+    color: isLight ? '#4b5563' : 'var(--text-secondary)',
     icon: (
       <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M12 19l7-7 3 3-7 7-3-3z" />
@@ -859,7 +859,7 @@ const SectionCard = ({ item, t, isLight }) => (
       <h2 style={{
         fontFamily: 'var(--font-display)',
         fontSize: 'clamp(1rem, 2.5vw, 1.3rem)',
-        color: 'var(--text-primary)',
+        color: isLight ? '#0d1333' : 'var(--text-primary)',
         letterSpacing: '2px',
         marginBottom: '0.5rem',
         textTransform: 'uppercase',
@@ -869,7 +869,7 @@ const SectionCard = ({ item, t, isLight }) => (
       </h2>
 
       <span style={{
-        color: 'var(--text-secondary)',
+        color: isLight ? '#4b5563' : 'var(--text-secondary)',
         fontSize: 'clamp(0.75rem, 1.5vw, 0.82rem)',
         textTransform: 'uppercase',
         letterSpacing: '1.5px',
@@ -994,7 +994,7 @@ const FeaturedCard = ({ to, badge, badgeColor, title, excerpt, linkLabel, linkCo
     </h3>
     {excerpt && (
       <p style={{
-        color: 'var(--text-secondary)',
+        color: isLight ? '#4b5563' : 'var(--text-secondary)',
         fontSize: '0.9rem',
         lineHeight: 1.7,
         margin: 0,
