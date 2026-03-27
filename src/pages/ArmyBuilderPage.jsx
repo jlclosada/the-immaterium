@@ -888,6 +888,14 @@ export default function ArmyBuilderPage() {
                 {saveMsg}
               </motion.span>
             )}
+            <button
+              onClick={() => navigate(-1)}
+              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', padding: '0.5rem 1rem', fontSize: '0.8rem', fontFamily: 'var(--font-display)', letterSpacing: '1px', display: 'flex', alignItems: 'center', gap: '0.35rem', transition: 'all 0.2s' }}
+              onMouseEnter={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.85)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)'; }}
+              onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; }}
+            >
+              ← SALIR
+            </button>
             <button onClick={newList} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px', color: 'rgba(255,255,255,0.7)', cursor: 'pointer', padding: '0.5rem 1rem', fontSize: '0.8rem', fontFamily: 'var(--font-display)', letterSpacing: '1px' }}>
               + NUEVA LISTA
             </button>

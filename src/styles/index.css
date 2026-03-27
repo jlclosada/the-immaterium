@@ -48,29 +48,37 @@
   --radius-full: 9999px;
 }
 
-/* ── Light theme overrides ───────────────────────────────────────────────── */
+/* ── Light theme — Tesla Futuristic ─────────────────────────────────────── */
 [data-theme="light"] {
-  --color-darker:  #f2f2f8;
-  --color-dark:    #e6e6f0;
-  --color-light:   #111128;
+  /* Core palette — polar white with electric-blue accents */
+  --color-primary:   #0099cc;          /* deeper cyan → readable on white   */
+  --color-secondary: #9900cc;          /* deeper magenta → readable on white */
+  --color-accent:    #cc8800;
 
-  --surface-header:          rgba(242,242,248,0.96);
-  --surface-header-gradient: rgba(242,242,248,0.75);
-  --surface-card:            rgba(0,0,0,0.04);
-  --surface-card-border:     rgba(0,0,0,0.09);
-  --surface-sidebar:         rgba(242,242,248,0.99);
-  --surface-overlay:         rgba(200,200,220,0.70);
+  --color-darker:  #eef2fb;            /* page base — cool arctic white     */
+  --color-dark:    #dce4f5;            /* slightly deeper surface            */
+  --color-light:   #0d1333;            /* body text — deep space blue        */
 
-  --text-primary:   #111128;
-  --text-secondary: rgba(10,10,40,0.72);
-  --text-dim:       rgba(10,10,40,0.50);
-  --text-faint:     rgba(10,10,40,0.30);
+  /* Surfaces */
+  --surface-header:          rgba(238,242,251,0.96);
+  --surface-header-gradient: rgba(238,242,251,0.80);
+  --surface-card:            rgba(255,255,255,0.75);
+  --surface-card-border:     rgba(0,153,204,0.15);
+  --surface-sidebar:         rgba(238,242,251,0.99);
+  --surface-overlay:         rgba(180,195,230,0.65);
+
+  /* Text — all dark enough for WCAG AA contrast on light backgrounds */
+  --text-primary:   #0d1333;
+  --text-secondary: #2a3668;
+  --text-dim:       #5060a0;
+  --text-faint:     #8090c0;
   --text-on-accent: #ffffff;
 
-  --glass-bg:       rgba(0,0,0,0.04);
-  --glass-bg-hover: rgba(0,0,0,0.07);
-  --glass-border:   rgba(0,0,0,0.10);
-  --glass-shadow:   0 8px 32px 0 rgba(0,0,0,0.12);
+  /* Glass */
+  --glass-bg:       rgba(255,255,255,0.60);
+  --glass-bg-hover: rgba(255,255,255,0.80);
+  --glass-border:   rgba(0,153,204,0.20);
+  --glass-shadow:   0 8px 32px 0 rgba(13,19,51,0.10);
 }
 
 * {

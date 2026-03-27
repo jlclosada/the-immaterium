@@ -458,9 +458,44 @@ const BattleReportDetailPage = () => {
   );
 };
 
+/* ── Export helpers ────────────────────────────────────────────── */
+function buildExportText(player, parsed) {
+  const lines = [];
+  if (parsed) {
+    lines.push(`++ ${parsed.armyName || player.name} [${
+      parsed.categories.flatMap(c => c.units).reduce((s, u) => s + (u.points || 0), 0)
+    }pts] ++`);
+    if (parsed.detachment) lines.push(`Destacamento: ${parsed.detachment}`);
+    if (parsed.listSize)   lines.push(`Tamaño: ${parsed.listSize}`);
+    lines.push('');
+    parsed.categories.forEach(cat => {
+      if (!cat.units.length) return;
+      lines.push(`== ${cat.name.toUpperCase()} ==`);
+      cat.units.forEach(u => {
+        lines.push(`  + ${u.name} [${u.points || 0}pts]`);
+        u.unitEnhancements?.forEach(e => lines.push(`      ✦ ${e}`));
+        u.models?.forEach(m => {
+          if (m.name) {
+            const cnt = m.count > 1 ? `${m.count}× ` : '';
+            lines.push(`      · ${cnt}${m.name}`);
+          }
+          m.equipment?.forEach(eq => lines.push(`          - ${eq}`));
+        });
+      });
+      lines.push('');
+    });
+  } else {
+    lines.push(`++ ${player.name} ++`);
+    lines.push('');
+    player.list?.forEach(u => lines.push(`  + ${u}`));
+  }
+  return lines.join('\n');
+}
+
 /* ── Army list display component ──────────────────────────────── */
 const ArmyListDisplay = ({ player, color }) => {
   const [openUnits, setOpenUnits] = useState({});
+  const [copied, setCopied]       = useState(false);
   const toggle = (key) => setOpenUnits(s => ({ ...s, [key]: !s[key] }));
 
   // Try to parse the rich listText JSON; fall back to simple list
@@ -471,13 +506,37 @@ const ArmyListDisplay = ({ player, color }) => {
 
   const accentColor = color && color !== '#fff' ? color : '#00d4ff';
 
+  const handleCopy = () => {
+    const text = buildExportText(player, parsed);
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }).catch(() => {
+      // fallback: open text in new window
+      const w = window.open('', '_blank');
+      w.document.write(`<pre style="font-family:monospace;white-space:pre-wrap;padding:1rem">${text}</pre>`);
+    });
+  };
+
   if (!parsed) {
     // Simple list fallback
     return (
       <div>
-        <h3 style={{ fontSize: '1rem', marginBottom: '1rem', color: accentColor, fontFamily: 'var(--font-display)', letterSpacing: '0.5px' }}>
-          {player.name}
-        </h3>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', gap: '0.5rem' }}>
+          <h3 style={{ fontSize: '1rem', color: accentColor, fontFamily: 'var(--font-display)', letterSpacing: '0.5px', margin: 0 }}>
+            {player.name}
+          </h3>
+          <button
+            onClick={handleCopy}
+            title="Copiar lista (texto)"
+            style={{ background: copied ? 'rgba(80,200,120,0.15)' : 'rgba(255,255,255,0.05)', border: `1px solid ${copied ? 'rgba(80,200,120,0.4)' : 'rgba(255,255,255,0.12)'}`, borderRadius: '8px', color: copied ? '#50c878' : 'rgba(255,255,255,0.5)', cursor: 'pointer', padding: '4px 10px', fontSize: '0.72rem', fontFamily: 'var(--font-display)', letterSpacing: '0.5px', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '5px' }}
+          >
+            {copied
+              ? <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>Copiado</>
+              : <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copiar lista</>
+            }
+          </button>
+        </div>
         <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
           {player.list?.map((unit, idx) => (
             <li key={idx} style={{
@@ -502,9 +561,21 @@ const ArmyListDisplay = ({ player, color }) => {
     <div>
       {/* Player header */}
       <div style={{ marginBottom: '1.25rem' }}>
-        <h3 style={{ fontSize: '1.1rem', color: accentColor, fontFamily: 'var(--font-display)', letterSpacing: '1px', margin: 0 }}>
-          {player.name}
-        </h3>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '0.35rem' }}>
+          <h3 style={{ fontSize: '1.1rem', color: accentColor, fontFamily: 'var(--font-display)', letterSpacing: '1px', margin: 0 }}>
+            {player.name}
+          </h3>
+          <button
+            onClick={handleCopy}
+            title="Copiar lista en formato texto"
+            style={{ flexShrink: 0, background: copied ? 'rgba(80,200,120,0.15)' : 'rgba(255,255,255,0.05)', border: `1px solid ${copied ? 'rgba(80,200,120,0.4)' : 'rgba(255,255,255,0.12)'}`, borderRadius: '8px', color: copied ? '#50c878' : 'rgba(255,255,255,0.5)', cursor: 'pointer', padding: '4px 10px', fontSize: '0.72rem', fontFamily: 'var(--font-display)', letterSpacing: '0.5px', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '5px' }}
+          >
+            {copied
+              ? <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>Copiado</>
+              : <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copiar lista</>
+            }
+          </button>
+        </div>
         <div style={{ marginTop: '0.35rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
           <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.95rem', color: '#fff', letterSpacing: '0.5px' }}>
             {parsed.armyName}

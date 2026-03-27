@@ -36,6 +36,7 @@ import VideosPage from './pages/VideosPage';
 import MarketplacePage from './pages/MarketplacePage';
 
 import './styles/index.css';
+import './index.css';
 
 const pageVariants = {
   initial: { opacity: 0, y: 12 },

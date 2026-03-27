@@ -297,18 +297,39 @@ const LandingPage = () => {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.9, duration: 0.6 }}
-            style={{ width: '100%', maxWidth: '1100px', zIndex: 1 }}
+            style={{
+              width: '100%', maxWidth: '1100px', zIndex: 1,
+              background: 'rgba(16,185,129,0.04)',
+              border: '1px solid rgba(16,185,129,0.18)',
+              borderRadius: '20px',
+              padding: 'clamp(1.25rem,3vw,1.75rem)',
+            }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-              <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.65rem', letterSpacing: '4px', color: '#10b981', textTransform: 'uppercase', opacity: 0.8, margin: 0 }}>
-                🛒 En venta ahora
-              </p>
-              <Link to="/marketplace" style={{ fontFamily: 'var(--font-display)', fontSize: '0.68rem', letterSpacing: '2px', color: 'rgba(255,255,255,0.35)', textDecoration: 'none', textTransform: 'uppercase', transition: 'color 0.2s' }}
-                onMouseEnter={e => e.currentTarget.style.color = '#10b981'}
-                onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.35)'}
-              >Ver todo →</Link>
+            {/* Section header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                </div>
+                <div>
+                  <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.62rem', letterSpacing: '3px', color: '#10b981', textTransform: 'uppercase', margin: 0, opacity: 0.85 }}>
+                    Marketplace · En venta ahora
+                  </p>
+                  <p style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.35)', margin: 0, marginTop: '1px' }}>
+                    Miniaturas de la comunidad disponibles
+                  </p>
+                </div>
+              </div>
+              <Link
+                to="/marketplace"
+                style={{ fontFamily: 'var(--font-display)', fontSize: '0.68rem', letterSpacing: '2px', color: '#10b981', textDecoration: 'none', textTransform: 'uppercase', border: '1px solid rgba(16,185,129,0.3)', borderRadius: '8px', padding: '0.4rem 0.85rem', transition: 'all 0.2s', background: 'rgba(16,185,129,0.07)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(16,185,129,0.15)'; e.currentTarget.style.borderColor = 'rgba(16,185,129,0.5)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(16,185,129,0.07)'; e.currentTarget.style.borderColor = 'rgba(16,185,129,0.3)'; }}
+              >
+                Ver todo →
+              </Link>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 'clamp(0.75rem, 2vw, 1.25rem)', maxWidth: `${featuredListings.length * 280}px` }} className="mp-featured-grid">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 'clamp(0.75rem, 2vw, 1.25rem)', maxWidth: `${featuredListings.length * 290}px` }} className="mp-featured-grid">
               {featuredListings.map(listing => (
                 <MarketplaceListingCard key={listing.id} listing={listing} />
               ))}
@@ -526,7 +547,7 @@ const MarketplaceListingCard = ({ listing }) => {
   const img = listing.images?.[0];
   const stateColor = STATE_COLOR[listing.state] || '#aaa';
   return (
-    <Link to="/marketplace" style={{ textDecoration: 'none' }}>
+    <Link to={`/marketplace/${listing.id}`} style={{ textDecoration: 'none' }}>
       <motion.div
         whileHover={{ y: -4, scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
