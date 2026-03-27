@@ -86,12 +86,14 @@
 
 /* Light theme section card overrides for landing page */
 [data-theme="light"] .section-card-inner {
-  background: rgba(255,255,255,0.82) !important;
-  box-shadow: 0 4px 32px rgba(0,50,120,0.08), 0 1px 4px rgba(0,0,0,0.06) !important;
+  background: rgba(255,255,255,0.97) !important;
+  box-shadow: 0 4px 32px rgba(0,50,120,0.12), 0 1px 4px rgba(0,0,0,0.08) !important;
+  border-color: rgba(0,120,200,0.20) !important;
 }
 
 [data-theme="light"] .section-card-inner:hover {
-  box-shadow: 0 8px 48px rgba(0,50,120,0.14), 0 2px 8px rgba(0,0,0,0.07) !important;
+  box-shadow: 0 10px 48px rgba(0,50,120,0.18), 0 2px 8px rgba(0,0,0,0.10) !important;
+  border-color: rgba(0,120,200,0.35) !important;
 }
 
 /* Light theme landing background override (in case inline style doesn't dominate) */

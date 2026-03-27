@@ -66,6 +66,22 @@ const HEADER_CSS = `
     .hdr-tablet  { display: none !important; }
     .hdr-mobile  { display: flex !important; }
   }
+  @media (max-width: 580px) {
+    .theme-toggle-pill {
+      width: 44px !important;
+      height: 22px !important;
+      border-radius: 11px !important;
+    }
+    .theme-toggle-thumb {
+      width: 16px !important;
+      height: 16px !important;
+      top: 2px !important;
+      left: 2px !important;
+    }
+    [data-theme="light"] .theme-toggle-thumb {
+      left: calc(100% - 19px) !important;
+    }
+  }
 `;
 
 // ─── navBtnStyle — module-level, no closure over component state ─────────────

@@ -1,6 +1,6 @@
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Footer from '../components/UI/Footer';
 import { useTranslation } from '../i18n/translations';
 import { api } from '../services/api';
@@ -144,7 +144,10 @@ const quickBtnStyle = (color) => ({
 const LandingPage = () => {
   const { fetchInitialData, language } = useStore();
   const t = useTranslation(language);
-  const { isLight } = useTheme();
+  const { isLight, toggleTheme } = useTheme();
+  const navigate = useNavigate();
+  const [navOpen, setNavOpen] = useState(false);
+  const [selectedListing, setSelectedListing] = useState(null);
   const [featuredNews,     setFeaturedNews]     = useState(null);
   const [featuredGuide,    setFeaturedGuide]    = useState(null);
   const [featuredReport,   setFeaturedReport]   = useState(null);
@@ -408,7 +411,7 @@ const LandingPage = () => {
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 'clamp(0.75rem, 2vw, 1.25rem)', maxWidth: `${featuredListings.length * 290}px` }} className="mp-featured-grid">
               {featuredListings.map(listing => (
-                <MarketplaceListingCard key={listing.id} listing={listing} />
+                <MarketplaceListingCard key={listing.id} listing={listing} onSelect={setSelectedListing} />
               ))}
             </div>
           </motion.div>
@@ -536,6 +539,317 @@ const LandingPage = () => {
       )}
 
       <Footer />
+
+      {/* ── Floating nav + theme toggle bar ── */}
+      <div style={{
+        position: 'fixed',
+        top: '1rem',
+        right: '1rem',
+        zIndex: 200,
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.5rem',
+      }}>
+        {/* Theme toggle */}
+        <motion.button
+          onClick={toggleTheme}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          title={isLight ? 'Modo oscuro' : 'Modo claro'}
+          style={{
+            width: '42px',
+            height: '42px',
+            borderRadius: '50%',
+            background: isLight ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.08)',
+            border: isLight ? '1px solid rgba(0,153,204,0.3)' : '1px solid rgba(255,255,255,0.15)',
+            backdropFilter: 'blur(12px)',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: isLight ? '0 2px 16px rgba(0,0,0,0.12)' : '0 2px 16px rgba(0,0,0,0.4)',
+            color: isLight ? '#b45309' : 'rgba(200,220,255,0.9)',
+            transition: 'all 0.3s',
+          }}
+        >
+          {isLight ? (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <circle cx="12" cy="12" r="4"/>
+              <line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/>
+              <line x1="4.22" y1="4.22" x2="6.34" y2="6.34"/><line x1="17.66" y1="17.66" x2="19.78" y2="19.78"/>
+              <line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/>
+              <line x1="4.22" y1="19.78" x2="6.34" y2="17.66"/><line x1="17.66" y1="6.34" x2="19.78" y2="4.22"/>
+            </svg>
+          ) : (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+          )}
+        </motion.button>
+
+        {/* Burger button */}
+        <motion.button
+          onClick={() => setNavOpen(v => !v)}
+          whileHover={{ scale: 1.08 }}
+          whileTap={{ scale: 0.92 }}
+          style={{
+            width: '42px',
+            height: '42px',
+            borderRadius: '50%',
+            background: navOpen
+              ? (isLight ? 'rgba(0,153,204,0.15)' : 'rgba(0,212,255,0.15)')
+              : (isLight ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.08)'),
+            border: navOpen
+              ? '1px solid var(--color-primary)'
+              : (isLight ? '1px solid rgba(0,153,204,0.3)' : '1px solid rgba(255,255,255,0.15)'),
+            backdropFilter: 'blur(12px)',
+            cursor: 'pointer',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '5px',
+            boxShadow: isLight ? '0 2px 16px rgba(0,0,0,0.12)' : '0 2px 16px rgba(0,0,0,0.4)',
+            transition: 'all 0.3s',
+          }}
+        >
+          <motion.span animate={{ rotate: navOpen ? 45 : 0, y: navOpen ? 6 : 0 }}
+            style={{ display: 'block', width: '16px', height: '2px', background: navOpen ? 'var(--color-primary)' : (isLight ? '#0d1333' : '#fff'), borderRadius: '2px', transformOrigin: 'center' }} />
+          <motion.span animate={{ opacity: navOpen ? 0 : 1 }}
+            style={{ display: 'block', width: '16px', height: '2px', background: isLight ? '#0d1333' : '#fff', borderRadius: '2px' }} />
+          <motion.span animate={{ rotate: navOpen ? -45 : 0, y: navOpen ? -6 : 0 }}
+            style={{ display: 'block', width: '16px', height: '2px', background: navOpen ? 'var(--color-primary)' : (isLight ? '#0d1333' : '#fff'), borderRadius: '2px', transformOrigin: 'center' }} />
+        </motion.button>
+      </div>
+
+      {/* ── Navigation slide panel ── */}
+      <AnimatePresence>
+        {navOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => setNavOpen(false)}
+              style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)', zIndex: 210 }}
+            />
+            <motion.div
+              initial={{ x: '100%', opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: '100%', opacity: 0 }}
+              transition={{ type: 'spring', damping: 28, stiffness: 260 }}
+              style={{
+                position: 'fixed', top: 0, right: 0, bottom: 0,
+                width: 'min(85vw, 300px)',
+                background: isLight ? 'rgba(238,242,251,0.97)' : 'rgba(8,8,20,0.97)',
+                backdropFilter: 'blur(24px)',
+                borderLeft: '1px solid rgba(0,212,255,0.2)',
+                boxShadow: '-10px 0 50px rgba(0,0,0,0.5)',
+                zIndex: 220, display: 'flex', flexDirection: 'column',
+                padding: '1.5rem',
+                overflowY: 'auto',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', paddingBottom: '1rem', borderBottom: '1px solid rgba(0,212,255,0.15)' }}>
+                <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: '4px', color: 'var(--color-primary)', textTransform: 'uppercase' }}>
+                  Navegación
+                </span>
+                <motion.button whileTap={{ scale: 0.9 }} onClick={() => setNavOpen(false)}
+                  style={{ background: 'rgba(255,255,255,0.08)', border: 'none', color: 'var(--text-primary)', width: '34px', height: '34px', borderRadius: '50%', cursor: 'pointer', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</motion.button>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1 }}>
+                {[
+                  { to: '/', label: 'Inicio', color: 'var(--color-primary)' },
+                  { to: '/armies', label: 'Ejércitos', color: 'var(--color-primary)' },
+                  { to: '/guides', label: 'Guías de Pintura', color: 'var(--color-secondary)' },
+                  { to: '/battle-reports', label: 'Informes de Batalla', color: '#ff6464' },
+                  { to: '/marketplace', label: 'Marketplace', color: '#10b981' },
+                  { to: '/army-builder', label: 'Army Builder', color: '#6366f1' },
+                  { to: '/lore', label: 'Lore', color: 'var(--color-accent)' },
+                  { to: '/news', label: 'Noticias', color: '#f59e0b' },
+                  { to: '/videos', label: 'Videos', color: '#ff4444' },
+                ].map(item => (
+                  <motion.button
+                    key={item.to}
+                    whileHover={{ x: 6 }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => { navigate(item.to); setNavOpen(false); }}
+                    style={{
+                      background: 'transparent',
+                      border: `1px solid transparent`,
+                      borderRadius: '12px',
+                      padding: '0.75rem 1rem',
+                      color: 'var(--text-primary)',
+                      fontFamily: 'var(--font-display)',
+                      fontSize: '0.82rem',
+                      letterSpacing: '1.5px',
+                      textTransform: 'uppercase',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      transition: 'all 0.15s',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.75rem',
+                    }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.background = `${item.color}12`;
+                      e.currentTarget.style.borderColor = `${item.color}40`;
+                      e.currentTarget.style.color = item.color;
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.background = 'transparent';
+                      e.currentTarget.style.borderColor = 'transparent';
+                      e.currentTarget.style.color = 'var(--text-primary)';
+                    }}
+                  >
+                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: item.color, flexShrink: 0, boxShadow: `0 0 6px ${item.color}` }} />
+                    {item.label}
+                  </motion.button>
+                ))}
+              </div>
+
+              <div style={{ paddingTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-faint)', fontFamily: 'var(--font-display)', letterSpacing: '1px' }}>TEMA</span>
+                <motion.button
+                  onClick={toggleTheme}
+                  whileTap={{ scale: 0.9 }}
+                  style={{
+                    padding: '0.4rem 0.9rem',
+                    borderRadius: '20px',
+                    background: isLight ? 'rgba(0,153,204,0.12)' : 'rgba(255,255,255,0.08)',
+                    border: '1px solid rgba(0,212,255,0.25)',
+                    color: 'var(--color-primary)',
+                    fontFamily: 'var(--font-display)',
+                    fontSize: '0.68rem',
+                    letterSpacing: '1px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {isLight ? '☀ CLARO' : '☽ OSCURO'}
+                </motion.button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* ── Listing Quick View Modal ── */}
+      <AnimatePresence>
+        {selectedListing && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSelectedListing(null)}
+            style={{
+              position: 'fixed', inset: 0,
+              background: 'rgba(0,0,0,0.75)',
+              backdropFilter: 'blur(8px)',
+              zIndex: 300,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: '1rem',
+            }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.92, y: 24 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.92, y: 24 }}
+              transition={{ duration: 0.22, ease: 'easeOut' }}
+              onClick={e => e.stopPropagation()}
+              style={{
+                background: isLight ? 'rgba(238,242,251,0.98)' : 'rgba(10,10,22,0.98)',
+                border: '1px solid rgba(0,212,255,0.2)',
+                borderRadius: '20px',
+                width: '100%',
+                maxWidth: '560px',
+                maxHeight: '90vh',
+                overflowY: 'auto',
+                position: 'relative',
+                boxShadow: '0 24px 64px rgba(0,0,0,0.6)',
+              }}
+            >
+              {/* Close */}
+              <button onClick={() => setSelectedListing(null)} style={{
+                position: 'absolute', top: '1rem', right: '1rem', zIndex: 10,
+                background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)',
+                borderRadius: '50%', width: '34px', height: '34px',
+                cursor: 'pointer', color: 'var(--text-primary)', fontSize: '1rem',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>✕</button>
+
+              {/* Image */}
+              {selectedListing.images?.[0] && (
+                <div style={{ width: '100%', aspectRatio: '16/9', overflow: 'hidden', borderRadius: '20px 20px 0 0' }}>
+                  <img src={selectedListing.images[0]} alt={selectedListing.title}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
+              )}
+
+              {/* Content */}
+              <div style={{ padding: '1.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem', marginBottom: '1rem' }}>
+                  <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.1rem, 3vw, 1.4rem)', color: 'var(--text-primary)', margin: 0, lineHeight: 1.3 }}>
+                    {selectedListing.title}
+                  </h2>
+                  <div style={{ background: 'rgba(10,185,100,0.9)', color: '#fff', padding: '4px 12px', borderRadius: '20px', fontFamily: 'var(--font-display)', fontSize: '0.85rem', fontWeight: 700, flexShrink: 0 }}>
+                    {selectedListing.price ? `${selectedListing.price} €` : 'Consultar'}
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+                  {selectedListing.faction && (
+                    <span style={{ fontSize: '0.75rem', color: 'var(--color-primary)', background: 'rgba(0,212,255,0.1)', border: '1px solid rgba(0,212,255,0.2)', borderRadius: '6px', padding: '2px 8px', fontFamily: 'var(--font-display)' }}>
+                      {selectedListing.faction}
+                    </span>
+                  )}
+                  {selectedListing.state && (
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '6px', padding: '2px 8px', fontFamily: 'var(--font-display)' }}>
+                      {STATE_LABEL[selectedListing.state] || selectedListing.state}
+                    </span>
+                  )}
+                </div>
+
+                {selectedListing.description && (
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.7, marginBottom: '1.5rem' }}>
+                    {selectedListing.description}
+                  </p>
+                )}
+
+                <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                  <motion.button
+                    whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                    onClick={() => { navigate('/marketplace'); setSelectedListing(null); }}
+                    style={{
+                      flex: 1, padding: '0.75rem 1.25rem',
+                      background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+                      border: 'none', borderRadius: '12px', color: '#000',
+                      fontFamily: 'var(--font-display)', fontSize: '0.8rem',
+                      letterSpacing: '1.5px', textTransform: 'uppercase',
+                      cursor: 'pointer', fontWeight: 700,
+                    }}
+                  >
+                    Ver en Marketplace →
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                    onClick={() => setSelectedListing(null)}
+                    style={{
+                      padding: '0.75rem 1.25rem',
+                      background: 'transparent',
+                      border: '1px solid rgba(255,255,255,0.15)', borderRadius: '12px',
+                      color: 'var(--text-secondary)',
+                      fontFamily: 'var(--font-display)', fontSize: '0.8rem',
+                      letterSpacing: '1.5px', textTransform: 'uppercase',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Cerrar
+                  </motion.button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
@@ -553,15 +867,15 @@ const SectionCard = ({ item, t, isLight }) => (
         flexDirection: 'column',
         alignItems: 'center',
         textAlign: 'center',
-        background: isLight ? 'rgba(255,255,255,0.72)' : 'rgba(255,255,255,0.03)',
-        border: isLight ? `1px solid ${item.color}30` : '1px solid rgba(255,255,255,0.07)',
+        background: isLight ? 'rgba(255,255,255,0.96)' : 'rgba(255,255,255,0.03)',
+        border: isLight ? `1px solid ${item.color}55` : '1px solid rgba(255,255,255,0.07)',
         borderRadius: 'var(--radius-xl)',
         cursor: 'pointer',
         position: 'relative',
         overflow: 'hidden',
         backdropFilter: 'blur(16px)',
         transition: 'border-color 0.3s, box-shadow 0.3s, background 0.3s',
-        boxShadow: isLight ? `0 4px 24px rgba(0,0,0,0.07), 0 0 0 0px ${item.color}40` : 'none',
+        boxShadow: isLight ? `0 6px 32px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06)` : 'none',
       }}
     >
       {/* Top gradient shimmer */}
@@ -623,53 +937,52 @@ const SectionCard = ({ item, t, isLight }) => (
 const STATE_LABEL = { sin_montar: 'Sin montar', montada: 'Montada', imprimada: 'Imprimada', pintada_parcial: 'Pintada parcial', pintada: 'Pintada', conversion: 'Conversión' };
 const STATE_COLOR = { sin_montar: '#b0b0b8', montada: '#6ab0f5', imprimada: '#f0924a', pintada_parcial: '#e8d040', pintada: '#40c878', conversion: '#c078f0' };
 
-const MarketplaceListingCard = ({ listing }) => {
+const MarketplaceListingCard = ({ listing, onSelect }) => {
   const img = listing.images?.[0];
   const stateColor = STATE_COLOR[listing.state] || '#aaa';
   return (
-    <Link to={`/marketplace/${listing.id}`} style={{ textDecoration: 'none' }}>
-      <motion.div
-        whileHover={{ y: -4, scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        transition={{ duration: 0.18 }}
-        style={{
-          background: 'rgba(16,185,129,0.04)',
-          border: '1px solid rgba(16,185,129,0.15)',
-          borderRadius: '14px',
-          overflow: 'hidden',
-          cursor: 'pointer',
-          position: 'relative',
-        }}
-      >
-        {/* Image — compact 16/9 */}
-        <div style={{ width: '100%', aspectRatio: '16/9', background: 'rgba(0,0,0,0.3)', overflow: 'hidden', position: 'relative' }}>
-          {img
-            ? <img src={img} alt={listing.title} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.3s' }} />
-            : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.15 }}>
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-              </div>
-          }
-          {/* Price badge */}
-          <div style={{ position: 'absolute', top: '0.4rem', right: '0.4rem', background: 'rgba(10,185,100,0.92)', color: '#fff', padding: '2px 8px', borderRadius: '20px', fontFamily: 'var(--font-display)', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.5px', backdropFilter: 'blur(4px)' }}>
-            {listing.price ? `${listing.price} €` : 'Consultar'}
-          </div>
+    <motion.div
+      whileHover={{ y: -4, scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ duration: 0.18 }}
+      onClick={() => onSelect(listing)}
+      style={{
+        background: 'rgba(16,185,129,0.04)',
+        border: '1px solid rgba(16,185,129,0.15)',
+        borderRadius: '14px',
+        overflow: 'hidden',
+        cursor: 'pointer',
+        position: 'relative',
+      }}
+    >
+      {/* Image — compact 16/9 */}
+      <div style={{ width: '100%', aspectRatio: '16/9', background: 'rgba(0,0,0,0.3)', overflow: 'hidden', position: 'relative' }}>
+        {img
+          ? <img src={img} alt={listing.title} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.3s' }} />
+          : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.15 }}>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            </div>
+        }
+        {/* Price badge */}
+        <div style={{ position: 'absolute', top: '0.4rem', right: '0.4rem', background: 'rgba(10,185,100,0.92)', color: '#fff', padding: '2px 8px', borderRadius: '20px', fontFamily: 'var(--font-display)', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.5px', backdropFilter: 'blur(4px)' }}>
+          {listing.price ? `${listing.price} €` : 'Consultar'}
         </div>
-        {/* Info — compact */}
-        <div style={{ padding: '0.6rem 0.75rem 0.7rem' }}>
-          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '0.82rem', color: 'var(--text-primary)', margin: '0 0 0.3rem', letterSpacing: '0.3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {listing.title}
-          </h3>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
-            {listing.faction && <span style={{ fontSize: '0.67rem', color: 'var(--text-dim)', fontFamily: 'var(--font-display)', letterSpacing: '0.3px' }}>{listing.faction}</span>}
-            <span style={{ fontSize: '0.65rem', color: stateColor, background: `${stateColor}15`, border: `1px solid ${stateColor}35`, borderRadius: '5px', padding: '1px 6px', fontFamily: 'var(--font-display)', letterSpacing: '0.3px' }}>
-              {STATE_LABEL[listing.state] || listing.state}
-            </span>
-          </div>
+      </div>
+      {/* Info — compact */}
+      <div style={{ padding: '0.6rem 0.75rem 0.7rem' }}>
+        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '0.82rem', color: 'var(--text-primary)', margin: '0 0 0.3rem', letterSpacing: '0.3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {listing.title}
+        </h3>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+          {listing.faction && <span style={{ fontSize: '0.67rem', color: 'var(--text-dim)', fontFamily: 'var(--font-display)', letterSpacing: '0.3px' }}>{listing.faction}</span>}
+          <span style={{ fontSize: '0.65rem', color: stateColor, background: `${stateColor}15`, border: `1px solid ${stateColor}35`, borderRadius: '5px', padding: '1px 6px', fontFamily: 'var(--font-display)', letterSpacing: '0.3px' }}>
+            {STATE_LABEL[listing.state] || listing.state}
+          </span>
         </div>
-        {/* Bottom accent */}
-        <div style={{ position: 'absolute', bottom: 0, left: '20%', right: '20%', height: '1.5px', background: 'linear-gradient(90deg, transparent, #10b981, transparent)', opacity: 0.5 }} />
-      </motion.div>
-    </Link>
+      </div>
+      {/* Bottom accent */}
+      <div style={{ position: 'absolute', bottom: 0, left: '20%', right: '20%', height: '1.5px', background: 'linear-gradient(90deg, transparent, #10b981, transparent)', opacity: 0.5 }} />
+    </motion.div>
   );
 };
 

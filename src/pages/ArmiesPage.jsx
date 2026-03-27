@@ -6,6 +6,7 @@ import { useStore } from '../stores/useStore';
 import { useTranslation } from '../i18n/translations';
 import Header from '../components/UI/Header';
 import Footer from '../components/UI/Footer';
+import { useTheme } from '../hooks/useTheme';
 
 const THEMES = {
   'sci-fi': {
@@ -58,6 +59,7 @@ const ArmiesPage = () => {
   const selectedGame = games.find(g => g.id === selectedGameId) || null;
   const theme = THEMES[selectedGame?.theme] || THEMES['sci-fi'];
   const accentColor = selectedGame?.accentColor || '#00d4ff';
+  const { isLight } = useTheme();
   const secondaryColor = selectedGame?.secondaryColor || '#7b2fff';
 
   const filteredArmies = armies.filter(army => {
@@ -76,7 +78,7 @@ const ArmiesPage = () => {
   return (
     <div style={{
       minHeight: '100vh',
-      background: theme.bg,
+      background: isLight ? 'var(--color-darker)' : theme.bg,
       display: 'flex',
       flexDirection: 'column',
       '--page-accent': accentColor,
@@ -124,7 +126,7 @@ const ArmiesPage = () => {
           }}>
             {t('armiesTitle')}
           </h1>
-          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem', letterSpacing: '1px' }}>
+          <p style={{ color: isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.4)', fontSize: '0.9rem', letterSpacing: '1px' }}>
             {filteredArmies.length > 0 ? `${filteredArmies.length} facciones registradas` : ''}
           </p>
         </motion.div>
@@ -150,7 +152,7 @@ const ArmiesPage = () => {
               return (
                 <React.Fragment key={game.id}>
                   {i > 0 && (
-                    <span style={{ color: 'rgba(255,255,255,0.12)', fontSize: '0.8rem' }}>·</span>
+                    <span style={{ color: isLight ? 'var(--text-faint)' : 'rgba(255,255,255,0.12)', fontSize: '0.8rem' }}>·</span>
                   )}
                   <motion.button
                     onClick={() => setSelectedGameId(game.id)}
@@ -159,7 +161,7 @@ const ArmiesPage = () => {
                       background: 'none',
                       border: 'none',
                       borderBottom: isSelected ? `1px solid ${gAccent}` : '1px solid transparent',
-                      color: isSelected ? gAccent : 'rgba(255,255,255,0.35)',
+                      color: isSelected ? gAccent : isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.35)',
                       fontFamily: 'var(--font-display)',
                       fontSize: '0.72rem',
                       letterSpacing: '3px',
