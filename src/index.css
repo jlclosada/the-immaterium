@@ -687,10 +687,10 @@
 [data-theme="light"] [style*="color: rgb(255, 255, 255"] {
   color: var(--text-primary) !important;
 }
-/* Excepción: botones con gradiente (color usado como fondo recortado)         */
-[data-theme="light"] [style*="WebkitTextFillColor: transparent"] {
-  /* No cambiar color en elementos con clip de texto */
-  color: unset !important;
+/* Excepción: elementos con gradient text clip — no sobreescribir su color    */
+[data-theme="light"] [style*="WebkitTextFillColor: transparent"],
+[data-theme="light"] [style*="-webkit-text-fill-color: transparent"] {
+  color: inherit !important;
 }
 
 /* ── Marketplace inputStyle/labelStyle ───────────────────────────────────── */
@@ -716,7 +716,9 @@
   background: var(--color-dark) !important;
 }
 
-/* ── Asegurar que titles con gradient clip siguen visibles en claro ────────── */
-[data-theme="light"] [style*="-webkit-text-fill-color: transparent"] {
-  color: unset !important;
+/* ── Landing page: ocultar theme toggle en barra flotante en móvil ────────── */
+@media (max-width: 580px) {
+  .landing-hide-mobile {
+    display: none !important;
+  }
 }

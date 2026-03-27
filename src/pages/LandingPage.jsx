@@ -497,42 +497,44 @@ const LandingPage = () => {
         alignItems: 'center',
         gap: '0.5rem',
       }}>
-        {/* Theme toggle */}
-        <motion.button
-          onClick={toggleTheme}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          title={isLight ? 'Modo oscuro' : 'Modo claro'}
-          style={{
-            width: '42px',
-            height: '42px',
-            borderRadius: '50%',
-            background: isLight ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.08)',
-            border: isLight ? '1px solid rgba(0,153,204,0.3)' : '1px solid rgba(255,255,255,0.15)',
-            backdropFilter: 'blur(12px)',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: isLight ? '0 2px 16px rgba(0,0,0,0.12)' : '0 2px 16px rgba(0,0,0,0.4)',
-            color: isLight ? '#b45309' : 'rgba(200,220,255,0.9)',
-            transition: 'all 0.3s',
-          }}
-        >
-          {isLight ? (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <circle cx="12" cy="12" r="4"/>
-              <line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/>
-              <line x1="4.22" y1="4.22" x2="6.34" y2="6.34"/><line x1="17.66" y1="17.66" x2="19.78" y2="19.78"/>
-              <line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/>
-              <line x1="4.22" y1="19.78" x2="6.34" y2="17.66"/><line x1="17.66" y1="6.34" x2="19.78" y2="4.22"/>
-            </svg>
-          ) : (
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-            </svg>
-          )}
-        </motion.button>
+        {/* Theme toggle — hidden on mobile (toggle is inside burger menu) */}
+        <div className="landing-hide-mobile">
+          <motion.button
+            onClick={toggleTheme}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            title={isLight ? 'Modo oscuro' : 'Modo claro'}
+            style={{
+              width: '42px',
+              height: '42px',
+              borderRadius: '50%',
+              background: isLight ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.08)',
+              border: isLight ? '1px solid rgba(0,153,204,0.3)' : '1px solid rgba(255,255,255,0.15)',
+              backdropFilter: 'blur(12px)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: isLight ? '0 2px 16px rgba(0,0,0,0.12)' : '0 2px 16px rgba(0,0,0,0.4)',
+              color: isLight ? '#b45309' : 'rgba(200,220,255,0.9)',
+              transition: 'all 0.3s',
+            }}
+          >
+            {isLight ? (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <circle cx="12" cy="12" r="4"/>
+                <line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/>
+                <line x1="4.22" y1="4.22" x2="6.34" y2="6.34"/><line x1="17.66" y1="17.66" x2="19.78" y2="19.78"/>
+                <line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/>
+                <line x1="4.22" y1="19.78" x2="6.34" y2="17.66"/><line x1="17.66" y1="6.34" x2="19.78" y2="4.22"/>
+              </svg>
+            ) : (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+              </svg>
+            )}
+          </motion.button>
+        </div>
 
         {/* Burger button */}
         <motion.button
@@ -862,7 +864,7 @@ const SectionCard = ({ item, t, isLight }) => (
       </h2>
 
       <span style={{
-        color: isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.55)',
+        color: isLight ? 'var(--text-secondary)' : 'rgba(255,255,255,0.55)',
         fontSize: 'clamp(0.75rem, 1.5vw, 0.82rem)',
         textTransform: 'uppercase',
         letterSpacing: '1.5px',
