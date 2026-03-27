@@ -29,7 +29,7 @@ function ThemeTogglePill({ isLight, onToggle }) {
           >
             {isLight ? (
               /* Sun rays */
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(120,60,0,0.9)" strokeWidth="2.5" strokeLinecap="round">
+              <svg className="toggle-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(120,60,0,0.9)" strokeWidth="2.5" strokeLinecap="round">
                 <circle cx="12" cy="12" r="4"/>
                 <line x1="12" y1="2"  x2="12" y2="5"/>
                 <line x1="12" y1="19" x2="12" y2="22"/>
@@ -42,7 +42,7 @@ function ThemeTogglePill({ isLight, onToggle }) {
               </svg>
             ) : (
               /* Crescent moon */
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(200,220,255,0.9)" strokeWidth="2.5" strokeLinecap="round">
+              <svg className="toggle-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(200,220,255,0.9)" strokeWidth="2.5" strokeLinecap="round">
                 <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
               </svg>
             )}
@@ -65,21 +65,30 @@ const HEADER_CSS = `
   @media (max-width: 580px) {
     .hdr-tablet  { display: none !important; }
     .hdr-mobile  { display: flex !important; }
-  }
-  @media (max-width: 580px) {
+
+    /* En móvil: convertir el pill en un botón circular simple */
     .theme-toggle-pill {
-      width: 44px !important;
-      height: 22px !important;
-      border-radius: 11px !important;
+      width: 36px !important;
+      height: 36px !important;
+      border-radius: 50% !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      overflow: hidden !important;
+    }
+    .theme-toggle-pill::before {
+      display: none !important;
     }
     .theme-toggle-thumb {
-      width: 16px !important;
-      height: 16px !important;
-      top: 2px !important;
-      left: 2px !important;
-    }
-    [data-theme="light"] .theme-toggle-thumb {
-      left: calc(100% - 19px) !important;
+      position: static !important;
+      width: 22px !important;
+      height: 22px !important;
+      border-radius: 50% !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      flex-shrink: 0 !important;
+      transition: none !important;
     }
   }
 `;

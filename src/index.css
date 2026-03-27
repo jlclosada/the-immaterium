@@ -84,16 +84,13 @@
   opacity: 1 !important;
 }
 
-/* Light theme section card overrides for landing page */
-[data-theme="light"] .section-card-inner {
-  background: rgba(255,255,255,0.97) !important;
-  box-shadow: 0 4px 32px rgba(0,50,120,0.12), 0 1px 4px rgba(0,0,0,0.08) !important;
-  border-color: rgba(0,120,200,0.20) !important;
-}
-
+/* Section card hover — boost shadow on hover */
 [data-theme="light"] .section-card-inner:hover {
-  box-shadow: 0 10px 48px rgba(0,50,120,0.18), 0 2px 8px rgba(0,0,0,0.10) !important;
-  border-color: rgba(0,120,200,0.35) !important;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.14), 0 2px 6px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9) !important;
+}
+[data-theme="dark"] .section-card-inner:hover,
+:root:not([data-theme="light"]) .section-card-inner:hover {
+  box-shadow: 0 8px 40px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.07) !important;
 }
 
 /* Light theme landing background override (in case inline style doesn't dominate) */
@@ -524,18 +521,17 @@
 [data-theme="light"] [style*="color: #6ab0f5"] { color: #1d6fa5 !important; }
 [data-theme="light"] [style*="color: #c078f0"] { color: #7e22ce !important; }
 
-/* ── Nav grid section cards (landing page) ──────────────────────────────── */
-[data-theme="light"] .section-card-inner {
-  background: rgba(255,255,255,0.80) !important;
-  border-color: rgba(0,153,204,0.15) !important;
-  box-shadow: 0 4px 24px rgba(13,19,51,0.07) !important;
-}
+/* ── Nav grid section cards — handled by inline styles in SectionCard ─── */
 
 /* ── Theme toggle pill ──────────────────────────────────────────────────── */
 .theme-toggle-pill {
   position: relative;
   width: 56px;
   height: 28px;
+  min-height: 0;
+  padding: 0;
+  -webkit-appearance: none;
+  appearance: none;
   border-radius: 14px;
   border: 1.5px solid rgba(255,255,255,0.15);
   background: linear-gradient(135deg, #1a1040 0%, #0d1d3a 100%);
@@ -585,4 +581,12 @@
   left: calc(100% - 23px);
   background: linear-gradient(135deg, #ffd700 0%, #ff9800 100%);
   box-shadow: 0 2px 8px rgba(255,152,0,0.5), 0 0 12px rgba(255,215,0,0.4);
+}
+
+/* Icono más grande en móvil */
+@media (max-width: 580px) {
+  .toggle-icon {
+    width: 18px !important;
+    height: 18px !important;
+  }
 }

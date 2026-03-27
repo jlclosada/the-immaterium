@@ -298,59 +298,6 @@ const LandingPage = () => {
           {t('description')}
         </motion.p>
 
-        {/* CTA buttons */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.65, duration: 0.5 }}
-          style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', zIndex: 1 }}
-        >
-          <Link to="/armies" style={{ textDecoration: 'none' }}>
-            <motion.button
-              whileHover={{ scale: 1.05, y: -2 }}
-              whileTap={{ scale: 0.97 }}
-              style={{
-                padding: '0.85rem 2rem',
-                borderRadius: '50px',
-                background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
-                border: 'none',
-                color: '#000',
-                fontFamily: 'var(--font-display)',
-                fontSize: '0.82rem',
-                letterSpacing: '2px',
-                textTransform: 'uppercase',
-                cursor: 'pointer',
-                fontWeight: 700,
-                boxShadow: '0 4px 24px rgba(0,212,255,0.3)',
-              }}
-            >
-              Explorar →
-            </motion.button>
-          </Link>
-          <Link to="/marketplace" style={{ textDecoration: 'none' }}>
-            <motion.button
-              whileHover={{ scale: 1.05, y: -2 }}
-              whileTap={{ scale: 0.97 }}
-              style={{
-                padding: '0.85rem 2rem',
-                borderRadius: '50px',
-                background: 'transparent',
-                border: '1px solid var(--color-primary)',
-                color: 'var(--color-primary)',
-                fontFamily: 'var(--font-display)',
-                fontSize: '0.82rem',
-                letterSpacing: '2px',
-                textTransform: 'uppercase',
-                cursor: 'pointer',
-                fontWeight: 700,
-                backdropFilter: 'blur(8px)',
-              }}
-            >
-              Marketplace
-            </motion.button>
-          </Link>
-        </motion.div>
-
         {/* ── Row 1: Marketplace · Pintura · Batallas ── */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -867,15 +814,17 @@ const SectionCard = ({ item, t, isLight }) => (
         flexDirection: 'column',
         alignItems: 'center',
         textAlign: 'center',
-        background: isLight ? 'rgba(255,255,255,0.96)' : 'rgba(255,255,255,0.03)',
-        border: isLight ? `1px solid ${item.color}55` : '1px solid rgba(255,255,255,0.07)',
+        background: isLight ? '#ffffff' : 'rgba(10,12,32,0.82)',
+        border: isLight ? `1.5px solid ${item.color}55` : `1px solid ${item.color}35`,
         borderRadius: 'var(--radius-xl)',
         cursor: 'pointer',
         position: 'relative',
         overflow: 'hidden',
-        backdropFilter: 'blur(16px)',
-        transition: 'border-color 0.3s, box-shadow 0.3s, background 0.3s',
-        boxShadow: isLight ? `0 6px 32px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06)` : 'none',
+        backdropFilter: 'blur(20px)',
+        transition: 'border-color 0.25s, box-shadow 0.25s, background 0.25s, transform 0.22s',
+        boxShadow: isLight
+          ? `0 6px 28px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.9)`
+          : `0 4px 32px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.05)`,
       }}
     >
       {/* Top gradient shimmer */}
@@ -913,7 +862,7 @@ const SectionCard = ({ item, t, isLight }) => (
       </h2>
 
       <span style={{
-        color: isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.35)',
+        color: isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.55)',
         fontSize: 'clamp(0.75rem, 1.5vw, 0.82rem)',
         textTransform: 'uppercase',
         letterSpacing: '1.5px',
