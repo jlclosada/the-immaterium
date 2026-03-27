@@ -83,6 +83,7 @@ function App() {
           <Route path="/army-builder" element={<AnimatedPage><ArmyBuilderPage /></AnimatedPage>} />
           <Route path="/army-builder/:listId" element={<AnimatedPage><ArmyBuilderPage /></AnimatedPage>} />
           <Route path="/marketplace" element={<AnimatedPage><MarketplacePage /></AnimatedPage>} />
+          <Route path="/marketplace/:id" element={<AnimatedPage><MarketplacePage /></AnimatedPage>} />
 
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminLayout />}>

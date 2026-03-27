@@ -64,5 +64,20 @@ export function useTheme() {
     try { localStorage.setItem(STORAGE_KEY, next); } catch (_) {}
   };
 
+  // Sync with any external data-theme attribute changes (e.g. from another useTheme instance)
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      const current = document.documentElement.getAttribute('data-theme');
+      if ((current === 'light' || current === 'dark') && current !== theme) {
+        setTheme(current);
+      }
+    });
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme'],
+    });
+    return () => observer.disconnect();
+  }, [theme]);
+
   return { theme, toggleTheme, isLight: theme === 'light' };
 }

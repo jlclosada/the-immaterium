@@ -161,7 +161,7 @@ function MoreBtn({ items, currentPath, navigate }) {
                     border: `1px solid ${active ? 'rgba(0,212,255,0.3)' : 'transparent'}`,
                     borderRadius: '10px',
                     padding: '0.6rem 0.9rem',
-                    color: active ? 'var(--color-primary)' : '#ccc',
+                    color: active ? 'var(--color-primary)' : 'var(--text-secondary)',
                     fontFamily: 'var(--font-display)',
                     fontSize: '0.75rem',
                     letterSpacing: '1px',
@@ -292,9 +292,9 @@ export default function Header() {
   return (
     <>
       <motion.header
-        initial={{ y: -100, opacity: 0 }}
+        initial={{ y: -16, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.3, type: 'spring', stiffness: 120 }}
+        transition={{ delay: 0, duration: 0.22, ease: 'easeOut' }}
         style={{
           position: 'fixed',
           top: 0, left: 0, right: 0,
@@ -325,7 +325,7 @@ export default function Header() {
               cursor: 'pointer',
             }}
           >
-            <span style={{ color: '#fff' }}>THE</span>
+            <span style={{ color: 'var(--text-primary)' }}>THE</span>
             <span style={{
               background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
               WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
@@ -377,7 +377,7 @@ export default function Header() {
               background: searchOpen ? 'rgba(0,212,255,0.15)' : 'rgba(255,255,255,0.07)',
               border: `1px solid ${searchOpen ? 'var(--color-primary)' : 'rgba(255,255,255,0.15)'}`,
               borderRadius: '10px', padding: '0.5rem', cursor: 'pointer',
-              color: searchOpen ? 'var(--color-primary)' : '#ccc',
+              color: searchOpen ? 'var(--color-primary)' : 'var(--text-dim)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               transition: 'all 0.2s', flexShrink: 0,
             }}
@@ -480,7 +480,7 @@ export default function Header() {
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', paddingBottom: '1.25rem', borderBottom: '1px solid rgba(0,212,255,0.15)' }}>
                 <span style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', color: 'var(--color-primary)', letterSpacing: '3px', textTransform: 'uppercase' }}>Menú</span>
-                <motion.button whileTap={{ scale: 0.9 }} onClick={() => setMobileMenuOpen(false)} style={{ background: 'rgba(255,255,255,0.08)', border: 'none', color: '#fff', width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>✕</motion.button>
+                <motion.button whileTap={{ scale: 0.9 }} onClick={() => setMobileMenuOpen(false)} style={{ background: 'rgba(255,255,255,0.08)', border: 'none', color: 'var(--text-primary)', width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>✕</motion.button>
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', flex: 1 }}>

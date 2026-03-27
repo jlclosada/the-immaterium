@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../services/api';
 import Header from '../components/UI/Header';
@@ -746,6 +747,7 @@ function DetailModal({ listing, onClose }) {
 // ── Main Page ──────────────────────────────────────────────────────────────
 
 const MarketplacePage = () => {
+  const { id: urlId } = useParams();
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState('');
@@ -762,7 +764,13 @@ const MarketplacePage = () => {
         if (filterFaction) params.faction = filterFaction;
         if (search) params.search = search;
         const data = await api.getListings(params);
-        setListings(Array.isArray(data) ? data : []);
+        const arr = Array.isArray(data) ? data : [];
+        setListings(arr);
+        // If navigated via /marketplace/:id, auto-open that listing
+        if (urlId) {
+          const match = arr.find(l => String(l.id) === String(urlId));
+          if (match) setSelectedListing(match);
+        }
       } catch (err) {
         console.error('Failed to fetch listings:', err);
       } finally {
@@ -770,7 +778,7 @@ const MarketplacePage = () => {
       }
     };
     fetchListings();
-  }, [filterStatus, filterFaction, search]);
+  }, [filterStatus, filterFaction, search, urlId]);
 
   // Derive unique factions for the filter dropdown
   const factions = [...new Set(listings.map(l => l.faction).filter(Boolean))].sort();
@@ -835,7 +843,7 @@ const MarketplacePage = () => {
             letterSpacing: '3px',
             lineHeight: 1.1,
           }}>
-            Mercadillo
+            Marketplace
           </h1>
           <p style={{
             marginTop: '1rem',

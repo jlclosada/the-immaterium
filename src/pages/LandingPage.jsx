@@ -5,6 +5,7 @@ import Footer from '../components/UI/Footer';
 import { useTranslation } from '../i18n/translations';
 import { api } from '../services/api';
 import { useStore } from '../stores/useStore';
+import { useTheme } from '../hooks/useTheme';
 
 // Row 1: Marketplace, Pintura, Batallas
 // [Featured marketplace products]
@@ -143,6 +144,7 @@ const quickBtnStyle = (color) => ({
 const LandingPage = () => {
   const { fetchInitialData, language } = useStore();
   const t = useTranslation(language);
+  const { isLight } = useTheme();
   const [featuredNews,     setFeaturedNews]     = useState(null);
   const [featuredGuide,    setFeaturedGuide]    = useState(null);
   const [featuredReport,   setFeaturedReport]   = useState(null);
@@ -173,16 +175,29 @@ const LandingPage = () => {
   };
 
   return (
-    <div style={{
-      color: 'white',
-      background: 'radial-gradient(ellipse at 50% 0%, #1a1a2e 0%, #050510 60%)',
+    <div className="landing-root" style={{
+      color: isLight ? 'var(--text-primary)' : 'white',
+      background: isLight
+        ? 'radial-gradient(ellipse at 50% -10%, #b8dcf8 0%, #ddeeff 30%, #eef2fb 65%, #f4f7ff 100%)'
+        : 'radial-gradient(ellipse at 50% 0%, #1a1a2e 0%, #050510 60%)',
       minHeight: '100vh',
       display: 'flex',
       flexDirection: 'column',
       overflowX: 'hidden',
       position: 'relative',
     }}>
-      <div className="scanline-overlay" />
+      {!isLight && <div className="scanline-overlay" />}
+      {/* Aurora orbs — dark mode */}
+      {!isLight && <>
+        <div className="aurora-orb aurora-orb-1" />
+        <div className="aurora-orb aurora-orb-2" />
+        <div className="aurora-orb aurora-orb-3" />
+      </>}
+      {/* Aurora orbs — light mode */}
+      {isLight && <>
+        <div className="aurora-orb-light aurora-orb-l1" />
+        <div className="aurora-orb-light aurora-orb-l2" />
+      </>}
 
       {/* ── HERO ── */}
       <section style={{
@@ -199,7 +214,12 @@ const LandingPage = () => {
         {/* Decorative grid pattern */}
         <div style={{
           position: 'absolute', inset: 0, zIndex: 0,
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+          backgroundImage: isLight
+            ? 'linear-gradient(rgba(0,120,200,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(0,120,200,0.06) 1px, transparent 1px)'
+            : `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+          backgroundSize: isLight ? '50px 50px' : undefined,
+          maskImage: isLight ? 'radial-gradient(ellipse 90% 70% at 50% 0%, black 0%, transparent 100%)' : undefined,
+          WebkitMaskImage: isLight ? 'radial-gradient(ellipse 90% 70% at 50% 0%, black 0%, transparent 100%)' : undefined,
           pointerEvents: 'none',
         }} />
         {/* Center glow */}
@@ -208,7 +228,9 @@ const LandingPage = () => {
           transform: 'translate(-50%, -60%)',
           width: 'min(700px, 100vw)', height: 'min(700px, 100vw)',
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(0,212,255,0.06) 0%, transparent 70%)',
+          background: isLight
+            ? 'radial-gradient(circle, rgba(0,120,220,0.08) 0%, transparent 70%)'
+            : 'radial-gradient(circle, rgba(0,212,255,0.06) 0%, transparent 70%)',
           pointerEvents: 'none', zIndex: 0,
         }} />
 
@@ -234,7 +256,9 @@ const LandingPage = () => {
             fontFamily: 'var(--font-display)',
             fontSize: 'clamp(2.2rem, 9vw, 6.5rem)',
             letterSpacing: 'clamp(0.1rem, 2vw, 0.6rem)',
-            background: 'linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.6) 100%)',
+            background: isLight
+              ? 'linear-gradient(180deg, #0d1333 0%, #2a4080 60%, #0099cc 100%)'
+              : 'linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.6) 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
@@ -262,7 +286,7 @@ const LandingPage = () => {
             fontSize: 'clamp(0.95rem, 2vw, 1.15rem)',
             maxWidth: '640px',
             marginBottom: 'clamp(2rem, 5vw, 3rem)',
-            color: 'rgba(255,255,255,0.5)',
+            color: isLight ? 'var(--text-secondary)' : 'rgba(255,255,255,0.5)',
             zIndex: 1,
             lineHeight: 1.8,
             letterSpacing: '0.3px',
@@ -270,6 +294,59 @@ const LandingPage = () => {
         >
           {t('description')}
         </motion.p>
+
+        {/* CTA buttons */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.65, duration: 0.5 }}
+          style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', zIndex: 1 }}
+        >
+          <Link to="/armies" style={{ textDecoration: 'none' }}>
+            <motion.button
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.97 }}
+              style={{
+                padding: '0.85rem 2rem',
+                borderRadius: '50px',
+                background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+                border: 'none',
+                color: '#000',
+                fontFamily: 'var(--font-display)',
+                fontSize: '0.82rem',
+                letterSpacing: '2px',
+                textTransform: 'uppercase',
+                cursor: 'pointer',
+                fontWeight: 700,
+                boxShadow: '0 4px 24px rgba(0,212,255,0.3)',
+              }}
+            >
+              Explorar →
+            </motion.button>
+          </Link>
+          <Link to="/marketplace" style={{ textDecoration: 'none' }}>
+            <motion.button
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.97 }}
+              style={{
+                padding: '0.85rem 2rem',
+                borderRadius: '50px',
+                background: 'transparent',
+                border: '1px solid var(--color-primary)',
+                color: 'var(--color-primary)',
+                fontFamily: 'var(--font-display)',
+                fontSize: '0.82rem',
+                letterSpacing: '2px',
+                textTransform: 'uppercase',
+                cursor: 'pointer',
+                fontWeight: 700,
+                backdropFilter: 'blur(8px)',
+              }}
+            >
+              Marketplace
+            </motion.button>
+          </Link>
+        </motion.div>
 
         {/* ── Row 1: Marketplace · Pintura · Batallas ── */}
         <motion.div
@@ -287,7 +364,7 @@ const LandingPage = () => {
           className="nav-grid"
         >
           {NAV_ROW1.map((item) => (
-            <SectionCard key={item.to} item={item} t={t} />
+            <SectionCard key={item.to} item={item} t={t} isLight={isLight} />
           ))}
         </motion.div>
 
@@ -315,7 +392,7 @@ const LandingPage = () => {
                   <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.62rem', letterSpacing: '3px', color: '#10b981', textTransform: 'uppercase', margin: 0, opacity: 0.85 }}>
                     Marketplace · En venta ahora
                   </p>
-                  <p style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.35)', margin: 0, marginTop: '1px' }}>
+                  <p style={{ fontSize: '0.78rem', color: isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.35)', margin: 0, marginTop: '1px' }}>
                     Miniaturas de la comunidad disponibles
                   </p>
                 </div>
@@ -353,7 +430,7 @@ const LandingPage = () => {
           className="nav-grid"
         >
           {NAV_ROW2.map((item) => (
-            <SectionCard key={item.to} item={item} t={t} />
+            <SectionCard key={item.to} item={item} t={t} isLight={isLight} />
           ))}
         </motion.div>
 
@@ -373,7 +450,7 @@ const LandingPage = () => {
           className="nav-grid two-col"
         >
           {NAV_ROW3.map((item) => (
-            <SectionCard key={item.to} item={item} t={t} />
+            <SectionCard key={item.to} item={item} t={t} isLight={isLight} />
           ))}
         </motion.div>
       </section>
@@ -402,7 +479,7 @@ const LandingPage = () => {
             <h2 style={{
               fontFamily: 'var(--font-display)',
               fontSize: 'clamp(1.4rem, 4vw, 2rem)',
-              color: 'rgba(255,255,255,0.9)',
+              color: isLight ? 'var(--text-primary)' : 'rgba(255,255,255,0.9)',
               letterSpacing: '3px',
               textTransform: 'uppercase',
             }}>
@@ -463,45 +540,48 @@ const LandingPage = () => {
   );
 };
 
-const SectionCard = ({ item, t }) => (
+const SectionCard = ({ item, t, isLight }) => (
   <Link to={item.to} style={{ textDecoration: 'none' }}>
     <motion.div
-      whileHover={{ y: -6, scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ duration: 0.2 }}
+      whileHover={{ y: -8, scale: 1.03 }}
+      whileTap={{ scale: 0.97 }}
+      transition={{ duration: 0.22, ease: [0.34, 1.56, 0.64, 1] }}
+      className="section-card-inner"
       style={{
         padding: 'clamp(1.75rem, 4vw, 2.5rem) clamp(1.25rem, 3vw, 2rem)',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         textAlign: 'center',
-        background: 'rgba(255,255,255,0.03)',
-        border: '1px solid rgba(255,255,255,0.07)',
+        background: isLight ? 'rgba(255,255,255,0.72)' : 'rgba(255,255,255,0.03)',
+        border: isLight ? `1px solid ${item.color}30` : '1px solid rgba(255,255,255,0.07)',
         borderRadius: 'var(--radius-xl)',
         cursor: 'pointer',
         position: 'relative',
         overflow: 'hidden',
-        backdropFilter: 'blur(10px)',
-        transition: 'border-color 0.3s, box-shadow 0.3s',
-      }}
-      onHoverStart={e => {}}
-      style2={{
-        '--card-color': item.color,
+        backdropFilter: 'blur(16px)',
+        transition: 'border-color 0.3s, box-shadow 0.3s, background 0.3s',
+        boxShadow: isLight ? `0 4px 24px rgba(0,0,0,0.07), 0 0 0 0px ${item.color}40` : 'none',
       }}
     >
+      {/* Top gradient shimmer */}
+      <div style={{
+        position: 'absolute', top: 0, left: 0, right: 0, height: '1px',
+        background: `linear-gradient(90deg, transparent, ${item.color}80, transparent)`,
+        opacity: isLight ? 0.7 : 0.4,
+      }} />
+
       {/* Glow on hover */}
       <div style={{
         position: 'absolute', inset: 0, borderRadius: 'var(--radius-xl)',
         background: `radial-gradient(circle at 50% 0%, ${item.color}18 0%, transparent 60%)`,
-        opacity: 0,
-        transition: 'opacity 0.3s',
         pointerEvents: 'none',
       }} className="card-glow" />
 
       <div style={{
         color: item.color,
         marginBottom: '1.25rem',
-        filter: `drop-shadow(0 0 12px ${item.color}55)`,
+        filter: `drop-shadow(0 0 14px ${item.color}66)`,
         transition: 'transform 0.3s',
       }}>
         {item.icon}
@@ -510,7 +590,7 @@ const SectionCard = ({ item, t }) => (
       <h2 style={{
         fontFamily: 'var(--font-display)',
         fontSize: 'clamp(1rem, 2.5vw, 1.3rem)',
-        color: '#fff',
+        color: isLight ? 'var(--text-primary)' : '#fff',
         letterSpacing: '2px',
         marginBottom: '0.5rem',
         textTransform: 'uppercase',
@@ -519,7 +599,7 @@ const SectionCard = ({ item, t }) => (
       </h2>
 
       <span style={{
-        color: 'rgba(255,255,255,0.35)',
+        color: isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.35)',
         fontSize: 'clamp(0.75rem, 1.5vw, 0.82rem)',
         textTransform: 'uppercase',
         letterSpacing: '1.5px',
@@ -531,10 +611,10 @@ const SectionCard = ({ item, t }) => (
       {/* Bottom accent line */}
       <div style={{
         position: 'absolute',
-        bottom: 0, left: '20%', right: '20%',
+        bottom: 0, left: '15%', right: '15%',
         height: '2px',
         background: `linear-gradient(90deg, transparent, ${item.color}, transparent)`,
-        opacity: 0.5,
+        opacity: isLight ? 0.7 : 0.5,
       }} />
     </motion.div>
   </Link>
@@ -576,11 +656,11 @@ const MarketplaceListingCard = ({ listing }) => {
         </div>
         {/* Info — compact */}
         <div style={{ padding: '0.6rem 0.75rem 0.7rem' }}>
-          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '0.82rem', color: 'rgba(255,255,255,0.9)', margin: '0 0 0.3rem', letterSpacing: '0.3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '0.82rem', color: 'var(--text-primary)', margin: '0 0 0.3rem', letterSpacing: '0.3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {listing.title}
           </h3>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
-            {listing.faction && <span style={{ fontSize: '0.67rem', color: 'rgba(255,255,255,0.38)', fontFamily: 'var(--font-display)', letterSpacing: '0.3px' }}>{listing.faction}</span>}
+            {listing.faction && <span style={{ fontSize: '0.67rem', color: 'var(--text-dim)', fontFamily: 'var(--font-display)', letterSpacing: '0.3px' }}>{listing.faction}</span>}
             <span style={{ fontSize: '0.65rem', color: stateColor, background: `${stateColor}15`, border: `1px solid ${stateColor}35`, borderRadius: '5px', padding: '1px 6px', fontFamily: 'var(--font-display)', letterSpacing: '0.3px' }}>
               {STATE_LABEL[listing.state] || listing.state}
             </span>
@@ -599,9 +679,9 @@ const FeaturedCard = ({ to, badge, badgeColor, title, excerpt, linkLabel, linkCo
     whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: true }}
     transition={{ duration: 0.5 }}
-    whileHover={{ y: -4 }}
+    whileHover={{ y: -6, transition: { duration: 0.2, ease: [0.34,1.56,0.64,1] } }}
     style={{
-      background: accentColor,
+      background: `var(--surface-card, ${accentColor})`,
       border: `1px solid ${borderColor}`,
       borderRadius: 'var(--radius-xl)',
       padding: 'clamp(1.5rem, 3vw, 2rem)',
@@ -610,8 +690,15 @@ const FeaturedCard = ({ to, badge, badgeColor, title, excerpt, linkLabel, linkCo
       gap: '0.75rem',
       backdropFilter: 'blur(12px)',
       transition: 'box-shadow 0.3s',
+      position: 'relative',
+      overflow: 'hidden',
     }}
   >
+    <div style={{
+      position: 'absolute', top: 0, left: 0, right: 0, height: '1px',
+      background: `linear-gradient(90deg, transparent, ${borderColor}, transparent)`,
+      opacity: 0.8,
+    }} />
     <span style={{
       display: 'inline-block',
       background: badgeColor,
@@ -629,7 +716,7 @@ const FeaturedCard = ({ to, badge, badgeColor, title, excerpt, linkLabel, linkCo
     <h3 style={{
       fontFamily: 'var(--font-display)',
       fontSize: 'clamp(1.1rem, 3vw, 1.4rem)',
-      color: '#fff',
+      color: 'var(--text-primary)',
       lineHeight: 1.3,
       margin: 0,
     }}>
@@ -637,7 +724,7 @@ const FeaturedCard = ({ to, badge, badgeColor, title, excerpt, linkLabel, linkCo
     </h3>
     {excerpt && (
       <p style={{
-        color: 'rgba(255,255,255,0.6)',
+        color: 'var(--text-secondary)',
         fontSize: '0.9rem',
         lineHeight: 1.7,
         margin: 0,
