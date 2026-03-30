@@ -84,6 +84,23 @@
   opacity: 1 !important;
 }
 
+/* Force solid white background + black text on section cards in light mode */
+[data-theme="light"] .section-card-inner {
+  background: #ffffff !important;
+}
+[data-theme="light"] .section-card-inner h2 {
+  color: #000000 !important;
+  font-weight: 900 !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+}
+[data-theme="light"] .section-card-inner span {
+  color: #111111 !important;
+  font-weight: 700 !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+}
+
 /* Section card hover — boost shadow on hover */
 [data-theme="light"] .section-card-inner:hover {
   box-shadow: 0 12px 40px rgba(0,0,0,0.14), 0 2px 6px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9) !important;

@@ -820,7 +820,7 @@ const SectionCard = ({ item, t, isLight }) => (
         flexDirection: 'column',
         alignItems: 'center',
         textAlign: 'center',
-        background: isLight ? 'rgba(255,255,255,0.75)' : 'rgba(10,12,32,0.82)',
+        background: isLight ? '#ffffff' : 'rgba(10,12,32,0.82)',
         border: isLight
           ? `1px solid ${item.color.startsWith('var(') ? item.color : item.color + '33'}`
           : `1px solid ${item.color.startsWith('var(') ? item.color : item.color + '35'}`,
@@ -867,22 +867,22 @@ const SectionCard = ({ item, t, isLight }) => (
       <h2 style={{
         fontFamily: 'var(--font-display)',
         fontSize: 'clamp(1rem, 2.5vw, 1.3rem)',
-        color: 'var(--text-primary)',
+        color: isLight ? '#000000' : '#ffffff',
         letterSpacing: '2px',
         marginBottom: '0.5rem',
         textTransform: 'uppercase',
-        fontWeight: 700,
+        fontWeight: isLight ? 900 : 700,
       }}>
         {t(item.titleKey)}
       </h2>
 
       <span style={{
-        color: 'var(--text-secondary)',
+        color: isLight ? '#111111' : 'rgba(255,255,255,0.55)',
         fontSize: 'clamp(0.75rem, 1.5vw, 0.82rem)',
         textTransform: 'uppercase',
         letterSpacing: '1.5px',
         fontFamily: 'var(--font-display)',
-        fontWeight: 600,
+        fontWeight: isLight ? 700 : 600,
       }}>
         {t(item.subtitleKey)}
       </span>
