@@ -79,35 +79,58 @@
   100% { transform: translate(2%, -3%) scale(1.06); }
 }
 
-/* ── Section cards — card hover glow effect ─────────────────────────────── */
+/* ── Section cards — Apple-style glassmorphism ──────────────────────────── */
 .section-card-inner:hover .card-glow {
   opacity: 1 !important;
 }
+.section-card-inner:hover > div[style*="filter"] {
+  transform: scale(1.08);
+  filter: brightness(1.15);
+}
 
-/* Force solid white background + black text on section cards in light mode */
+/* Light mode */
+[data-theme="light"] {
+  --sc-bg: rgba(255, 255, 255, 0.82);
+  --sc-border: rgba(0, 0, 0, 0.07);
+}
 [data-theme="light"] .section-card-inner {
-  background: #ffffff !important;
+  background: rgba(255, 255, 255, 0.82) !important;
+  box-shadow:
+    0 1px 1px rgba(0,0,0,0.04),
+    0 4px 16px rgba(0,0,0,0.06),
+    0 12px 32px rgba(0,0,0,0.05),
+    inset 0 1px 0 rgba(255,255,255,0.9) !important;
 }
-[data-theme="light"] .section-card-inner h2 {
-  color: #000000 !important;
-  font-weight: 900 !important;
-  -webkit-font-smoothing: antialiased !important;
-  -moz-osx-font-smoothing: grayscale !important;
-}
-[data-theme="light"] .section-card-inner span {
-  color: #111111 !important;
-  font-weight: 700 !important;
-  -webkit-font-smoothing: antialiased !important;
-  -moz-osx-font-smoothing: grayscale !important;
+[data-theme="light"] .section-card-inner:hover {
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.06),
+    0 8px 28px rgba(0,0,0,0.10),
+    0 20px 48px rgba(0,0,0,0.08),
+    inset 0 1px 0 rgba(255,255,255,1) !important;
 }
 
-/* Section card hover — boost shadow on hover */
-[data-theme="light"] .section-card-inner:hover {
-  box-shadow: 0 12px 40px rgba(0,0,0,0.14), 0 2px 6px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9) !important;
+/* Dark mode */
+[data-theme="dark"],
+:root:not([data-theme="light"]) {
+  --sc-bg: rgba(255, 255, 255, 0.05);
+  --sc-border: rgba(255, 255, 255, 0.09);
+}
+[data-theme="dark"] .section-card-inner,
+:root:not([data-theme="light"]) .section-card-inner {
+  background: rgba(255, 255, 255, 0.05) !important;
+  box-shadow:
+    0 1px 1px rgba(0,0,0,0.12),
+    0 4px 16px rgba(0,0,0,0.25),
+    0 12px 32px rgba(0,0,0,0.20),
+    inset 0 1px 0 rgba(255,255,255,0.08) !important;
 }
 [data-theme="dark"] .section-card-inner:hover,
 :root:not([data-theme="light"]) .section-card-inner:hover {
-  box-shadow: 0 8px 40px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.07) !important;
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.20),
+    0 8px 28px rgba(0,0,0,0.35),
+    0 20px 48px rgba(0,0,0,0.28),
+    inset 0 1px 0 rgba(255,255,255,0.12) !important;
 }
 
 /* Light theme landing background override (in case inline style doesn't dominate) */

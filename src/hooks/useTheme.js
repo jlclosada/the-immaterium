@@ -12,7 +12,7 @@ function getInitialTheme() {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored === 'light' || stored === 'dark') return stored;
   } catch (_) {}
-  return getSystemTheme();
+  return 'dark';
 }
 
 function applyTheme(theme) {

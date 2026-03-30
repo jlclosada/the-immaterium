@@ -318,7 +318,7 @@ const LandingPage = () => {
           className="nav-grid"
         >
           {NAV_ROW1.map((item) => (
-            <SectionCard key={item.to} item={item} t={t} isLight={isLight} />
+            <SectionCard key={item.to} item={item} t={t} />
           ))}
         </motion.div>
 
@@ -384,7 +384,7 @@ const LandingPage = () => {
           className="nav-grid"
         >
           {NAV_ROW2.map((item) => (
-            <SectionCard key={item.to} item={item} t={t} isLight={isLight} />
+            <SectionCard key={item.to} item={item} t={t} />
           ))}
         </motion.div>
 
@@ -404,7 +404,7 @@ const LandingPage = () => {
           className="nav-grid two-col"
         >
           {NAV_ROW3.map((item) => (
-            <SectionCard key={item.to} item={item} t={t} isLight={isLight} />
+            <SectionCard key={item.to} item={item} t={t} />
           ))}
         </motion.div>
       </section>
@@ -807,97 +807,109 @@ const LandingPage = () => {
   );
 };
 
-const SectionCard = ({ item, t, isLight }) => (
-  <Link to={item.to} style={{ textDecoration: 'none' }}>
-    <motion.div
-      whileHover={{ y: -8, scale: 1.03 }}
-      whileTap={{ scale: 0.97 }}
-      transition={{ duration: 0.22, ease: [0.34, 1.56, 0.64, 1] }}
-      className="section-card-inner"
-      style={{
-        padding: 'clamp(1.75rem, 4vw, 2.5rem) clamp(1.25rem, 3vw, 2rem)',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        textAlign: 'center',
-        background: isLight ? '#ffffff' : 'rgba(10,12,32,0.82)',
-        border: isLight
-          ? `1px solid ${item.color.startsWith('var(') ? item.color : item.color + '33'}`
-          : `1px solid ${item.color.startsWith('var(') ? item.color : item.color + '35'}`,
-        borderRadius: 'var(--radius-xl)',
-        cursor: 'pointer',
-        position: 'relative',
-        overflow: 'hidden',
-        backdropFilter: 'blur(20px)',
-        transition: 'border-color 0.25s, box-shadow 0.25s, background 0.25s, transform 0.22s',
-        boxShadow: isLight
-          ? `0 4px 20px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.05)`
-          : `0 4px 32px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.05)`,
-      }}
-    >
-      {/* Top gradient shimmer */}
-      <div style={{
-        position: 'absolute', top: 0, left: 0, right: 0, height: '1px',
-        background: item.color.startsWith('var(')
-          ? `linear-gradient(90deg, transparent, ${item.color}, transparent)`
-          : `linear-gradient(90deg, transparent, ${item.color}80, transparent)`,
-        opacity: isLight ? 0.7 : 0.4,
-      }} />
+const SectionCard = ({ item, t }) => {
+  const accentHex = item.color.startsWith('var(') ? null : item.color;
+  return (
+    <Link to={item.to} style={{ textDecoration: 'none' }}>
+      <motion.div
+        whileHover={{ y: -5, scale: 1.018 }}
+        whileTap={{ scale: 0.975 }}
+        transition={{ duration: 0.28, ease: [0.34, 1.56, 0.64, 1] }}
+        className="section-card-inner"
+        style={{
+          padding: 'clamp(1.75rem, 3.5vw, 2.5rem) clamp(1.25rem, 2.5vw, 1.75rem)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          textAlign: 'center',
+          background: 'var(--sc-bg)',
+          border: '1px solid var(--sc-border)',
+          borderRadius: '20px',
+          cursor: 'pointer',
+          position: 'relative',
+          overflow: 'hidden',
+          backdropFilter: 'blur(28px)',
+          WebkitBackdropFilter: 'blur(28px)',
+          transition: 'box-shadow 0.3s ease, transform 0.28s ease',
+        }}
+      >
+        {/* Accent radial glow from top — always visible, subtle */}
+        <div style={{
+          position: 'absolute', top: 0, left: 0, right: 0,
+          height: '60%',
+          background: accentHex
+            ? `radial-gradient(ellipse 70% 80% at 50% -20%, ${accentHex}28 0%, transparent 70%)`
+            : `radial-gradient(ellipse 70% 80% at 50% -20%, ${item.color}28 0%, transparent 70%)`,
+          pointerEvents: 'none',
+        }} />
 
-      {/* Glow on hover */}
-      <div style={{
-        position: 'absolute', inset: 0, borderRadius: 'var(--radius-xl)',
-        background: item.color.startsWith('var(')
-          ? `radial-gradient(circle at 50% 0%, ${item.color} 0%, transparent 60%)`
-          : `radial-gradient(circle at 50% 0%, ${item.color}18 0%, transparent 60%)`,
-        pointerEvents: 'none',
-      }} className="card-glow" />
+        {/* Hover glow — intensifies on hover */}
+        <div className="card-glow" style={{
+          position: 'absolute', inset: 0, pointerEvents: 'none', borderRadius: 'inherit',
+          background: accentHex
+            ? `radial-gradient(ellipse 80% 70% at 50% 0%, ${accentHex}20 0%, transparent 65%)`
+            : `radial-gradient(ellipse 80% 70% at 50% 0%, ${item.color}20 0%, transparent 65%)`,
+          opacity: 0, transition: 'opacity 0.35s ease',
+        }} />
 
-      <div style={{
-        color: item.color,
-        marginBottom: '1.25rem',
-        filter: item.color.startsWith('var(')
-          ? `drop-shadow(0 0 12px ${item.color})`
-          : `drop-shadow(0 0 12px ${item.color}88)`,
-        transition: 'transform 0.3s',
-      }}>
-        {item.icon}
-      </div>
+        {/* Icon container — opacity trick so CSS vars work correctly */}
+        <div style={{
+          width: '64px', height: '64px',
+          borderRadius: '16px',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          position: 'relative',
+          marginBottom: '1.2rem',
+          color: item.color,
+          filter: accentHex
+            ? `drop-shadow(0 2px 10px ${accentHex}60)`
+            : `drop-shadow(0 2px 10px ${item.color})`,
+          transition: 'filter 0.3s, transform 0.3s',
+          zIndex: 1,
+          flexShrink: 0,
+        }}>
+          {/* Tinted background */}
+          <div style={{
+            position: 'absolute', inset: 0, borderRadius: 'inherit',
+            background: item.color, opacity: 0.13, pointerEvents: 'none',
+          }} />
+          {/* Border ring */}
+          <div style={{
+            position: 'absolute', inset: 0, borderRadius: 'inherit',
+            border: `1px solid ${item.color}`, opacity: 0.35, pointerEvents: 'none',
+          }} />
+          {item.icon}
+        </div>
 
-      <h2 style={{
-        fontFamily: 'var(--font-display)',
-        fontSize: 'clamp(1rem, 2.5vw, 1.3rem)',
-        color: isLight ? '#000000' : '#ffffff',
-        letterSpacing: '2px',
-        marginBottom: '0.5rem',
-        textTransform: 'uppercase',
-        fontWeight: isLight ? 900 : 700,
-      }}>
-        {t(item.titleKey)}
-      </h2>
+        <h2 style={{
+          fontFamily: 'var(--font-display)',
+          fontSize: 'clamp(0.82rem, 1.8vw, 1rem)',
+          color: 'var(--text-primary)',
+          letterSpacing: '2px',
+          margin: '0 0 0.4rem',
+          textTransform: 'uppercase',
+          fontWeight: 700,
+          lineHeight: 1.2,
+          zIndex: 1,
+        }}>
+          {t(item.titleKey)}
+        </h2>
 
-      <span style={{
-        color: isLight ? '#111111' : 'rgba(255,255,255,0.55)',
-        fontSize: 'clamp(0.75rem, 1.5vw, 0.82rem)',
-        textTransform: 'uppercase',
-        letterSpacing: '1.5px',
-        fontFamily: 'var(--font-display)',
-        fontWeight: isLight ? 700 : 600,
-      }}>
-        {t(item.subtitleKey)}
-      </span>
-
-      {/* Bottom accent line */}
-      <div style={{
-        position: 'absolute',
-        bottom: 0, left: '15%', right: '15%',
-        height: '2px',
-        background: `linear-gradient(90deg, transparent, ${item.color}, transparent)`,
-        opacity: isLight ? 0.7 : 0.5,
-      }} />
-    </motion.div>
-  </Link>
-);
+        <span style={{
+          fontFamily: 'var(--font-display)',
+          fontSize: 'clamp(0.6rem, 1vw, 0.68rem)',
+          color: 'var(--text-secondary)',
+          textTransform: 'uppercase',
+          letterSpacing: '1.8px',
+          fontWeight: 500,
+          opacity: 0.85,
+          zIndex: 1,
+        }}>
+          {t(item.subtitleKey)}
+        </span>
+      </motion.div>
+    </Link>
+  );
+};
 
 const STATE_LABEL = { sin_montar: 'Sin montar', montada: 'Montada', imprimada: 'Imprimada', pintada_parcial: 'Pintada parcial', pintada: 'Pintada', conversion: 'Conversión' };
 const STATE_COLOR = { sin_montar: '#b0b0b8', montada: '#6ab0f5', imprimada: '#f0924a', pintada_parcial: '#e8d040', pintada: '#40c878', conversion: '#c078f0' };
