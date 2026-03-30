@@ -444,42 +444,59 @@ export default function Header() {
       {/* ── Search dropdown ── */}
       <AnimatePresence>
         {searchOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.18 }}
-            style={{
-              position: 'fixed', top: '68px', left: '50%', transform: 'translateX(-50%)',
-              width: 'min(560px, 92vw)', zIndex: 120,
-            }}
-          >
-            <form onSubmit={handleSearchSubmit} style={{ display: 'flex', gap: '0.5rem' }}>
-              <div style={{ position: 'relative', flex: 1 }}>
-                <div style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#666', pointerEvents: 'none', display: 'flex' }}>
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <>
+            {/* backdrop tap-to-close */}
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => setSearchOpen(false)}
+              style={{ position: 'fixed', inset: 0, zIndex: 119 }}
+            />
+            <motion.div
+              initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.18 }}
+              style={{
+                position: 'fixed',
+                top: 'calc(var(--header-height, 64px) + 8px)',
+                left: '1rem',
+                right: '1rem',
+                maxWidth: '580px',
+                margin: '0 auto',
+                zIndex: 120,
+              }}
+            >
+              <form onSubmit={handleSearchSubmit} style={{ display: 'flex', gap: '0.5rem' }}>
+                <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>
+                  <div style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#666', pointerEvents: 'none', display: 'flex' }}>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+                    </svg>
+                  </div>
+                  <input
+                    ref={searchInputRef} type="text" value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    placeholder="Buscar en The Immaterium..."
+                    style={{
+                      width: '100%', padding: '0.8rem 1rem 0.8rem 2.75rem',
+                      background: 'var(--surface-header)', border: '1px solid rgba(0,212,255,0.4)',
+                      borderRadius: '12px', color: 'var(--text-primary)', fontSize: '1rem', outline: 'none',
+                      fontFamily: 'var(--font-body)', boxSizing: 'border-box',
+                      boxShadow: '0 8px 32px rgba(0,0,0,0.6)', backdropFilter: 'blur(24px)',
+                    }}
+                  />
+                </div>
+                <motion.button type="submit" whileTap={{ scale: 0.95 }} style={{
+                  background: 'var(--color-primary)', border: 'none', borderRadius: '12px',
+                  padding: '0.8rem 1.1rem', color: '#000', cursor: 'pointer', fontWeight: 'bold',
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.5)', flexShrink: 0,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
                   </svg>
-                </div>
-                <input
-                  ref={searchInputRef} type="text" value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  placeholder="Buscar en The Immaterium..."
-                  style={{
-                    width: '100%', padding: '0.75rem 1rem 0.75rem 2.75rem',
-                    background: 'var(--surface-header)', border: '1px solid rgba(0,212,255,0.4)',
-                    borderRadius: '12px', color: 'var(--text-primary)', fontSize: '0.95rem', outline: 'none',
-                    fontFamily: 'var(--font-body)', boxSizing: 'border-box',
-                    boxShadow: '0 8px 32px rgba(0,0,0,0.5)', backdropFilter: 'blur(20px)',
-                  }}
-                />
-              </div>
-              <motion.button type="submit" whileTap={{ scale: 0.95 }} style={{
-                background: 'var(--color-primary)', border: 'none', borderRadius: '12px',
-                padding: '0.75rem 1.25rem', color: '#000', fontFamily: 'var(--font-display)',
-                fontSize: '0.8rem', letterSpacing: '1px', cursor: 'pointer', fontWeight: 'bold',
-                whiteSpace: 'nowrap', boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-              }}>BUSCAR</motion.button>
-            </form>
-          </motion.div>
+                </motion.button>
+              </form>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
 

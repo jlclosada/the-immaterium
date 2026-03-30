@@ -523,10 +523,8 @@ class NewsArticleViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         import uuid
         data = request.data.copy()
-        if 'coverImage' in data:
-            data['cover_image'] = data.pop('coverImage')
-        if 'isPublished' in data:
-            data['is_published'] = data.pop('isPublished')
+        # Note: camelCase→snake_case is handled by the serializer (source= parameter)
+        # Do NOT manually rename coverImage or isPublished here
         if not data.get('id'):
             data['id'] = str(uuid.uuid4())[:8]
         serializer = self.get_serializer(data=data)
@@ -538,10 +536,8 @@ class NewsArticleViewSet(viewsets.ModelViewSet):
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         data = request.data.copy()
-        if 'coverImage' in data:
-            data['cover_image'] = data.pop('coverImage')
-        if 'isPublished' in data:
-            data['is_published'] = data.pop('isPublished')
+        # Note: camelCase→snake_case is handled by the serializer (source= parameter)
+        # Do NOT manually rename coverImage or isPublished here
         serializer = self.get_serializer(instance, data=data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()

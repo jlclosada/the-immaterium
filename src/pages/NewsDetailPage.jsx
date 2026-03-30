@@ -66,38 +66,47 @@ const NewsDetailPage = () => {
           ← Volver a Noticias
         </Link>
 
-        {/* Cover image */}
-        {article.coverImage && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            style={{
-              borderRadius: 'var(--radius-xl)',
-              overflow: 'hidden',
-              marginBottom: '2rem',
-              maxHeight: '400px',
-            }}
-          >
-            <img src={article.coverImage} alt={article.title} style={{ width: '100%', objectFit: 'cover', display: 'block' }} />
-          </motion.div>
-        )}
+        {/* Header: title + tags first */}
+        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: '2rem' }}>
+          {/* Date + author */}
+          <div style={{
+            display: 'flex', flexWrap: 'wrap', gap: '0.4rem 0.75rem',
+            fontSize: '0.75rem', color: 'rgba(255,255,255,0.3)',
+            letterSpacing: '0.5px', textTransform: 'uppercase',
+            fontFamily: 'var(--font-display)', marginBottom: '1rem',
+          }}>
+            {article.publishedAt && (
+              <span>{new Date(article.publishedAt).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+            )}
+            {article.author && <><span style={{ opacity: 0.3 }}>·</span><span>Por {article.author}</span></>}
+          </div>
 
-        {/* Header */}
-        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
+          <h1 style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 'clamp(1.6rem, 5vw, 2.75rem)',
+            color: '#fff',
+            lineHeight: 1.15,
+            letterSpacing: '0.5px',
+            marginBottom: '1.25rem',
+          }}>
+            {article.title}
+          </h1>
+
           {/* Tags */}
           {article.tags?.length > 0 && (
-            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+            <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
               {article.tags.map(tag => (
                 <span key={tag} style={{
-                  padding: '2px 9px',
-                  borderRadius: 'var(--radius-full)',
-                  background: 'rgba(0,212,255,0.1)',
+                  padding: '3px 10px',
+                  borderRadius: '999px',
+                  background: 'rgba(0,212,255,0.08)',
                   border: '1px solid rgba(0,212,255,0.2)',
                   color: 'var(--color-primary)',
-                  fontSize: '0.7rem',
+                  fontSize: '0.68rem',
                   fontWeight: 700,
                   textTransform: 'uppercase',
-                  letterSpacing: '0.5px',
+                  letterSpacing: '0.8px',
+                  fontFamily: 'var(--font-display)',
                 }}>
                   {tag}
                 </span>
@@ -105,26 +114,31 @@ const NewsDetailPage = () => {
             </div>
           )}
 
-          <h1 style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(1.75rem, 5vw, 2.75rem)',
-            color: '#fff',
-            lineHeight: 1.2,
-            letterSpacing: '1px',
-            marginBottom: '1rem',
-          }}>
-            {article.title}
-          </h1>
-
-          <div style={{ display: 'flex', gap: '1.5rem', fontSize: '0.82rem', color: 'rgba(255,255,255,0.35)', marginBottom: '2rem' }}>
-            <span>Por {article.author}</span>
-            {article.publishedAt && (
-              <span>{new Date(article.publishedAt).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
-            )}
-          </div>
-
-          <div style={{ width: '60px', height: '2px', background: 'linear-gradient(90deg, var(--color-primary), var(--color-secondary))', marginBottom: '2rem' }} />
+          <div style={{ width: '48px', height: '2px', background: 'linear-gradient(90deg, var(--color-primary), var(--color-secondary))' }} />
         </motion.div>
+
+        {/* Cover image — after title + tags */}
+        {article.coverImage && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.1 }}
+            style={{
+              borderRadius: 'var(--radius-xl)',
+              overflow: 'hidden',
+              marginBottom: '2.5rem',
+              aspectRatio: '16/7',
+              background: 'rgba(255,255,255,0.03)',
+              boxShadow: '0 8px 40px rgba(0,0,0,0.4)',
+            }}
+          >
+            <img
+              src={article.coverImage}
+              alt={article.title}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            />
+          </motion.div>
+        )}
 
         {/* Content */}
         <motion.div
