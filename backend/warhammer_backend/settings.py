@@ -14,7 +14,7 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-warhammer-galaxy-dev-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1, theimmaterium.com,api.theimmaterium.com').split(',')
 
 # Application definition
 INSTALLED_APPS = [
@@ -121,7 +121,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # CORS settings
 CORS_ALLOWED_ORIGINS = config(
     'CORS_ALLOWED_ORIGINS',
-    default='http://localhost:5173,http://localhost:3000'
+    default='http://localhost:5173,http://localhost:3000,https://theimmaterium.com,https://www.theimmaterium.com'
 ).split(',')
 
 CORS_ALLOW_CREDENTIALS = True
