@@ -153,3 +153,8 @@ LOGGING = {
     },
 }
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://theimmaterium.com',
+    'https://www.theimmaterium.com',
+]
+
