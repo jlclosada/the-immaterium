@@ -370,7 +370,7 @@ function PurchaseForm({ listing, onSuccess }) {
         * Campos obligatorios
       </p>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+      <div className="mp-purchase-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
         <div>
           <label style={labelStyle}>Nombre *</label>
           <input value={form.name} onChange={set('name')} placeholder="Tu nombre" style={inputStyle} required />
@@ -487,6 +487,7 @@ function DetailModal({ listing, onClose }) {
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           transition={{ duration: 0.25, ease: 'easeOut' }}
           onClick={e => e.stopPropagation()}
+          className="mp-modal-container"
           style={{
             background: 'var(--color-dark)',
             border: '1px solid rgba(255,255,255,0.1)',
@@ -518,9 +519,9 @@ function DetailModal({ listing, onClose }) {
             ✕
           </button>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: 0 }}>
+          <div className="mp-modal-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: 0 }}>
             {/* Left: image gallery */}
-            <div style={{ borderRight: '1px solid rgba(255,255,255,0.07)', padding: '1.5rem' }}>
+            <div className="mp-modal-left" style={{ borderRight: '1px solid rgba(255,255,255,0.07)', padding: '1.5rem' }}>
               {/* Main image */}
               <div style={{
                 borderRadius: '12px',
@@ -565,7 +566,7 @@ function DetailModal({ listing, onClose }) {
             </div>
 
             {/* Right: info + form */}
-            <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.8rem', overflowY: 'auto' }}>
+            <div className="mp-modal-right" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.8rem', overflowY: 'auto' }}>
               {/* Badges row */}
               <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
                 <StateBadge state={listing.state} />
@@ -738,11 +739,30 @@ function DetailModal({ listing, onClose }) {
             </div>
           </div>
 
-          {/* Mobile: stack images above info */}
           <style>{`
             @media (max-width: 640px) {
-              .mp-modal-grid { grid-template-columns: 1fr !important; }
-              .mp-modal-grid > div:first-child { border-right: none !important; border-bottom: 1px solid rgba(255,255,255,0.07); }
+              .mp-modal-container {
+                border-radius: 12px !important;
+                max-height: 95vh !important;
+              }
+              .mp-modal-grid {
+                grid-template-columns: 1fr !important;
+              }
+              .mp-modal-left {
+                border-right: none !important;
+                border-bottom: 1px solid rgba(255,255,255,0.07) !important;
+                padding: 0.85rem !important;
+              }
+              .mp-modal-left > div:first-child {
+                aspect-ratio: 16/9 !important;
+                max-height: 200px !important;
+              }
+              .mp-modal-right {
+                padding: 0.85rem !important;
+              }
+              .mp-purchase-grid {
+                grid-template-columns: 1fr !important;
+              }
             }
           `}</style>
         </motion.div>
