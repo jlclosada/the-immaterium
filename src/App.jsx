@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { useStore } from './stores/useStore';
+import { api } from './services/api';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import ScrollToTop from './components/UI/ScrollToTop';
@@ -34,6 +35,9 @@ import SearchPage from './pages/SearchPage';
 import ArmyBuilderPage from './pages/ArmyBuilderPage';
 import VideosPage from './pages/VideosPage';
 import MarketplacePage from './pages/MarketplacePage';
+import PaymentSuccessPage from './pages/PaymentSuccessPage';
+import PaymentCancelPage from './pages/PaymentCancelPage';
+import AuthModal from './components/Auth/AuthModal';
 
 import './styles/index.css';
 import './index.css';
@@ -51,17 +55,26 @@ const AnimatedPage = ({ children }) => (
 );
 
 function App() {
-  const { fetchInitialData } = useStore();
+  const { fetchInitialData, token, setUser } = useStore();
   const location = useLocation();
 
   useEffect(() => {
     fetchInitialData();
   }, []);
 
+  // Restore session on load
+  useEffect(() => {
+    if (!token) return;
+    api.getMe(token)
+      .then(data => setUser(data.user, data.purchases || []))
+      .catch(() => {}); // token may be expired — that's fine
+  }, []);
+
   return (
     <>
       <ScrollToTop />
       <BackToTop />
+      <AuthModal />
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<AnimatedPage><LandingPage /></AnimatedPage>} />
@@ -84,6 +97,8 @@ function App() {
           <Route path="/army-builder/:listId" element={<AnimatedPage><ArmyBuilderPage /></AnimatedPage>} />
           <Route path="/marketplace" element={<AnimatedPage><MarketplacePage /></AnimatedPage>} />
           <Route path="/marketplace/:id" element={<AnimatedPage><MarketplacePage /></AnimatedPage>} />
+          <Route path="/payment/success" element={<AnimatedPage><PaymentSuccessPage /></AnimatedPage>} />
+          <Route path="/payment/cancel" element={<AnimatedPage><PaymentCancelPage /></AnimatedPage>} />
 
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminLayout />}>

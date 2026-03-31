@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Background -->
+  <rect width="64" height="64" rx="10" fill="#07071A"/>
+
+  <!-- ── Bird skull crest ── -->
+  <!-- Skull dome -->
+  <ellipse cx="32" cy="11" rx="6" ry="5" fill="#DDD098"/>
+  <!-- Beak pointing down -->
+  <path d="M30 15 L34 15 L32 21 Z" fill="#C8B870"/>
+  <!-- Eye sockets of skull -->
+  <ellipse cx="29.5" cy="10" rx="1.5" ry="1.5" fill="#07071A"/>
+  <ellipse cx="34.5" cy="10" rx="1.5" ry="1.5" fill="#07071A"/>
+
+  <!-- ── Helmet main body ── -->
+  <!-- Gold shell -->
+  <path d="
+    M14 42
+    L14 27
+    Q14 17 32 17
+    Q50 17 50 27
+    L50 42
+    Q49 53 32 53
+    Q15 53 14 42 Z
+  " fill="#C49A28"/>
+
+  <!-- Highlight top of dome -->
+  <path d="
+    M20 22
+    Q32 16 44 22
+    Q38 19 32 19
+    Q26 19 20 22 Z
+  " fill="#E0B840" opacity="0.5"/>
+
+  <!-- ── Teal recessed side panels ── -->
+  <path d="M15.5 27 Q15 34 15.5 42 L18 43 Q17.5 34 18 27 Z" fill="#2A6575"/>
+  <path d="M48.5 27 Q49 34 48.5 42 L46 43 Q46.5 34 46 27 Z" fill="#2A6575"/>
+
+  <!-- ── Eye lenses ── -->
+  <ellipse cx="25" cy="33" rx="5.5" ry="4.5" fill="#07071A"/>
+  <ellipse cx="39" cy="33" rx="5.5" ry="4.5" fill="#07071A"/>
+  <!-- Subtle blue inner glow -->
+  <ellipse cx="25" cy="33" rx="3.5" ry="3" fill="#112235"/>
+  <ellipse cx="39" cy="33" rx="3.5" ry="3" fill="#112235"/>
+  <!-- Eye highlight -->
+  <ellipse cx="23.5" cy="31.5" rx="1.2" ry="1" fill="#1A3D55" opacity="0.7"/>
+  <ellipse cx="37.5" cy="31.5" rx="1.2" ry="1" fill="#1A3D55" opacity="0.7"/>
+
+  <!-- ── Nose bridge ── -->
+  <rect x="29" y="31" width="6" height="5" rx="1.5" fill="#B08820"/>
+
+  <!-- ── Chin ribs ── -->
+  <rect x="26" y="43" width="12" height="2"   rx="1" fill="#9A7218"/>
+  <rect x="27" y="46" width="10" height="1.8" rx="0.9" fill="#9A7218"/>
+  <rect x="28" y="49" width="8"  height="1.6" rx="0.8" fill="#9A7218"/>
+
+  <!-- ── Gold rim edge highlights ── -->
+  <path d="M14 27 Q14 17 32 17 Q50 17 50 27" fill="none" stroke="#E8C040" stroke-width="1" opacity="0.6"/>
+</svg>

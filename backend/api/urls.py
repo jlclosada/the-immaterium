@@ -3,6 +3,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views
 from . import builder_views
+from . import auth_views
 
 router = DefaultRouter()
 router.register(r'games', views.GameViewSet, basename='game')
@@ -23,7 +24,19 @@ builder_router.register(r'lists', builder_views.BuilderArmyListViewSet, basename
 # Por tanto NO se debe añadir el prefijo 'api/' aquí — ya está en el padre.
 urlpatterns = [
     path('', include(router.urls)),
+    # Admin login (username-based, existing)
     path('auth/login/', views.login_view, name='api_token_auth'),
+    # User-facing auth (email-based)
+    path('auth/register/', auth_views.register_view, name='register'),
+    path('auth/login-email/', auth_views.login_email_view, name='login_email'),
+    path('auth/google/', auth_views.google_auth_view, name='google_auth'),
+    path('auth/me/', auth_views.me_view, name='me'),
+    path('auth/logout/', auth_views.logout_view, name='logout'),
+    path('auth/purchases/', auth_views.my_purchases, name='my_purchases'),
+    # Stripe
+    path('stripe/create-checkout/', auth_views.create_checkout_session, name='create_checkout'),
+    path('stripe/webhook/', auth_views.stripe_webhook, name='stripe_webhook'),
+    # Other
     path('search/', views.global_search, name='global_search'),
     path('new-recruit/', views.new_recruit_proxy, name='new_recruit_proxy'),
     path('users/', views.users_list, name='users_list'),

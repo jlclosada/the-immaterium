@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { api } from '../services/api';
+import { useStore } from '../stores/useStore';
 import Header from '../components/UI/Header';
 import Footer from '../components/UI/Footer';
 import ImageModal from '../components/Gallery/ImageModal';
+import PremiumGate from '../components/Auth/PremiumGate';
 
 const DIFFICULTY_COLORS = {
   beginner: { bg: 'rgba(80,200,120,0.12)', border: 'rgba(80,200,120,0.3)', color: '#50c878', label: 'Principiante' },
@@ -22,6 +24,7 @@ const GuideDetailPage = () => {
   const [guide, setGuide] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(null);
+  const { purchases } = useStore();
 
   useEffect(() => {
     const fetchGuide = async () => {
@@ -57,6 +60,9 @@ const GuideDetailPage = () => {
   }
 
   const diffStyle = getDifficultyStyle(guide.difficulty);
+  const isPremium = guide.isPremium || guide.is_premium;
+  const isPurchased = purchases.includes(String(guide.id));
+  const isLocked = isPremium && !isPurchased;
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-darker)', display: 'flex', flexDirection: 'column' }}>
@@ -126,6 +132,25 @@ const GuideDetailPage = () => {
             }}>
               {diffStyle.label}
             </span>
+            {isPremium && (
+              <span style={{
+                display: 'inline-flex', alignItems: 'center', gap: '4px',
+                padding: '4px 12px',
+                borderRadius: 'var(--radius-full)',
+                background: 'rgba(255,215,0,0.12)',
+                border: '1px solid rgba(255,215,0,0.4)',
+                color: '#FFD700',
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                letterSpacing: '1px',
+              }}>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+                {isPurchased ? 'Desbloqueado' : 'Premium'}
+              </span>
+            )}
             {guide.estimatedTime && (
               <span style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.45)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -177,8 +202,11 @@ const GuideDetailPage = () => {
           )}
         </motion.div>
 
+        {/* Premium gate — shown when locked */}
+        {isLocked && <PremiumGate guide={guide} />}
+
         {/* Cover image */}
-        {guide.coverImage && (
+        {guide.coverImage && !isLocked && (
           <motion.div
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -207,7 +235,7 @@ const GuideDetailPage = () => {
         )}
 
         {/* Materials */}
-        {guide.materials?.length > 0 && (
+        {guide.materials?.length > 0 && !isLocked && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -275,7 +303,7 @@ const GuideDetailPage = () => {
         )}
 
         {/* Steps */}
-        {guide.steps?.map((step, index) => (
+        {!isLocked && guide.steps?.map((step, index) => (
           <motion.div
             key={step.stepNumber}
             initial={{ opacity: 0, y: 20 }}

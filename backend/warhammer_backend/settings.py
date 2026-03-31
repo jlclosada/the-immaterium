@@ -139,6 +139,17 @@ REST_FRAMEWORK = {
     ],
 }
 
+# Stripe
+STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY', default='')
+STRIPE_PUBLISHABLE_KEY = config('STRIPE_PUBLISHABLE_KEY', default='')
+STRIPE_WEBHOOK_SECRET = config('STRIPE_WEBHOOK_SECRET', default='')
+
+# Google OAuth
+GOOGLE_CLIENT_ID = config('GOOGLE_CLIENT_ID', default='')
+
+# Frontend URL (for Stripe redirects)
+FRONTEND_URL = config('FRONTEND_URL', default='https://theimmaterium.com')
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

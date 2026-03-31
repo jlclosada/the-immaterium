@@ -29,15 +29,24 @@ export const useStore = create((set, get) => ({
   // Auth state
   token: localStorage.getItem('token') || null,
   username: localStorage.getItem('username') || null,
+  user: null,          // Full user profile object
+  purchases: [],       // List of purchased guide IDs
+  authModalOpen: false, // Global auth modal visibility
+
   setToken: (token, username) => {
     localStorage.setItem('token', token);
     if (username) localStorage.setItem('username', username);
     set({ token, username: username || get().username });
   },
+  setUser: (user, purchases = []) => {
+    set({ user, purchases });
+  },
+  openAuthModal: () => set({ authModalOpen: true }),
+  closeAuthModal: () => set({ authModalOpen: false }),
   logout: () => {
     localStorage.removeItem('token');
     localStorage.removeItem('username');
-    set({ token: null, username: null });
+    set({ token: null, username: null, user: null, purchases: [] });
   },
 
   // Data state (fetched from API)

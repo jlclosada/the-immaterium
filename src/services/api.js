@@ -504,4 +504,78 @@ export const api = {
     const data = await response.json()
     return data.count || 0
   },
+
+  // ── User Auth ──────────────────────────────────────────────────────────────
+
+  register: async (name, email, password) => {
+    const res = await fetch(`${API_URL}/api/auth/register/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password }),
+    })
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.error || 'Error al registrarse')
+    return data
+  },
+
+  loginWithEmail: async (email, password) => {
+    const res = await fetch(`${API_URL}/api/auth/login-email/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    })
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.error || 'Credenciales incorrectas')
+    return data
+  },
+
+  googleAuth: async (credential) => {
+    const res = await fetch(`${API_URL}/api/auth/google/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ credential }),
+    })
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.error || 'Error con Google Sign-In')
+    return data
+  },
+
+  getMe: async (token) => {
+    const res = await fetch(`${API_URL}/api/auth/me/`, {
+      headers: { Authorization: `Token ${token}` },
+    })
+    if (!res.ok) throw new Error('Sesión expirada')
+    return res.json()
+  },
+
+  logoutUser: async (token) => {
+    await fetch(`${API_URL}/api/auth/logout/`, {
+      method: 'POST',
+      headers: { Authorization: `Token ${token}` },
+    }).catch(() => {})
+  },
+
+  // ── Stripe ────────────────────────────────────────────────────────────────
+
+  createCheckoutSession: async (guideId, token) => {
+    const res = await fetch(`${API_URL}/api/stripe/create-checkout/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Token ${token}`,
+      },
+      body: JSON.stringify({ guide_id: guideId }),
+    })
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.error || 'Error al crear sesión de pago')
+    return data
+  },
+
+  getMyPurchases: async (token) => {
+    const res = await fetch(`${API_URL}/api/auth/purchases/`, {
+      headers: { Authorization: `Token ${token}` },
+    })
+    if (!res.ok) return { purchases: [] }
+    return res.json()
+  },
 }

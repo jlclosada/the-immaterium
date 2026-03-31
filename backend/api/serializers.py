@@ -137,20 +137,21 @@ class PaintingGuideSerializer(serializers.ModelSerializer):
     estimatedTime = serializers.CharField(source='estimated_time', read_only=True)
     dateCreated = serializers.DateField(source='date_created', read_only=True)
     coverImage = serializers.URLField(source='cover_image', read_only=True)
+    isPremium = serializers.BooleanField(source='is_premium', required=False, default=False)
     faction = serializers.SerializerMethodField()
     materials = serializers.SerializerMethodField()
     steps = GuideStepSerializer(many=True, read_only=True)
     comments = CommentSerializer(many=True, read_only=True)
-    # duplicate field definitions removed
-    
+
     class Meta:
         model = PaintingGuide
         fields = [
             'id', 'title', 'difficulty', 'estimated_time', 'author',
             'date_created', 'cover_image', 'tags', 'likes', 'views',
+            'is_premium', 'price',
             'materials', 'steps', 'comments', 'faction',
             # camelCase read‑only aliases
-            'estimatedTime', 'dateCreated', 'coverImage'
+            'estimatedTime', 'dateCreated', 'coverImage', 'isPremium'
         ]
         
     def get_materials(self, obj):

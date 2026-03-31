@@ -4,6 +4,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useStore } from '../../stores/useStore';
 import { useTranslation } from '../../i18n/translations';
 import { useTheme } from '../../hooks/useTheme';
+import { api } from '../../services/api';
 
 // ─── Theme toggle pill ────────────────────────────────────────────────────────
 // Renders as a sliding pill: moon (dark) → sun (light)
@@ -212,6 +213,155 @@ function MoreBtn({ items, currentPath, navigate }) {
   );
 }
 
+// ─── UserMenu ─────────────────────────────────────────────────────────────────
+function UserMenu({ user, token, onLogout, openAuthModal }) {
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+
+  if (!token) {
+    return (
+      <motion.button
+        whileHover={{ scale: 1.05, y: -1 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={openAuthModal}
+        style={{
+          background: 'linear-gradient(135deg, rgba(0,212,255,0.18), rgba(135,206,250,0.1))',
+          border: '1px solid rgba(0,212,255,0.4)',
+          borderRadius: '12px',
+          padding: '0.48rem 1rem',
+          color: 'var(--color-primary)',
+          fontFamily: 'var(--font-display)',
+          fontSize: '0.7rem',
+          letterSpacing: '1.5px',
+          cursor: 'pointer',
+          display: 'flex', alignItems: 'center', gap: '0.4rem',
+          textTransform: 'uppercase',
+          whiteSpace: 'nowrap',
+          boxShadow: '0 0 12px rgba(0,212,255,0.15)',
+        }}
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+          <polyline points="10 17 15 12 10 7"/>
+          <line x1="15" y1="12" x2="3" y2="12"/>
+        </svg>
+        Entrar
+      </motion.button>
+    );
+  }
+
+  const initials = (user?.name || user?.username || 'U').slice(0, 2).toUpperCase();
+  const avatar = user?.avatarUrl;
+
+  return (
+    <div ref={wrapRef} style={{ position: 'relative' }}>
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => setOpen(v => !v)}
+        style={{
+          background: 'rgba(0,212,255,0.1)',
+          border: '1px solid rgba(0,212,255,0.3)',
+          borderRadius: '30px',
+          padding: '0.28rem 0.75rem 0.28rem 0.28rem',
+          cursor: 'pointer',
+          display: 'flex', alignItems: 'center', gap: '0.5rem',
+          transition: 'all 0.2s',
+        }}
+      >
+        {avatar ? (
+          <img src={avatar} alt="" style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+        ) : (
+          <div style={{
+            width: '28px', height: '28px', borderRadius: '50%',
+            background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: '0.65rem', fontWeight: 700, color: '#000',
+            flexShrink: 0,
+          }}>
+            {initials}
+          </div>
+        )}
+        <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.68rem', color: 'var(--text-primary)', letterSpacing: '1px', maxWidth: '80px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {user?.name || user?.username || 'Usuario'}
+        </span>
+        <motion.span animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.18 }} style={{ fontSize: '0.5rem', color: 'var(--text-dim)' }}>▾</motion.span>
+      </motion.button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: -6, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -6, scale: 0.97 }}
+            transition={{ duration: 0.15 }}
+            style={{
+              position: 'absolute', top: 'calc(100% + 0.5rem)', right: 0,
+              minWidth: '200px',
+              background: 'var(--surface-header)',
+              border: '1px solid rgba(0,212,255,0.2)',
+              borderRadius: '16px',
+              padding: '0.5rem',
+              boxShadow: '0 16px 48px rgba(0,0,0,0.7)',
+              backdropFilter: 'blur(24px)',
+              zIndex: 300,
+            }}
+          >
+            {/* User info */}
+            <div style={{ padding: '0.65rem 0.9rem 0.85rem', borderBottom: '1px solid rgba(255,255,255,0.07)', marginBottom: '0.3rem' }}>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: '0.75rem', color: 'var(--text-primary)', letterSpacing: '1px', marginBottom: '0.2rem' }}>
+                {user?.name || user?.username}
+              </div>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {user?.email}
+              </div>
+            </div>
+
+            {/* Logout */}
+            <motion.button
+              whileHover={{ x: 4 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => { setOpen(false); onLogout(); }}
+              style={{
+                width: '100%',
+                background: 'transparent',
+                border: '1px solid transparent',
+                borderRadius: '10px',
+                padding: '0.6rem 0.9rem',
+                color: 'rgba(255,100,100,0.8)',
+                fontFamily: 'var(--font-display)',
+                fontSize: '0.72rem',
+                letterSpacing: '1px',
+                cursor: 'pointer',
+                textAlign: 'left',
+                textTransform: 'uppercase',
+                display: 'flex', alignItems: 'center', gap: '0.65rem',
+                transition: 'all 0.15s',
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                <polyline points="16 17 21 12 16 7"/>
+                <line x1="21" y1="12" x2="9" y2="12"/>
+              </svg>
+              Cerrar sesión
+            </motion.button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 // ─── Header ──────────────────────────────────────────────────────────────────
 export default function Header() {
   const navigate  = useNavigate();
@@ -225,6 +375,15 @@ export default function Header() {
   const t = useTranslation(language);
   const currentPath = location.pathname;
   const { theme, toggleTheme, isLight } = useTheme();
+  const token = useStore(s => s.token);
+  const user = useStore(s => s.user);
+  const logout = useStore(s => s.logout);
+  const openAuthModal = useStore(s => s.openAuthModal);
+
+  const handleLogout = async () => {
+    try { if (token) await api.logoutUser(token); } catch (_) {}
+    logout();
+  };
 
   // Inject responsive CSS once
   useEffect(() => {
@@ -416,6 +575,11 @@ export default function Header() {
           {/* Theme toggle pill — desktop/tablet only */}
           <div className="hdr-hide-mobile">
             <ThemeTogglePill isLight={isLight} onToggle={toggleTheme} />
+          </div>
+
+          {/* User auth button */}
+          <div className="hdr-hide-mobile">
+            <UserMenu user={user} token={token} onLogout={handleLogout} openAuthModal={openAuthModal} />
           </div>
 
           {/* Mobile hamburger (<580px) */}

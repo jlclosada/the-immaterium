@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
+from django.contrib.auth.models import User
 
 
 def default_position():
@@ -104,6 +105,8 @@ class PaintingGuide(models.Model):
     tags = ArrayField(models.CharField(max_length=100), default=list)
     likes = models.IntegerField(default=0)
     views = models.IntegerField(default=0)
+    is_premium = models.BooleanField(default=False)
+    price = models.IntegerField(null=True, blank=True, help_text='Precio en céntimos (499 = 4,99€)')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -526,3 +529,40 @@ class PurchaseRequest(models.Model):
     def __str__(self):
         return f'{self.name} {self.surname} → {self.listing.title}'
 
+
+# ────────────────────────────────────────
+# User Auth & Premium
+# ────────────────────────────────────────
+
+class UserProfile(models.Model):
+    """Extended profile for authenticated users"""
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    google_id = models.CharField(max_length=200, blank=True, null=True, unique=True)
+    avatar_url = models.URLField(max_length=500, blank=True)
+    stripe_customer_id = models.CharField(max_length=200, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Perfil de usuario'
+        verbose_name_plural = 'Perfiles de usuario'
+
+    def __str__(self):
+        return f'Perfil de {self.user.email}'
+
+
+class GuidePurchase(models.Model):
+    """Tracks which users have purchased which premium guides via Stripe"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='guide_purchases')
+    guide = models.ForeignKey('PaintingGuide', on_delete=models.CASCADE, related_name='purchases')
+    stripe_session_id = models.CharField(max_length=500, unique=True)
+    stripe_payment_intent = models.CharField(max_length=500, blank=True)
+    amount_paid = models.IntegerField(help_text='Precio pagado en céntimos')
+    purchased_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['user', 'guide']
+        verbose_name = 'Compra de guía'
+        verbose_name_plural = 'Compras de guías'
+
+    def __str__(self):
+        return f'{self.user.email} → {self.guide.title}'

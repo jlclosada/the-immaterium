@@ -241,6 +241,29 @@ const GuideCard = ({ guide, index, onClick }) => {
         }}>
           {diffStyle.label}
         </div>
+        {/* Premium badge top-left */}
+        {(guide.isPremium || guide.is_premium) && (
+          <div style={{
+            position: 'absolute', top: '0.65rem', left: '0.65rem',
+            display: 'flex', alignItems: 'center', gap: '4px',
+            padding: '3px 9px',
+            borderRadius: 'var(--radius-full)',
+            background: 'rgba(255,215,0,0.15)',
+            border: '1px solid rgba(255,215,0,0.5)',
+            backdropFilter: 'blur(6px)',
+            color: '#FFD700',
+            fontSize: '0.62rem',
+            fontWeight: 700,
+            letterSpacing: '0.5px',
+            fontFamily: 'var(--font-display)',
+          }}>
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            Premium
+          </div>
+        )}
       </div>
 
       {/* Content */}
