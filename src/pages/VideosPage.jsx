@@ -26,6 +26,10 @@ const VideosPage = () => {
   const [activeSeries, setActiveSeries] = useState('all');
 
   useEffect(() => {
+    document.title = 'Videos | The Immaterium';
+  }, []);
+
+  useEffect(() => {
     fetchYouTubeVideos();
   }, []);
 

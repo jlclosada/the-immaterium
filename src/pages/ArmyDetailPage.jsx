@@ -110,6 +110,7 @@ const ArmyDetailPage = () => {
       try {
         const data = await api.getArmy(id);
         setArmy(data);
+        if (data?.name) document.title = `${data.name} | The Immaterium`;
         loadRelated(data);
       } catch (err) {
         console.error('Failed to fetch army:', err);

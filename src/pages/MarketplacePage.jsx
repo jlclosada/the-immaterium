@@ -783,6 +783,10 @@ const MarketplacePage = () => {
   const [selectedListing, setSelectedListing] = useState(null);
 
   useEffect(() => {
+    document.title = 'Marketplace | The Immaterium';
+  }, []);
+
+  useEffect(() => {
     const fetchListings = async () => {
       setLoading(true);
       try {

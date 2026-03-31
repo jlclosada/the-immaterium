@@ -32,6 +32,7 @@ const LoreDetailPage = () => {
       try {
         const data = await api.getLoreEntry(id);
         setLore(data);
+        if (data?.title) document.title = `${data.title} | The Immaterium`;
       } catch (error) {
         console.error('Failed to fetch lore entry:', error);
       } finally {

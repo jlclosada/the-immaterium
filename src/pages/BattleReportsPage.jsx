@@ -15,6 +15,10 @@ const BattleReportsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
+    document.title = 'Battle Reports | The Immaterium';
+  }, []);
+
+  useEffect(() => {
     const fetchReports = async () => {
       try {
         const data = await api.getBattleReports();
@@ -148,6 +152,7 @@ const ReportCard = ({ report, index, onClick }) => {
   const p2 = report.armies?.player2;
   const s1 = report.finalScore?.player1;
   const s2 = report.finalScore?.player2;
+  const [hovered, setHovered] = React.useState(false);
 
   return (
     <motion.div
@@ -156,9 +161,11 @@ const ReportCard = ({ report, index, onClick }) => {
       transition={{ delay: index * 0.07, duration: 0.4 }}
       onClick={onClick}
       whileHover={{ y: -6 }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       style={{
         background: isLight ? 'rgba(255,255,255,0.97)' : 'rgba(255,255,255,0.025)',
-        border: `1px solid ${isLight ? 'rgba(0,120,200,0.15)' : 'rgba(255,255,255,0.07)'}`,
+        border: `1px solid ${hovered ? 'rgba(255,100,100,0.35)' : (isLight ? 'rgba(0,120,200,0.15)' : 'rgba(255,255,255,0.07)')}`,
         borderRadius: 'var(--radius-xl)',
         padding: 'clamp(1.25rem, 3vw, 1.75rem)',
         cursor: 'pointer',
@@ -169,6 +176,7 @@ const ReportCard = ({ report, index, onClick }) => {
         overflow: 'hidden',
         transition: 'box-shadow 0.3s, border-color 0.3s',
         backdropFilter: 'blur(8px)',
+        boxShadow: hovered ? '0 12px 40px rgba(255,100,100,0.12), 0 2px 8px rgba(0,0,0,0.2)' : 'none',
       }}
     >
       {/* Top accent */}
@@ -259,14 +267,27 @@ const ReportCard = ({ report, index, onClick }) => {
       )}
 
       <div style={{
-        fontSize: '0.78rem',
-        color: '#f9cb28',
-        letterSpacing: '1px',
-        fontFamily: 'var(--font-display)',
-        opacity: 0.7,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingTop: '0.75rem',
+        borderTop: `1px solid ${isLight ? 'rgba(0,120,200,0.08)' : 'rgba(255,255,255,0.05)'}`,
         marginTop: 'auto',
       }}>
-        Ver informe →
+        <span style={{
+          fontSize: '0.72rem',
+          color: '#f9cb28',
+          letterSpacing: '1px',
+          fontFamily: 'var(--font-display)',
+          fontWeight: 700,
+          textTransform: 'uppercase',
+        }}>
+          Ver informe
+        </span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f9cb28" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+          style={{ transition: 'transform 0.2s', transform: hovered ? 'translateX(3px)' : 'translateX(0)' }}>
+          <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+        </svg>
       </div>
     </motion.div>
   );

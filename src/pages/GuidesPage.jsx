@@ -25,6 +25,10 @@ const GuidesPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
+    document.title = 'Guías de Pintura | The Immaterium';
+  }, []);
+
+  useEffect(() => {
     const fetchGuides = async () => {
       try {
         const data = await api.getPaintingGuides();
@@ -144,6 +148,7 @@ const GuidesPage = () => {
 const GuideCard = ({ guide, index, onClick }) => {
   const { isLight } = useTheme();
   const diffStyle = getDifficultyStyle(guide.difficulty);
+  const [hovered, setHovered] = React.useState(false);
 
   return (
     <motion.div
@@ -152,6 +157,8 @@ const GuideCard = ({ guide, index, onClick }) => {
       transition={{ delay: index * 0.07, duration: 0.4 }}
       onClick={onClick}
       whileHover={{ y: -6 }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       style={{
         background: isLight ? 'rgba(255,255,255,0.97)' : 'rgba(255,255,255,0.025)',
         border: `1px solid ${isLight ? 'rgba(0,120,200,0.15)' : 'rgba(255,255,255,0.07)'}`,
@@ -162,6 +169,7 @@ const GuideCard = ({ guide, index, onClick }) => {
         flexDirection: 'column',
         transition: 'box-shadow 0.3s, border-color 0.3s',
         backdropFilter: 'blur(8px)',
+        boxShadow: hovered ? `0 12px 40px rgba(${isLight ? '0,120,200' : '255,180,50'},0.12), 0 2px 8px rgba(0,0,0,0.2)` : 'none',
       }}
     >
       {/* Cover image */}
@@ -169,7 +177,7 @@ const GuideCard = ({ guide, index, onClick }) => {
         height: '200px',
         position: 'relative',
         overflow: 'hidden',
-        background: 'rgba(0,0,0,0.4)',
+        background: isLight ? 'rgba(0,0,0,0.08)' : 'rgba(0,0,0,0.4)',
         flexShrink: 0,
       }}>
         {guide.coverImage ? (
@@ -178,7 +186,8 @@ const GuideCard = ({ guide, index, onClick }) => {
             alt={guide.title}
             style={{
               width: '100%', height: '100%', objectFit: 'cover',
-              transition: 'transform 0.4s ease',
+              transition: 'transform 0.5s ease',
+              transform: hovered ? 'scale(1.06)' : 'scale(1)',
             }}
           />
         ) : (
@@ -195,32 +204,53 @@ const GuideCard = ({ guide, index, onClick }) => {
           position: 'absolute', bottom: 0, left: 0, right: 0,
           height: '60%',
           background: isLight ? 'linear-gradient(to top, rgba(255,255,255,0.0) 0%, transparent 100%)' : 'linear-gradient(to top, rgba(10,10,20,0.9) 0%, transparent 100%)',
+          transition: 'opacity 0.3s',
         }} />
         {/* Faction badge */}
         {guide.faction && (
           <div style={{
             position: 'absolute', bottom: '0.75rem', left: '0.75rem',
             display: 'flex', alignItems: 'center', gap: '0.35rem',
+            background: 'rgba(0,0,0,0.5)',
+            backdropFilter: 'blur(6px)',
+            borderRadius: '20px',
+            padding: '3px 8px 3px 5px',
           }}>
             {guide.faction.iconUrl && (
               <img src={guide.faction.iconUrl} alt={guide.faction.name}
-                style={{ width: '18px', height: '18px', objectFit: 'contain', filter: 'brightness(1.3)' }} />
+                style={{ width: '16px', height: '16px', objectFit: 'contain', filter: 'brightness(1.3)' }} />
             )}
-            <span style={{ fontSize: '0.75rem', color: isLight ? 'var(--text-secondary)' : 'rgba(255,255,255,0.8)', fontWeight: 600 }}>
+            <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.9)', fontWeight: 600, letterSpacing: '0.3px' }}>
               {guide.faction.name}
             </span>
           </div>
         )}
+        {/* Difficulty badge top-right */}
+        <div style={{
+          position: 'absolute', top: '0.65rem', right: '0.65rem',
+          padding: '3px 9px',
+          borderRadius: 'var(--radius-full)',
+          background: diffStyle.bg,
+          border: `1px solid ${diffStyle.border}`,
+          backdropFilter: 'blur(6px)',
+          color: diffStyle.color,
+          fontSize: '0.65rem',
+          fontWeight: 700,
+          letterSpacing: '0.5px',
+          fontFamily: 'var(--font-display)',
+        }}>
+          {diffStyle.label}
+        </div>
       </div>
 
       {/* Content */}
       <div style={{
         padding: 'clamp(1rem, 3vw, 1.5rem)',
-        flex: 1, display: 'flex', flexDirection: 'column', gap: '0.75rem',
+        flex: 1, display: 'flex', flexDirection: 'column', gap: '0.6rem',
       }}>
         <h2 style={{
           fontFamily: 'var(--font-display)',
-          fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
+          fontSize: 'clamp(1rem, 2.5vw, 1.2rem)',
           color: isLight ? 'var(--text-primary)' : '#fff',
           lineHeight: 1.25,
           letterSpacing: '0.5px',
@@ -230,21 +260,10 @@ const GuideCard = ({ guide, index, onClick }) => {
 
         {/* Metadata row */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
-          <span style={{
-            padding: '3px 10px',
-            borderRadius: 'var(--radius-full)',
-            background: diffStyle.bg,
-            border: `1px solid ${diffStyle.border}`,
-            color: diffStyle.color,
-            fontSize: '0.72rem',
-            fontWeight: 700,
-            letterSpacing: '0.5px',
-          }}>
-            {diffStyle.label}
-          </span>
           {guide.estimatedTime && (
-            <span style={{ fontSize: '0.78rem', color: isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
-              ⏱️ {guide.estimatedTime}
+            <span style={{ fontSize: '0.75rem', color: isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              {guide.estimatedTime}
             </span>
           )}
         </div>
@@ -254,9 +273,13 @@ const GuideCard = ({ guide, index, onClick }) => {
           <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', marginTop: 'auto' }}>
             {guide.tags.slice(0, 3).map(tag => (
               <span key={tag} style={{
-                fontSize: '0.72rem',
-                color: isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.3)',
-                fontStyle: 'italic',
+                padding: '2px 8px',
+                borderRadius: 'var(--radius-full)',
+                background: isLight ? 'rgba(0,120,200,0.06)' : 'rgba(255,255,255,0.05)',
+                border: `1px solid ${isLight ? 'rgba(0,120,200,0.12)' : 'rgba(255,255,255,0.08)'}`,
+                fontSize: '0.68rem',
+                color: isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.35)',
+                letterSpacing: '0.3px',
               }}>
                 #{tag}
               </span>
@@ -265,14 +288,27 @@ const GuideCard = ({ guide, index, onClick }) => {
         )}
 
         <div style={{
-          fontSize: '0.78rem',
-          color: 'var(--color-secondary)',
-          letterSpacing: '1px',
-          fontFamily: 'var(--font-display)',
-          opacity: 0.8,
-          paddingTop: '0.25rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          paddingTop: '0.75rem',
+          borderTop: `1px solid ${isLight ? 'rgba(0,120,200,0.08)' : 'rgba(255,255,255,0.05)'}`,
+          marginTop: 'auto',
         }}>
-          Ver guía →
+          <span style={{
+            fontSize: '0.72rem',
+            color: 'var(--color-secondary)',
+            letterSpacing: '1px',
+            fontFamily: 'var(--font-display)',
+            fontWeight: 700,
+            textTransform: 'uppercase',
+          }}>
+            Ver guía
+          </span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-secondary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+            style={{ transition: 'transform 0.2s', transform: hovered ? 'translateX(3px)' : 'translateX(0)' }}>
+            <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+          </svg>
         </div>
       </div>
     </motion.div>

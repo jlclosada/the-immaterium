@@ -13,6 +13,10 @@ const NewsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
+    document.title = 'Noticias | The Immaterium';
+  }, []);
+
+  useEffect(() => {
     const fetch = async () => {
       try {
         const data = await api.getNewsArticles();

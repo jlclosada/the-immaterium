@@ -154,6 +154,7 @@ const LandingPage = () => {
   const [featuredListings, setFeaturedListings] = useState([]);
 
   useEffect(() => {
+    document.title = 'The Immaterium | Comunidad Warhammer 40,000 en Español';
     fetchInitialData();
     loadFeaturedContent();
   }, []);

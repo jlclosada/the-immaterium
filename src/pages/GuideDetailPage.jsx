@@ -28,6 +28,7 @@ const GuideDetailPage = () => {
       try {
         const data = await api.getGuide(id);
         setGuide(data);
+        if (data?.title) document.title = `${data.title} | The Immaterium`;
       } catch (error) {
         console.error('Failed to fetch guide:', error);
       } finally {

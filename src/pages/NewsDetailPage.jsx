@@ -25,6 +25,12 @@ const NewsDetailPage = () => {
     if (id) fetch();
   }, [id]);
 
+  useEffect(() => {
+    if (article?.title) {
+      document.title = `${article.title} | The Immaterium`;
+    }
+  }, [article]);
+
   if (loading) {
     return (
       <div style={{ minHeight: '100vh', background: 'var(--color-darker)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

@@ -115,8 +115,8 @@ function ResultCard({ result, index }) {
           </span>
           {result.subtitle && (
             <>
-              <span style={{ color: '#444', fontSize: '0.7rem' }}>·</span>
-              <span style={{ fontSize: '0.75rem', color: '#888' }}>{result.subtitle}</span>
+              <span style={{ color: 'var(--text-faint)', fontSize: '0.7rem' }}>·</span>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>{result.subtitle}</span>
             </>
           )}
         </div>
@@ -136,8 +136,8 @@ function ResultCard({ result, index }) {
           <p style={{
             margin: '0.35rem 0 0',
             fontSize: '0.82rem',
-            color: '#999',
-            lineHeight: 1.5,
+            color: 'var(--text-dim)',
+            lineHeight: 1.55,
             display: '-webkit-box',
             WebkitLineClamp: 2,
             WebkitBoxOrient: 'vertical',
@@ -149,7 +149,7 @@ function ResultCard({ result, index }) {
       </div>
 
       {/* Arrow */}
-      <div style={{ flexShrink: 0, color: '#444', alignSelf: 'center' }}>
+      <div style={{ flexShrink: 0, color: 'var(--text-dim)', alignSelf: 'center' }}>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <polyline points="9 18 15 12 9 6" />
         </svg>
@@ -169,8 +169,9 @@ export default function SearchPage() {
   const inputRef = useRef(null);
   const debounceRef = useRef(null);
 
-  // Focus input on mount
+  // Focus input on mount + set page title
   useEffect(() => {
+    document.title = 'Buscar | The Immaterium';
     inputRef.current?.focus();
   }, []);
 
@@ -232,18 +233,28 @@ export default function SearchPage() {
           animate={{ opacity: 1, y: 0 }}
           style={{ marginBottom: '2rem', textAlign: 'center' }}
         >
+          <p style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: '0.65rem',
+            letterSpacing: '4px',
+            color: 'var(--color-primary)',
+            textTransform: 'uppercase',
+            opacity: 0.7,
+            marginBottom: '0.75rem',
+          }}>The Immaterium</p>
           <h1 style={{
             fontFamily: 'var(--font-display)',
             fontSize: 'clamp(1.5rem, 4vw, 2.5rem)',
-            background: 'linear-gradient(135deg, #fff 0%, var(--color-primary) 100%)',
+            background: 'linear-gradient(135deg, var(--text-primary) 0%, var(--color-primary) 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
-            margin: '0 0 0.5rem',
+            backgroundClip: 'text',
+            margin: '0 0 0.75rem',
             letterSpacing: '2px',
           }}>
             BÚSQUEDA GLOBAL
           </h1>
-          <p style={{ color: '#888', fontSize: '0.9rem', margin: 0 }}>
+          <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem', margin: 0 }}>
             Busca en ejércitos, guías, batallas, trasfondo y noticias
           </p>
         </motion.div>
@@ -400,10 +411,10 @@ export default function SearchPage() {
               style={{ textAlign: 'center', padding: '4rem 0' }}
             >
               <div style={{ fontSize: '3rem', marginBottom: '1rem', opacity: 0.4 }}>🔍</div>
-              <p style={{ color: '#666', fontSize: '1rem' }}>
-                Sin resultados para <strong style={{ color: '#aaa' }}>"{query}"</strong>
+              <p style={{ color: 'var(--text-dim)', fontSize: '1rem' }}>
+                Sin resultados para <strong style={{ color: 'var(--text-secondary)' }}>"{query}"</strong>
               </p>
-              <p style={{ color: '#555', fontSize: '0.85rem', marginTop: '0.5rem' }}>
+              <p style={{ color: 'var(--text-faint)', fontSize: '0.85rem', marginTop: '0.5rem' }}>
                 Prueba con otros términos o cambia el filtro de tipo
               </p>
             </motion.div>
@@ -428,7 +439,7 @@ export default function SearchPage() {
                   </span>
                 ))}
               </div>
-              <p style={{ color: '#555', marginTop: '1.5rem', fontSize: '0.85rem' }}>
+              <p style={{ color: 'var(--text-faint)', marginTop: '1.5rem', fontSize: '0.85rem' }}>
                 Escribe al menos 2 caracteres para buscar
               </p>
             </motion.div>
@@ -439,10 +450,10 @@ export default function SearchPage() {
               animate={{ opacity: 1 }}
             >
               {/* Result count */}
-              <p style={{ color: '#666', fontSize: '0.85rem', marginBottom: '1rem' }}>
+              <p style={{ color: 'var(--text-dim)', fontSize: '0.85rem', marginBottom: '1rem' }}>
                 <span style={{ color: 'var(--color-primary)', fontWeight: 'bold' }}>{filteredResults.length}</span>
                 {' '}resultado{filteredResults.length !== 1 ? 's' : ''} para{' '}
-                <strong style={{ color: '#ccc' }}>"{query}"</strong>
+                <strong style={{ color: 'var(--text-secondary)' }}>"{query}"</strong>
               </p>
 
               {/* Cards */}

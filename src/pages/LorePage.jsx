@@ -30,6 +30,10 @@ const LorePage = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
+    document.title = 'Biblioteca de Lore | The Immaterium';
+  }, []);
+
+  useEffect(() => {
     const fetchLore = async () => {
       try {
         const data = await api.getLoreEntries();
@@ -211,108 +215,134 @@ const LoreCard = ({ entry, index }) => {
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: index * 0.06, duration: 0.35 }}
-        whileHover={{ y: -3, boxShadow: '0 8px 30px rgba(0,212,255,0.15)' }}
+        transition={{ delay: index * 0.05, duration: 0.35 }}
+        whileHover={{ y: -3 }}
         style={{
-          background: isLight ? 'rgba(255,255,255,0.97)' : 'rgba(255,255,255,0.025)',
-          border: `1px solid ${isLight ? 'rgba(0,120,200,0.15)' : 'rgba(255,255,255,0.07)'}`,
+          background: isLight ? '#ffffff' : 'rgba(255,255,255,0.025)',
+          border: `1px solid ${isLight ? 'rgba(0,120,200,0.12)' : 'rgba(255,255,255,0.06)'}`,
+          borderLeft: `3px solid ${categoryColor}`,
           borderRadius: 'var(--radius-xl)',
           padding: 'clamp(1.25rem, 3vw, 1.75rem)',
           position: 'relative',
           overflow: 'hidden',
-          transition: 'border-color 0.3s, box-shadow 0.3s',
-          borderLeft: entry.isFeatured ? `3px solid var(--color-accent)` : `1px solid ${isLight ? 'rgba(0,120,200,0.15)' : 'rgba(255,255,255,0.07)'}`,
+          display: 'flex',
+          gap: '1.25rem',
+          alignItems: 'flex-start',
+          transition: 'box-shadow 0.3s, border-color 0.25s',
+        }}
+        onMouseEnter={e => {
+          e.currentTarget.style.boxShadow = `0 8px 32px ${categoryColor}18, 0 2px 8px rgba(0,0,0,0.2)`;
+          e.currentTarget.style.borderColor = `${categoryColor}60`;
+        }}
+        onMouseLeave={e => {
+          e.currentTarget.style.boxShadow = 'none';
+          e.currentTarget.style.borderColor = isLight ? 'rgba(0,120,200,0.12)' : 'rgba(255,255,255,0.06)';
         }}
       >
-        {/* Featured badge */}
-        {entry.isFeatured && (
-          <div style={{
-            position: 'absolute', top: '1rem', right: '1rem',
-            background: 'var(--color-accent)',
-            color: '#000',
-            padding: '2px 10px',
-            borderRadius: 'var(--radius-full)',
-            fontSize: '0.7rem',
-            fontWeight: 700,
-            letterSpacing: '0.5px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px',
-          }}>
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            Destacado
-          </div>
-        )}
+        {/* Category color dot */}
+        <div style={{
+          width: '36px', height: '36px', flexShrink: 0,
+          borderRadius: '10px',
+          background: `${categoryColor}18`,
+          border: `1px solid ${categoryColor}35`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          marginTop: '2px',
+        }}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={categoryColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+        </div>
 
-        {/* Badges row */}
-        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem', flexWrap: 'wrap' }}>
-          <span style={{
-            padding: '2px 9px',
-            borderRadius: 'var(--radius-full)',
-            background: `${categoryColor}18`,
-            border: `1px solid ${categoryColor}35`,
-            color: categoryColor,
-            fontSize: '0.7rem',
-            fontWeight: 700,
-            textTransform: 'uppercase',
-            letterSpacing: '0.5px',
-          }}>
-            {entry.category}
-          </span>
-          {entry.relatedFaction && (
+        <div style={{ flex: 1, minWidth: 0 }}>
+          {/* Badges row */}
+          <div style={{ display: 'flex', gap: '0.4rem', marginBottom: '0.6rem', flexWrap: 'wrap', alignItems: 'center' }}>
             <span style={{
               padding: '2px 9px',
               borderRadius: 'var(--radius-full)',
-              background: 'rgba(255,215,0,0.1)',
-              border: '1px solid rgba(255,215,0,0.2)',
-              color: 'var(--color-accent)',
-              fontSize: '0.7rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.3rem',
+              background: `${categoryColor}15`,
+              border: `1px solid ${categoryColor}30`,
+              color: categoryColor,
+              fontSize: '0.65rem',
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.8px',
+              fontFamily: 'var(--font-display)',
             }}>
-              {entry.relatedFaction.iconUrl && (
-                <img src={entry.relatedFaction.iconUrl} alt="" style={{ width: '13px', height: '13px', objectFit: 'contain' }} />
-              )}
-              {entry.relatedFaction.name}
+              {entry.category}
             </span>
+            {entry.isFeatured && (
+              <span style={{
+                padding: '2px 9px',
+                borderRadius: 'var(--radius-full)',
+                background: 'rgba(255,215,0,0.12)',
+                border: '1px solid rgba(255,215,0,0.3)',
+                color: 'var(--color-accent)',
+                fontSize: '0.65rem',
+                fontWeight: 700,
+                letterSpacing: '0.8px',
+                fontFamily: 'var(--font-display)',
+                display: 'flex', alignItems: 'center', gap: '4px',
+              }}>
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                DESTACADO
+              </span>
+            )}
+            {entry.relatedFaction && (
+              <span style={{
+                fontSize: '0.72rem',
+                color: 'var(--text-dim)',
+                display: 'flex', alignItems: 'center', gap: '0.25rem',
+              }}>
+                {entry.relatedFaction.iconUrl && (
+                  <img src={entry.relatedFaction.iconUrl} alt="" style={{ width: '12px', height: '12px', objectFit: 'contain' }} />
+                )}
+                {entry.relatedFaction.name}
+              </span>
+            )}
+          </div>
+
+          <h2 style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 'clamp(1rem, 2.5vw, 1.3rem)',
+            color: isLight ? 'var(--text-primary)' : '#fff',
+            marginBottom: '0.5rem',
+            lineHeight: 1.25,
+            letterSpacing: '0.3px',
+          }}>
+            {entry.title}
+          </h2>
+
+          {entry.excerpt && (
+            <p style={{
+              color: isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.5)',
+              lineHeight: 1.7,
+              fontSize: 'clamp(0.82rem, 1.8vw, 0.9rem)',
+              margin: '0 0 0.75rem',
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+            }}>
+              {entry.excerpt}
+            </p>
           )}
-        </div>
 
-        <h2 style={{
-          fontFamily: 'var(--font-display)',
-          fontSize: 'clamp(1.1rem, 3vw, 1.5rem)',
-          color: isLight ? 'var(--text-primary)' : '#fff',
-          marginBottom: '0.75rem',
-          lineHeight: 1.25,
-          letterSpacing: '0.5px',
-        }}>
-          {entry.title}
-        </h2>
-
-        <p style={{
-          color: 'rgba(255,255,255,0.6)',
-          lineHeight: 1.75,
-          fontSize: 'clamp(0.85rem, 2vw, 0.95rem)',
-          marginBottom: '1rem',
-          display: '-webkit-box',
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: 'vertical',
-          overflow: 'hidden',
-        }}>
-          {entry.excerpt}
-        </p>
-
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          fontSize: '0.78rem',
-          color: 'rgba(255,255,255,0.3)',
-        }}>
-          <span>Por {entry.author}</span>
-          <div style={{ display: 'flex', gap: '1rem' }}>
-            <span style={{ color: categoryColor, fontWeight: 600 }}>Leer →</span>
+          <div style={{
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            fontSize: '0.75rem', color: 'var(--text-faint)',
+          }}>
+            <span>Por {entry.author}</span>
+            <span style={{
+              color: categoryColor, fontWeight: 700,
+              fontFamily: 'var(--font-display)', fontSize: '0.68rem',
+              letterSpacing: '1px', textTransform: 'uppercase',
+              display: 'flex', alignItems: 'center', gap: '0.3rem',
+            }}>
+              Leer
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+              </svg>
+            </span>
           </div>
         </div>
       </motion.div>

@@ -36,6 +36,10 @@ const ArmiesPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
+    document.title = 'Ejércitos & Facciones | The Immaterium';
+  }, []);
+
+  useEffect(() => {
     const fetchData = async () => {
       try {
         const [armiesData, gamesData] = await Promise.allSettled([
@@ -248,6 +252,7 @@ const ArmiesPage = () => {
 };
 
 const ArmyCard = ({ army, index, language, theme, accentColor, onClick }) => {
+  const { isLight } = useTheme();
   const name = language === 'es' && army.nameEs ? army.nameEs : army.name;
   const description = language === 'es' && army.descriptionEs ? army.descriptionEs : army.description;
   const imageCount = army.images?.length || 0;
@@ -327,7 +332,7 @@ const ArmyCard = ({ army, index, language, theme, accentColor, onClick }) => {
           <h2 style={{
             fontFamily: 'var(--font-display)',
             fontSize: 'clamp(1rem, 2.5vw, 1.2rem)',
-            color: 'var(--color-light)',
+            color: 'var(--text-primary)',
             letterSpacing: '1.5px',
             textTransform: 'uppercase',
             marginBottom: '0.2rem',
@@ -349,7 +354,7 @@ const ArmyCard = ({ army, index, language, theme, accentColor, onClick }) => {
         </div>
 
         <p style={{
-          color: 'rgba(255,255,255,0.5)',
+          color: isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.5)',
           lineHeight: 1.65,
           fontSize: '0.82rem',
           flex: 1,
