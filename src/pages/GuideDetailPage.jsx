@@ -134,21 +134,28 @@ const GuideDetailPage = () => {
             </span>
             {isPremium && (
               <span style={{
-                display: 'inline-flex', alignItems: 'center', gap: '4px',
-                padding: '4px 12px',
+                display: 'inline-flex', alignItems: 'center', gap: '5px',
+                padding: '5px 12px',
                 borderRadius: 'var(--radius-full)',
-                background: 'rgba(255,215,0,0.12)',
-                border: '1px solid rgba(255,215,0,0.4)',
-                color: '#FFD700',
-                fontSize: '0.72rem',
+                background: isPurchased ? 'rgba(80,200,120,0.1)' : 'rgba(255,215,0,0.1)',
+                border: `1px solid ${isPurchased ? 'rgba(80,200,120,0.4)' : 'rgba(255,215,0,0.45)'}`,
+                color: isPurchased ? '#50c878' : '#FFD700',
+                fontSize: '0.75rem',
                 fontWeight: 700,
-                letterSpacing: '1px',
+                letterSpacing: '0.5px',
               }}>
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  {isPurchased
+                    ? <><polyline points="20 6 9 17 4 12"/></>
+                    : <><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></>
+                  }
                 </svg>
-                {isPurchased ? 'Desbloqueado' : 'Premium'}
+                {isPurchased
+                  ? 'Desbloqueado'
+                  : guide.price
+                    ? `Premium · ${(guide.price / 100).toFixed(2)}€`
+                    : 'Premium'
+                }
               </span>
             )}
             {guide.estimatedTime && (
