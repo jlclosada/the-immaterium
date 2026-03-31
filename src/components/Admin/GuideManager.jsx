@@ -165,6 +165,8 @@ const GuideManager = () => {
         coverImage: '',
         tags: [],
         faction: null,
+        isPremium: false,
+        price: '',
     });
 
     const [formData, setFormData] = useState(emptyForm());
@@ -226,6 +228,8 @@ const GuideManager = () => {
                 date_created: formData.dateCreated,
                 cover_image: formData.coverImage,
                 faction: formData.faction?.id || null,
+                is_premium: formData.isPremium,
+                price: formData.isPremium && formData.price ? parseInt(formData.price, 10) : null,
                 materials: materials.map(m => ({ name: m.name, paint_id: m.paint?.id || null })),
                 steps: steps.map(step => ({
                     step_number: step.stepNumber,
@@ -238,6 +242,7 @@ const GuideManager = () => {
             delete dataToSend.estimatedTime;
             delete dataToSend.dateCreated;
             delete dataToSend.coverImage;
+            delete dataToSend.isPremium;
 
             if (editingGuide) {
                 await api.updateGuide(editingGuide.id, dataToSend, token);
@@ -266,6 +271,8 @@ const GuideManager = () => {
             coverImage: guide.coverImage || '',
             tags: guide.tags || [],
             faction: guide.faction || null,
+            isPremium: guide.isPremium || guide.is_premium || false,
+            price: guide.price ? String(guide.price) : '',
         });
         setMaterials((guide.materials || []).map(m =>
             typeof m === 'string' ? { name: m, paint: null } : { name: m.name, paint: m.paint || null }
@@ -567,6 +574,18 @@ const GuideManager = () => {
                                                     {guide.title}
                                                 </span>
                                                 {!panelOpen && <DifficultyBadge value={guide.difficulty} />}
+                                                {(guide.isPremium || guide.is_premium) && (
+                                                    <span style={{
+                                                        display: 'inline-flex', alignItems: 'center', gap: '3px',
+                                                        padding: '2px 8px', borderRadius: '20px',
+                                                        background: 'rgba(255,215,0,0.12)',
+                                                        border: '1px solid rgba(255,215,0,0.4)',
+                                                        color: '#FFD700', fontSize: '0.62rem', fontWeight: 700,
+                                                        letterSpacing: '0.5px',
+                                                    }}>
+                                                        ★ {guide.price ? `${(guide.price/100).toFixed(2)}€` : 'Premium'}
+                                                    </span>
+                                                )}
                                             </div>
                                             {!panelOpen && (
                                                 <div style={{ marginTop: '0.2rem', fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
@@ -936,6 +955,91 @@ function StepInfoBasica({ formData, setFormData, armies, armySearch, setArmySear
                     <div style={{ marginTop: '0.5rem', borderRadius: '10px', overflow: 'hidden', maxHeight: '120px' }}>
                         <img src={formData.coverImage} alt="preview" style={{ width: '100%', height: '120px', objectFit: 'cover' }}
                             onError={e => { e.target.style.display = 'none'; }} />
+                    </div>
+                )}
+            </div>
+
+            {/* Premium toggle + price */}
+            <div style={{
+                background: formData.isPremium ? 'rgba(255,215,0,0.06)' : 'rgba(255,255,255,0.03)',
+                border: `1px solid ${formData.isPremium ? 'rgba(255,215,0,0.3)' : 'rgba(255,255,255,0.08)'}`,
+                borderRadius: '12px',
+                padding: '1rem 1.25rem',
+                transition: 'all 0.25s',
+            }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+                    <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={formData.isPremium ? '#FFD700' : 'rgba(255,255,255,0.4)'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                            </svg>
+                            <label style={{ ...labelStyle, margin: 0, color: formData.isPremium ? '#FFD700' : 'rgba(255,255,255,0.5)' }}>
+                                Contenido Premium
+                            </label>
+                        </div>
+                        <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.3)', margin: 0 }}>
+                            Los usuarios deberán pagar para ver esta guía
+                        </p>
+                    </div>
+                    {/* Toggle switch */}
+                    <button
+                        type="button"
+                        onClick={() => field('isPremium', !formData.isPremium)}
+                        style={{
+                            width: '48px', height: '26px', flexShrink: 0,
+                            borderRadius: '13px',
+                            background: formData.isPremium ? '#FFD700' : 'rgba(255,255,255,0.12)',
+                            border: 'none', cursor: 'pointer',
+                            position: 'relative', transition: 'background 0.25s',
+                        }}
+                    >
+                        <div style={{
+                            position: 'absolute',
+                            top: '3px',
+                            left: formData.isPremium ? '25px' : '3px',
+                            width: '20px', height: '20px',
+                            borderRadius: '50%',
+                            background: formData.isPremium ? '#000' : 'rgba(255,255,255,0.6)',
+                            transition: 'left 0.25s',
+                        }} />
+                    </button>
+                </div>
+
+                {formData.isPremium && (
+                    <div style={{ marginTop: '1rem', borderTop: '1px solid rgba(255,215,0,0.15)', paddingTop: '1rem' }}>
+                        <label style={{ ...labelStyle, color: 'rgba(255,215,0,0.7)' }}>
+                            Precio (en céntimos) — ej: 499 = 4,99€
+                        </label>
+                        <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                            <span style={{
+                                position: 'absolute', left: '0.9rem',
+                                color: 'rgba(255,215,0,0.5)', fontSize: '1rem', fontWeight: 700,
+                                pointerEvents: 'none',
+                            }}>€</span>
+                            <input
+                                type="number"
+                                min="50"
+                                step="1"
+                                placeholder="499"
+                                value={formData.price}
+                                onChange={e => field('price', e.target.value)}
+                                style={{
+                                    ...inputStyle,
+                                    paddingLeft: '2rem',
+                                    border: '1px solid rgba(255,215,0,0.35)',
+                                    background: 'rgba(255,215,0,0.05)',
+                                }}
+                            />
+                            {formData.price && (
+                                <span style={{
+                                    position: 'absolute', right: '0.9rem',
+                                    color: '#FFD700', fontSize: '0.85rem', fontWeight: 700,
+                                    pointerEvents: 'none',
+                                }}>
+                                    = {(parseInt(formData.price) / 100).toFixed(2)}€
+                                </span>
+                            )}
+                        </div>
                     </div>
                 )}
             </div>
