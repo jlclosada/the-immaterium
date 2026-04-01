@@ -1,10 +1,12 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useStore } from '../../stores/useStore';
 import { api } from '../../services/api';
 
 export default function PremiumGate({ guide }) {
-  const { token, purchases, openAuthModal } = useStore();
+  const { token, purchases } = useStore();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const isPurchased = purchases.includes(String(guide.id));
 
@@ -14,7 +16,7 @@ export default function PremiumGate({ guide }) {
   const priceEuros = guide.price ? (guide.price / 100).toFixed(2) : null;
 
   const handleBuy = async () => {
-    if (!token) { openAuthModal(); return; }
+    if (!token) { navigate('/signin'); return; }
     setLoading(true);
     try {
       const { url } = await api.createCheckoutSession(guide.id, token);

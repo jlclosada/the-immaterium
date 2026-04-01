@@ -229,33 +229,55 @@ function UserMenu({ user, token, onLogout, openAuthModal }) {
 
   if (!token) {
     return (
-      <motion.button
-        whileHover={{ scale: 1.05, y: -1 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={openAuthModal}
-        style={{
-          background: 'linear-gradient(135deg, rgba(0,212,255,0.18), rgba(135,206,250,0.1))',
-          border: '1px solid rgba(0,212,255,0.4)',
-          borderRadius: '12px',
-          padding: '0.48rem 1rem',
-          color: 'var(--color-primary)',
-          fontFamily: 'var(--font-display)',
-          fontSize: '0.7rem',
-          letterSpacing: '1.5px',
-          cursor: 'pointer',
-          display: 'flex', alignItems: 'center', gap: '0.4rem',
-          textTransform: 'uppercase',
-          whiteSpace: 'nowrap',
-          boxShadow: '0 0 12px rgba(0,212,255,0.15)',
-        }}
-      >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
-          <polyline points="10 17 15 12 10 7"/>
-          <line x1="15" y1="12" x2="3" y2="12"/>
-        </svg>
-        Entrar
-      </motion.button>
+      <div style={{ display: 'flex', gap: '0.4rem' }}>
+        <Link to="/signin"
+          style={{
+            background: 'linear-gradient(135deg, rgba(0,212,255,0.18), rgba(135,206,250,0.1))',
+            border: '1px solid rgba(0,212,255,0.4)',
+            borderRadius: '12px',
+            padding: '0.48rem 1rem',
+            color: 'var(--color-primary)',
+            fontFamily: 'var(--font-display)',
+            fontSize: '0.7rem',
+            letterSpacing: '1.5px',
+            display: 'flex', alignItems: 'center', gap: '0.4rem',
+            textTransform: 'uppercase',
+            whiteSpace: 'nowrap',
+            boxShadow: '0 0 12px rgba(0,212,255,0.15)',
+            textDecoration: 'none',
+            transition: 'all 0.2s',
+          }}
+          onMouseEnter={e => e.currentTarget.style.boxShadow = '0 0 20px rgba(0,212,255,0.3)'}
+          onMouseLeave={e => e.currentTarget.style.boxShadow = '0 0 12px rgba(0,212,255,0.15)'}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+            <polyline points="10 17 15 12 10 7"/>
+            <line x1="15" y1="12" x2="3" y2="12"/>
+          </svg>
+          Entrar
+        </Link>
+        <Link to="/signin?mode=register"
+          style={{
+            background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+            border: 'none',
+            borderRadius: '12px',
+            padding: '0.48rem 1rem',
+            color: '#000',
+            fontFamily: 'var(--font-display)',
+            fontSize: '0.7rem',
+            letterSpacing: '1.5px',
+            display: 'flex', alignItems: 'center', gap: '0.4rem',
+            textTransform: 'uppercase',
+            whiteSpace: 'nowrap',
+            textDecoration: 'none',
+            fontWeight: 700,
+          }}
+          className="hdr-hide-mobile"
+        >
+          Registro
+        </Link>
+      </div>
     );
   }
 

@@ -37,7 +37,6 @@ import VideosPage from './pages/VideosPage';
 import MarketplacePage from './pages/MarketplacePage';
 import PaymentSuccessPage from './pages/PaymentSuccessPage';
 import PaymentCancelPage from './pages/PaymentCancelPage';
-import AuthModal from './components/Auth/AuthModal';
 import UserAuthPage from './pages/UserAuthPage';
 import ProfilePage from './pages/ProfilePage';
 
@@ -76,7 +75,6 @@ function App() {
     <>
       <ScrollToTop />
       <BackToTop />
-      <AuthModal />
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<AnimatedPage><LandingPage /></AnimatedPage>} />
