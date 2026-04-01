@@ -507,13 +507,15 @@ export const api = {
 
   // ── User Auth ──────────────────────────────────────────────────────────────
 
-  register: async (name, email, password) => {
+  register: async (name, email, password, extra = {}) => {
     const res = await fetch(`${API_URL}/api/auth/register/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, password }),
+      body: JSON.stringify({ name, email, password, ...extra }),
     })
-    const data = await res.json()
+    let data
+    try { data = await res.json() }
+    catch { throw new Error('No se pudo conectar con el servidor. Revisa la configuración de VITE_API_URL.') }
     if (!res.ok) throw new Error(data.error || 'Error al registrarse')
     return data
   },

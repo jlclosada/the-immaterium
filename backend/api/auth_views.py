@@ -68,6 +68,8 @@ def register_view(request):
         counter += 1
 
     parts = name.split(' ', 1)
+    wants_premium = request.data.get('wants_premium', False)
+
     user = User.objects.create_user(
         username=username,
         email=email,
@@ -75,7 +77,7 @@ def register_view(request):
         first_name=parts[0] if parts else '',
         last_name=parts[1] if len(parts) > 1 else '',
     )
-    UserProfile.objects.create(user=user)
+    UserProfile.objects.create(user=user, is_premium=bool(wants_premium))
     token, _ = Token.objects.get_or_create(user=user)
 
     return Response({
