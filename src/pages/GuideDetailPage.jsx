@@ -8,6 +8,34 @@ import Footer from '../components/UI/Footer';
 import ImageModal from '../components/Gallery/ImageModal';
 import PremiumGate from '../components/Auth/PremiumGate';
 
+// ── YouTube helpers ────────────────────────────────────────────────────────────
+function getYouTubeId(url) {
+  if (!url) return null;
+  const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+
+function YouTubeEmbed({ url }) {
+  const id = getYouTubeId(url);
+  if (!id) return null;
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.12 }}
+      style={{ marginBottom: '1.5rem', borderRadius: 'var(--radius-xl)', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)', background: '#000', position: 'relative', paddingTop: '56.25%' }}
+    >
+      <iframe
+        src={`https://www.youtube.com/embed/${id}`}
+        title="Vídeo de YouTube"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+      />
+    </motion.div>
+  );
+}
+
 const DIFFICULTY_COLORS = {
   beginner: { bg: 'rgba(80,200,120,0.12)', border: 'rgba(80,200,120,0.3)', color: '#50c878', label: 'Principiante' },
   intermediate: { bg: 'rgba(255,180,50,0.12)', border: 'rgba(255,180,50,0.3)', color: '#ffb432', label: 'Intermedio' },
@@ -24,7 +52,7 @@ const GuideDetailPage = () => {
   const [guide, setGuide] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(null);
-  const { purchases } = useStore();
+  const { purchases, user } = useStore();
 
   useEffect(() => {
     const fetchGuide = async () => {
@@ -62,7 +90,9 @@ const GuideDetailPage = () => {
   const diffStyle = getDifficultyStyle(guide.difficulty);
   const isPremium = guide.isPremium || guide.is_premium;
   const isPurchased = purchases.includes(String(guide.id));
-  const isLocked = isPremium && !isPurchased;
+  const userIsPremium = user?.isPremium || false;
+  // Premium users get all guides; individual purchases also unlock
+  const isLocked = isPremium && !userIsPremium && !isPurchased;
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-darker)', display: 'flex', flexDirection: 'column' }}>
@@ -239,6 +269,11 @@ const GuideDetailPage = () => {
               }}
             />
           </motion.div>
+        )}
+
+        {/* YouTube embed */}
+        {guide.youtube_url && !isLocked && (
+          <YouTubeEmbed url={guide.youtube_url} />
         )}
 
         {/* Materials */}

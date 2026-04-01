@@ -163,6 +163,7 @@ const GuideManager = () => {
         author: '',
         dateCreated: new Date().toISOString().split('T')[0],
         coverImage: '',
+        youtubeUrl: '',
         tags: [],
         faction: null,
         isPremium: false,
@@ -227,6 +228,7 @@ const GuideManager = () => {
                 estimated_time: formData.estimatedTime,
                 date_created: formData.dateCreated,
                 cover_image: formData.coverImage,
+                youtube_url: formData.youtubeUrl || '',
                 faction: formData.faction?.id || null,
                 is_premium: formData.isPremium,
                 price: formData.isPremium && formData.price ? parseInt(formData.price, 10) : null,
@@ -242,6 +244,7 @@ const GuideManager = () => {
             delete dataToSend.estimatedTime;
             delete dataToSend.dateCreated;
             delete dataToSend.coverImage;
+            delete dataToSend.youtubeUrl;
             delete dataToSend.isPremium;
 
             if (editingGuide) {
@@ -269,6 +272,7 @@ const GuideManager = () => {
             author: guide.author || '',
             dateCreated: guide.dateCreated ? guide.dateCreated.split('T')[0] : new Date().toISOString().split('T')[0],
             coverImage: guide.coverImage || '',
+            youtubeUrl: guide.youtube_url || '',
             tags: guide.tags || [],
             faction: guide.faction || null,
             isPremium: guide.isPremium || guide.is_premium || false,
@@ -957,6 +961,29 @@ function StepInfoBasica({ formData, setFormData, armies, armySearch, setArmySear
                             onError={e => { e.target.style.display = 'none'; }} />
                     </div>
                 )}
+            </div>
+
+            {/* YouTube URL */}
+            <div>
+                <label style={labelStyle}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '5px', verticalAlign: 'middle' }}><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+                    URL vídeo de YouTube <span style={{ color: 'rgba(255,255,255,0.3)', fontWeight: 400 }}>(opcional)</span>
+                </label>
+                <input
+                    type="url"
+                    style={inputStyle}
+                    placeholder="https://www.youtube.com/watch?v=... o https://youtu.be/..."
+                    value={formData.youtubeUrl}
+                    onChange={e => field('youtubeUrl', e.target.value)}
+                />
+                {formData.youtubeUrl && (() => {
+                    const m = formData.youtubeUrl.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+                    return m ? (
+                        <div style={{ marginTop: '0.5rem', borderRadius: '10px', overflow: 'hidden', background: '#000', position: 'relative', paddingTop: '40%' }}>
+                            <iframe src={`https://www.youtube.com/embed/${m[1]}`} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }} allowFullScreen title="preview" />
+                        </div>
+                    ) : <p style={{ fontSize: '0.75rem', color: '#ff8080', marginTop: '0.3rem' }}>URL de YouTube no reconocida</p>;
+                })()}
             </div>
 
             {/* Premium toggle + price */}

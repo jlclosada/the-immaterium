@@ -148,7 +148,7 @@ class PaintingGuideSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'title', 'difficulty', 'estimated_time', 'author',
             'date_created', 'cover_image', 'tags', 'likes', 'views',
-            'is_premium', 'price',
+            'is_premium', 'price', 'youtube_url',
             'materials', 'steps', 'comments', 'faction',
             # camelCase read‑only aliases
             'estimatedTime', 'dateCreated', 'coverImage', 'isPremium'
@@ -208,7 +208,7 @@ class BattleReportSerializer(serializers.ModelSerializer):
         model = BattleReport
         fields = [
             'id', 'title', 'factions', 'mission', 'points', 'date',
-            'tags', 'likes', 'views', 'mvp', 'images',
+            'tags', 'likes', 'views', 'mvp', 'images', 'youtube_url',
             # Writable player fields
             'player1_name', 'player1_faction', 'player1_score', 'player1_list', 'player1ListText',
             'player2_name', 'player2_faction', 'player2_score', 'player2_list', 'player2ListText',

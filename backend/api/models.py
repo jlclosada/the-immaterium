@@ -107,6 +107,7 @@ class PaintingGuide(models.Model):
     views = models.IntegerField(default=0)
     is_premium = models.BooleanField(default=False)
     price = models.IntegerField(null=True, blank=True, help_text='Precio en céntimos (499 = 4,99€)')
+    youtube_url = models.URLField(max_length=500, blank=True, help_text='URL del vídeo de YouTube (opcional)')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -216,6 +217,9 @@ class BattleReport(models.Model):
 
     # Optional battle images (Cloudinary URLs)
     images = ArrayField(models.URLField(max_length=500), default=list)
+
+    # Optional YouTube video
+    youtube_url = models.URLField(max_length=500, blank=True, help_text='URL del vídeo de YouTube (opcional)')
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

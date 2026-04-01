@@ -39,6 +39,7 @@ const EMPTY_FORM = {
     keyMoments: [],
     mvp: '',
     images: [],
+    youtube_url: '',
 };
 
 // ─── Shared style helpers ─────────────────────────────────────────────────────
@@ -771,6 +772,7 @@ const ReportManager = () => {
                 keyMoments: formData.keyMoments,
                 mvp: formData.mvp,
                 images: formData.images,
+                youtube_url: formData.youtube_url || '',
                 player1_name: formData.player1_name,
                 player1_faction: formData.player1_faction,
                 player1_score: formData.player1_score,
@@ -827,6 +829,7 @@ const ReportManager = () => {
             keyMoments: report.keyMoments || [],
             mvp: report.mvp || '',
             images: report.images || [],
+            youtube_url: report.youtube_url || '',
         });
         setNarrative(report.narrative || []);
         setImport1({ text: '', parsed: null });
@@ -1670,6 +1673,27 @@ const ReportManager = () => {
                                                         + Añadir
                                                     </button>
                                                 </div>
+                                            </section>
+
+                                            {/* ── Section: YouTube ── */}
+                                            <section style={sectionDivider}>
+                                                <SectionHeader accent="rgba(239,68,68,0.7)">
+                                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '5px', verticalAlign: 'middle' }}><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+                                                    Vídeo de YouTube <span style={{ fontFamily: 'var(--font-body)', fontWeight: 400, fontSize: '0.75rem', color: 'rgba(255,255,255,0.3)', letterSpacing: 0, textTransform: 'none' }}>(opcional)</span>
+                                                </SectionHeader>
+                                                <Input
+                                                    placeholder="https://www.youtube.com/watch?v=... o https://youtu.be/..."
+                                                    value={formData.youtube_url}
+                                                    onChange={e => setFormData(f => ({ ...f, youtube_url: e.target.value }))}
+                                                />
+                                                {formData.youtube_url && (() => {
+                                                    const m = formData.youtube_url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+                                                    return m ? (
+                                                        <div style={{ marginTop: '0.75rem', borderRadius: '10px', overflow: 'hidden', background: '#000', position: 'relative', paddingTop: '40%' }}>
+                                                            <iframe src={`https://www.youtube.com/embed/${m[1]}`} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }} allowFullScreen title="preview" />
+                                                        </div>
+                                                    ) : <p style={{ fontSize: '0.75rem', color: '#ff8080', marginTop: '0.3rem' }}>URL de YouTube no reconocida</p>;
+                                                })()}
                                             </section>
 
                                             {/* ── Action buttons ── */}

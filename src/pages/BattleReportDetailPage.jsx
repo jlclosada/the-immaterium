@@ -451,12 +451,66 @@ const BattleReportDetailPage = () => {
             )}
           </motion.div>
         )}
+        {/* YouTube embed */}
+        {report.youtube_url && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            style={{ marginBottom: '1.5rem' }}
+          >
+            <div style={{
+              background: 'rgba(255,255,255,0.025)',
+              border: '1px solid rgba(255,255,255,0.07)',
+              borderRadius: 'var(--radius-xl)',
+              padding: 'clamp(1.5rem, 4vw, 2rem)',
+            }}>
+              <h2 style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: '0.75rem',
+                letterSpacing: '3px',
+                color: '#ff4444',
+                textTransform: 'uppercase',
+                marginBottom: '1.25rem',
+              }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+                  Vídeo de la Batalla
+                </span>
+              </h2>
+              <YouTubeEmbed url={report.youtube_url} />
+            </div>
+          </motion.div>
+        )}
       </div>
 
       <Footer />
     </div>
   );
 };
+
+/* ── YouTube helpers ────────────────────────────────────────────── */
+function getYouTubeId(url) {
+  if (!url) return null;
+  const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+
+function YouTubeEmbed({ url }) {
+  const id = getYouTubeId(url);
+  if (!id) return null;
+  return (
+    <div style={{ position: 'relative', paddingTop: '56.25%', borderRadius: '12px', overflow: 'hidden', background: '#000' }}>
+      <iframe
+        src={`https://www.youtube.com/embed/${id}`}
+        title="Vídeo de YouTube"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+      />
+    </div>
+  );
+}
 
 /* ── Export helpers ────────────────────────────────────────────── */
 function buildExportText(player, parsed) {

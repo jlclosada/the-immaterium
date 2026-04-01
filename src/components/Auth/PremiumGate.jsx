@@ -4,14 +4,22 @@ import { motion } from 'framer-motion';
 import { useStore } from '../../stores/useStore';
 import { api } from '../../services/api';
 
+const PREMIUM_BENEFITS = [
+  { icon: '🎨', text: 'Acceso a todas las guías de pintura premium' },
+  { icon: '🎬', text: 'Vídeos exclusivos de técnicas avanzadas' },
+  { icon: '🏷️', text: '10% de descuento en tu primera compra en el Marketplace' },
+  { icon: '⭐', text: 'Badge Premium en tu perfil' },
+];
+
 export default function PremiumGate({ guide }) {
-  const { token, purchases } = useStore();
+  const { token, purchases, user } = useStore();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const isPurchased = purchases.includes(String(guide.id));
+  const userIsPremium = user?.isPremium || false;
 
   if (!guide.isPremium && !guide.is_premium) return null;
-  if (isPurchased) return null;
+  if (isPurchased || userIsPremium) return null;
 
   const priceEuros = guide.price ? (guide.price / 100).toFixed(2) : null;
 
@@ -93,12 +101,21 @@ export default function PremiumGate({ guide }) {
               fontSize: 'clamp(0.82rem, 2vw, 0.9rem)',
               lineHeight: 1.65,
               maxWidth: '380px',
-              margin: '0 auto',
+              margin: '0 auto 1rem',
             }}>
               {token
-                ? 'Esta guía requiere un pago único para desbloquear el acceso completo.'
-                : 'Crea una cuenta gratuita o inicia sesión para acceder a este contenido premium.'}
+                ? 'Desbloquea esta guía con un pago único o con la cuenta Premium.'
+                : 'Crea una cuenta gratuita o inicia sesión para acceder a este contenido.'}
             </p>
+            {/* Benefits list */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', maxWidth: '320px', margin: '0 auto', textAlign: 'left' }}>
+              {PREMIUM_BENEFITS.map((b, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.78rem', color: 'rgba(255,255,255,0.45)' }}>
+                  <span style={{ fontSize: '1rem', flexShrink: 0 }}>{b.icon}</span>
+                  {b.text}
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Price block */}
