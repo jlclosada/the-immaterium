@@ -617,9 +617,56 @@ export default function Header() {
             <ThemeTogglePill isLight={isLight} onToggle={toggleTheme} />
           </div>
 
-          {/* User auth button */}
+          {/* User auth button — desktop/tablet only */}
           <div className="hdr-hide-mobile">
             <UserMenu user={user} token={token} onLogout={handleLogout} openAuthModal={openAuthModal} />
+          </div>
+
+          {/* Mobile: avatar/login icon — shown only on mobile, before hamburger */}
+          <div className="hdr-mobile" style={{ alignItems: 'center' }}>
+            {token ? (
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                onClick={() => setMobileMenuOpen(v => !v)}
+                style={{
+                  background: 'rgba(0,212,255,0.12)',
+                  border: '1px solid rgba(0,212,255,0.35)',
+                  borderRadius: '50%', padding: 0,
+                  width: '36px', height: '36px',
+                  cursor: 'pointer', overflow: 'hidden',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                {user?.avatarUrl ? (
+                  <img src={user.avatarUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.7rem', fontWeight: 700, color: 'var(--color-primary)' }}>
+                    {(user?.name || user?.username || 'U').slice(0, 2).toUpperCase()}
+                  </span>
+                )}
+              </motion.button>
+            ) : (
+              <Link to="/signin" style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+                border: 'none', borderRadius: '10px',
+                padding: '0.42rem 0.85rem',
+                color: '#000', fontFamily: 'var(--font-display)',
+                fontSize: '0.62rem', fontWeight: 800,
+                letterSpacing: '1px', textTransform: 'uppercase',
+                textDecoration: 'none', whiteSpace: 'nowrap',
+                gap: '0.35rem',
+                boxShadow: '0 0 14px rgba(0,212,255,0.3)',
+              }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                  <polyline points="10 17 15 12 10 7"/>
+                  <line x1="15" y1="12" x2="3" y2="12"/>
+                </svg>
+                Entrar
+              </Link>
+            )}
           </div>
 
           {/* Mobile hamburger (<580px) */}
@@ -732,6 +779,95 @@ export default function Header() {
                 <motion.button whileTap={{ scale: 0.9 }} onClick={() => setMobileMenuOpen(false)} style={{ background: 'rgba(255,255,255,0.08)', border: 'none', color: 'var(--text-primary)', width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>✕</motion.button>
               </div>
 
+              {/* ── User section — top of sidebar ── */}
+              {token && user ? (
+                <div style={{
+                  marginBottom: '1.25rem',
+                  background: 'rgba(0,212,255,0.05)',
+                  border: '1px solid rgba(0,212,255,0.15)',
+                  borderRadius: '16px',
+                  padding: '1rem',
+                  display: 'flex', alignItems: 'center', gap: '0.85rem',
+                }}>
+                  {/* Avatar */}
+                  <div style={{
+                    width: '48px', height: '48px', borderRadius: '50%', flexShrink: 0,
+                    background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    overflow: 'hidden',
+                    border: '2px solid rgba(0,212,255,0.3)',
+                  }}>
+                    {user.avatarUrl ? (
+                      <img src={user.avatarUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                      <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', fontWeight: 700, color: '#000' }}>
+                        {(user.name || user.username || 'U').slice(0, 2).toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+                  {/* Info */}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontFamily: 'var(--font-display)', fontSize: '0.78rem', color: 'var(--text-primary)', letterSpacing: '1px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {user.name || user.username}
+                    </div>
+                    {user.isPremium && (
+                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', marginTop: '2px', background: 'rgba(255,215,0,0.12)', border: '1px solid rgba(255,215,0,0.3)', borderRadius: '20px', padding: '1px 7px', fontSize: '0.6rem', color: '#FFD700', fontFamily: 'var(--font-display)', letterSpacing: '1px' }}>
+                        ★ PREMIUM
+                      </div>
+                    )}
+                    <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {user.email}
+                    </div>
+                  </div>
+                </div>
+              ) : !token ? (
+                <div style={{ marginBottom: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                  {/* Header text */}
+                  <div style={{ textAlign: 'center', marginBottom: '0.25rem' }}>
+                    <div style={{ fontFamily: 'var(--font-display)', fontSize: '0.65rem', letterSpacing: '3px', color: 'rgba(0,212,255,0.5)', textTransform: 'uppercase', marginBottom: '0.35rem' }}>
+                      The Immaterium
+                    </div>
+                    <div style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.35)' }}>
+                      Inicia sesión para acceder a todo el contenido
+                    </div>
+                  </div>
+                  {/* CTA buttons */}
+                  <Link to="/signin" onClick={() => setMobileMenuOpen(false)} style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+                    background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+                    border: 'none', borderRadius: '14px',
+                    padding: '0.85rem',
+                    color: '#000', fontFamily: 'var(--font-display)',
+                    fontSize: '0.78rem', fontWeight: 800,
+                    letterSpacing: '2px', textTransform: 'uppercase',
+                    textDecoration: 'none',
+                    boxShadow: '0 4px 20px rgba(0,212,255,0.3)',
+                  }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                      <polyline points="10 17 15 12 10 7"/>
+                      <line x1="15" y1="12" x2="3" y2="12"/>
+                    </svg>
+                    Iniciar sesión
+                  </Link>
+                  <Link to="/signin?mode=register" onClick={() => setMobileMenuOpen(false)} style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+                    background: 'transparent',
+                    border: '1px solid rgba(255,255,255,0.2)', borderRadius: '14px',
+                    padding: '0.75rem',
+                    color: 'rgba(255,255,255,0.7)', fontFamily: 'var(--font-display)',
+                    fontSize: '0.78rem', fontWeight: 700,
+                    letterSpacing: '2px', textTransform: 'uppercase',
+                    textDecoration: 'none',
+                  }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                    </svg>
+                    Crear cuenta gratis
+                  </Link>
+                </div>
+              ) : null}
+
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', flex: 1 }}>
                 {mobileAll.map(item => {
                   const active = item.path === '/' ? currentPath === '/' : currentPath.startsWith(item.path);
@@ -757,6 +893,47 @@ export default function Header() {
                     </motion.button>
                   );
                 })}
+
+                {/* Profile + logout if logged in */}
+                {token && (
+                  <>
+                    <div style={{ height: '1px', background: 'rgba(255,255,255,0.08)', margin: '0.25rem 0' }} />
+                    <motion.button
+                      whileHover={{ x: 8 }} whileTap={{ scale: 0.98 }}
+                      onClick={() => navigate('/profile')}
+                      style={{
+                        background: 'var(--glass-bg)', border: '1px solid var(--glass-border)',
+                        borderRadius: '12px', padding: '0.85rem 1rem',
+                        color: 'var(--text-primary)', fontSize: '0.95rem', textAlign: 'left',
+                        cursor: 'pointer', transition: 'all 0.2s',
+                        display: 'flex', alignItems: 'center', gap: '0.85rem',
+                        fontFamily: 'var(--font-display)', letterSpacing: '1px',
+                      }}
+                    >
+                      <span style={{ display: 'flex', alignItems: 'center', opacity: 0.7, flexShrink: 0 }}>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                      </span>
+                      <span style={{ textTransform: 'uppercase' }}>Mi perfil</span>
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ x: 8 }} whileTap={{ scale: 0.98 }}
+                      onClick={() => { setMobileMenuOpen(false); handleLogout(); }}
+                      style={{
+                        background: 'rgba(255,80,80,0.06)', border: '1px solid rgba(255,80,80,0.2)',
+                        borderRadius: '12px', padding: '0.85rem 1rem',
+                        color: '#ff8080', fontSize: '0.95rem', textAlign: 'left',
+                        cursor: 'pointer', transition: 'all 0.2s',
+                        display: 'flex', alignItems: 'center', gap: '0.85rem',
+                        fontFamily: 'var(--font-display)', letterSpacing: '1px',
+                      }}
+                    >
+                      <span style={{ display: 'flex', alignItems: 'center', opacity: 0.8, flexShrink: 0 }}>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                      </span>
+                      <span style={{ textTransform: 'uppercase' }}>Cerrar sesión</span>
+                    </motion.button>
+                  </>
+                )}
               </div>
 
               <div style={{ marginTop: 'auto', paddingTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.12)', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
