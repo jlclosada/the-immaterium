@@ -578,4 +578,15 @@ export const api = {
     if (!res.ok) return { purchases: [] }
     return res.json()
   },
+
+  updateProfile: async (token, profileData) => {
+    const res = await fetch(`${API_URL}/api/auth/profile/`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Token ${token}` },
+      body: JSON.stringify(profileData),
+    })
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.error || 'Error al actualizar perfil')
+    return data
+  },
 }

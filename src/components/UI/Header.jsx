@@ -326,6 +326,24 @@ function UserMenu({ user, token, onLogout, openAuthModal }) {
               </div>
             </div>
 
+            {/* Profile link */}
+            <Link to="/profile" onClick={() => setOpen(false)} style={{
+              display: 'flex', alignItems: 'center', gap: '0.65rem',
+              padding: '0.6rem 0.9rem', borderRadius: '10px',
+              color: 'rgba(255,255,255,0.6)', textDecoration: 'none',
+              fontFamily: 'var(--font-display)', fontSize: '0.72rem',
+              letterSpacing: '1px', textTransform: 'uppercase',
+              transition: 'all 0.15s',
+            }}
+              onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+              </svg>
+              Mi perfil
+            </Link>
+
             {/* Logout */}
             <motion.button
               whileHover={{ x: 4 }}

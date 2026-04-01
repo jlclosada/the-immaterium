@@ -541,6 +541,11 @@ class UserProfile(models.Model):
     avatar_url = models.URLField(max_length=500, blank=True)
     stripe_customer_id = models.CharField(max_length=200, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    # Extended profile fields
+    bio = models.TextField(blank=True)
+    favorite_faction = models.CharField(max_length=100, blank=True)
+    player_types = models.CharField(max_length=200, blank=True)   # comma-separated
+    is_premium = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = 'Perfil de usuario'

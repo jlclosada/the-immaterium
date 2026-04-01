@@ -30,6 +30,10 @@ def _serialize_user(user):
         'isAdmin': user.is_staff or user.is_superuser,
         'avatarUrl': profile.avatar_url if profile else '',
         'createdAt': user.date_joined.isoformat(),
+        'bio': profile.bio if profile else '',
+        'favorite_faction': profile.favorite_faction if profile else '',
+        'player_types': profile.player_types if profile else '',
+        'isPremium': profile.is_premium if profile else False,
     }
 
 
@@ -328,4 +332,44 @@ def stripe_webhook(request):
 def my_purchases(request):
     return Response({
         'purchases': _get_purchases(request.user),
+    })
+
+
+# ── update profile ────────────────────────────────────────────────────────────
+
+@api_view(['PATCH'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def update_profile_view(request):
+    user = request.user
+    profile, _ = UserProfile.objects.get_or_create(user=user)
+    data = request.data
+
+    # Update User fields
+    if 'name' in data:
+        parts = data['name'].strip().split(' ', 1)
+        user.first_name = parts[0]
+        user.last_name = parts[1] if len(parts) > 1 else ''
+        user.save(update_fields=['first_name', 'last_name'])
+
+    if 'username' in data and data['username'].strip():
+        new_username = data['username'].strip()
+        if new_username != user.username:
+            if User.objects.filter(username=new_username).exclude(pk=user.pk).exists():
+                return Response({'error': 'Ese nombre de usuario ya está en uso'}, status=400)
+            user.username = new_username
+            user.save(update_fields=['username'])
+
+    # Update Profile fields
+    changed = []
+    for field in ('avatar_url', 'bio', 'favorite_faction', 'player_types'):
+        if field in data:
+            setattr(profile, field, data[field])
+            changed.append(field)
+    if changed:
+        profile.save(update_fields=changed)
+
+    return Response({
+        'user': _serialize_user(user),
+        'purchases': _get_purchases(user),
     })

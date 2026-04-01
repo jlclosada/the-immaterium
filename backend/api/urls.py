@@ -33,6 +33,7 @@ urlpatterns = [
     path('auth/me/', auth_views.me_view, name='me'),
     path('auth/logout/', auth_views.logout_view, name='logout'),
     path('auth/purchases/', auth_views.my_purchases, name='my_purchases'),
+    path('auth/profile/', auth_views.update_profile_view, name='update_profile'),
     # Stripe
     path('stripe/create-checkout/', auth_views.create_checkout_session, name='create_checkout'),
     path('stripe/webhook/', auth_views.stripe_webhook, name='stripe_webhook'),

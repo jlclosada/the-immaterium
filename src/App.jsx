@@ -38,6 +38,8 @@ import MarketplacePage from './pages/MarketplacePage';
 import PaymentSuccessPage from './pages/PaymentSuccessPage';
 import PaymentCancelPage from './pages/PaymentCancelPage';
 import AuthModal from './components/Auth/AuthModal';
+import UserAuthPage from './pages/UserAuthPage';
+import ProfilePage from './pages/ProfilePage';
 
 import './styles/index.css';
 import './index.css';
@@ -99,6 +101,9 @@ function App() {
           <Route path="/marketplace/:id" element={<AnimatedPage><MarketplacePage /></AnimatedPage>} />
           <Route path="/payment/success" element={<AnimatedPage><PaymentSuccessPage /></AnimatedPage>} />
           <Route path="/payment/cancel" element={<AnimatedPage><PaymentCancelPage /></AnimatedPage>} />
+          <Route path="/signin" element={<UserAuthPage />} />
+          <Route path="/register" element={<UserAuthPage />} />
+          <Route path="/profile" element={<AnimatedPage><ProfilePage /></AnimatedPage>} />
 
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminLayout />}>
