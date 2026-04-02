@@ -19,7 +19,9 @@ export default function PremiumGate({ guide }) {
   const userIsPremium = user?.isPremium || false;
 
   if (!guide.isPremium && !guide.is_premium) return null;
-  if (isPurchased || userIsPremium) return null;
+  // Admins and leaders always have full access
+  const hasFullAccess = isPurchased || userIsPremium || user?.isAdmin || user?.isLeader;
+  if (hasFullAccess) return null;
 
   const priceEuros = guide.price ? (guide.price / 100).toFixed(2) : null;
 

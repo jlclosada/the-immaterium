@@ -1,5 +1,5 @@
 /**
- * PROFILE PAGE — Edit profile, purchases, premium status
+ * PROFILE PAGE — Edit profile, purchases, preferences, security
  */
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
@@ -9,16 +9,33 @@ import { api } from '../services/api';
 import Header from '../components/UI/Header';
 import Footer from '../components/UI/Footer';
 
-const FACTIONS = [
-  { id: 'space_marines',  label: 'Space Marines',    color: '#4488cc' },
-  { id: 'chaos',          label: 'Caos',              color: '#aa3333' },
-  { id: 'necrons',        label: 'Necrones',          color: '#33aa77' },
-  { id: 'tau',            label: 'Tau',               color: '#44bbcc' },
-  { id: 'tyranids',       label: 'Tiránidos',         color: '#9944cc' },
-  { id: 'eldar',          label: 'Aeldari',           color: '#ccaa33' },
-  { id: 'orks',           label: 'Orkos',             color: '#558833' },
-  { id: 'imperial_guard', label: 'Guardia Imperial',  color: '#886644' },
-  { id: 'none',           label: 'Sin facción',       color: '#555' },
+const GAMES = [
+  { id: '40k',       label: 'Warhammer 40,000', icon: '⚔️',  color: '#cc2222' },
+  { id: 'aos',       label: 'Age of Sigmar',     icon: '✨',  color: '#4488ff' },
+  { id: 'hh',        label: 'Horus Heresy',      icon: '🔥', color: '#ff6600' },
+  { id: 'necromunda',label: 'Necromunda',         icon: '🏙️', color: '#aa8833' },
+  { id: 'kill_team', label: 'Kill Team',          icon: '🎯', color: '#33aa66' },
+  { id: 'warcry',    label: 'Warcry',             icon: '🗡️', color: '#9944cc' },
+];
+
+const ARMIES_40K = [
+  'Space Marines','Blood Angels','Dark Angels','Space Wolves','Grey Knights','Custodes',
+  'Astra Militarum','Adeptus Mechanicus','Hermanas de Batalla','Necrones','Tiránidos','Tau',
+  'Aeldari','Drukhari','Orkos','Chaos Space Marines','Death Guard','Thousand Sons',
+  'World Eaters',"Emperor's Children",'Genestealers',
+];
+const ARMIES_AOS = [
+  'Stormcast Eternals','Nighthaunt','Flesh-eater Courts','Ossiarch Bonereapers',
+  'Slaves to Darkness','Maggotkin','Skaven','Orruk Warclans','Lumineth Realm-lords',
+  'Idoneth Deepkin','Fyreslayers','Kharadron Overlords',
+];
+const ALL_ARMIES = [...ARMIES_40K, ...ARMIES_AOS];
+
+const PLAYER_TYPES = [
+  { id: 'competitive', label: 'Competitivo', icon: '🏆' },
+  { id: 'narrative',   label: 'Narrativo',   icon: '📖' },
+  { id: 'painter',     label: 'Pintor',      icon: '🎨' },
+  { id: 'collector',   label: 'Coleccionista', icon: '📦' },
 ];
 
 const PRESET_AVATARS = [
@@ -86,17 +103,23 @@ export default function ProfilePage() {
   const navigate = useNavigate();
   const { token, user, purchases, setUser, logout } = useStore();
 
-  // Form state
+  // Form state — Perfil
   const [name, setName] = useState('');
   const [username, setUsername] = useState('');
   const [bio, setBio] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
-  const [faction, setFaction] = useState('');
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState('');
   const [activeTab, setActiveTab] = useState('profile');
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [avatarInput, setAvatarInput] = useState('');
+
+  // Form state — Gustos
+  const [favoriteGame, setFavoriteGame] = useState('');
+  const [favoriteArmies, setFavoriteArmies] = useState([]);
+  const [playerTypes, setPlayerTypes] = useState([]);
+  const [savingPrefs, setSavingPrefs] = useState(false);
+  const [savePrefsMsg, setSavePrefsMsg] = useState('');
 
   // Password change
   const [currentPw, setCurrentPw] = useState('');
@@ -112,14 +135,16 @@ export default function ProfilePage() {
       setUsername(user.username || '');
       setBio(user.bio || '');
       setAvatarUrl(user.avatarUrl || '');
-      setFaction(user.favorite_faction || '');
+      setFavoriteGame(user.favorite_game || '');
+      setFavoriteArmies(user.favorite_armies ? user.favorite_armies.split(',').filter(Boolean) : []);
+      setPlayerTypes(user.player_types ? user.player_types.split(',').filter(Boolean) : []);
     }
   }, [token, user]);
 
   const handleSave = async () => {
     setSaving(true); setSaveMsg('');
     try {
-      const data = await api.updateProfile(token, { name, username, bio, avatar_url: avatarUrl, favorite_faction: faction });
+      const data = await api.updateProfile(token, { name, username, bio, avatar_url: avatarUrl });
       setUser({ ...user, ...data.user }, purchases);
       setSaveMsg('✓ Perfil actualizado correctamente');
       setTimeout(() => setSaveMsg(''), 3000);
@@ -130,10 +155,40 @@ export default function ProfilePage() {
     }
   };
 
+  const handleSavePrefs = async () => {
+    setSavingPrefs(true); setSavePrefsMsg('');
+    try {
+      const data = await api.updateProfile(token, {
+        favorite_game: favoriteGame,
+        favorite_armies: favoriteArmies.join(','),
+        player_types: playerTypes.join(','),
+      });
+      setUser({ ...user, ...data.user }, purchases);
+      setSavePrefsMsg('✓ Preferencias guardadas');
+      setTimeout(() => setSavePrefsMsg(''), 3000);
+    } catch (e) {
+      setSavePrefsMsg('✗ ' + (e.message || 'Error al guardar'));
+    } finally {
+      setSavingPrefs(false);
+    }
+  };
+
   const handleLogout = async () => {
     try { await api.logoutUser(token); } catch (_) {}
     logout();
     navigate('/');
+  };
+
+  const toggleArmy = (army) => {
+    setFavoriteArmies(prev =>
+      prev.includes(army) ? prev.filter(a => a !== army) : [...prev, army]
+    );
+  };
+
+  const togglePlayerType = (typeId) => {
+    setPlayerTypes(prev =>
+      prev.includes(typeId) ? prev.filter(t => t !== typeId) : [...prev, typeId]
+    );
   };
 
   const initials = (name || username || 'U').slice(0, 2).toUpperCase();
@@ -141,8 +196,9 @@ export default function ProfilePage() {
   const isAdmin = user?.isAdmin;
 
   const tabs = [
-    { id: 'profile',   label: 'Perfil', icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> },
-    { id: 'purchases', label: 'Compras', icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> },
+    { id: 'profile',   label: 'Perfil',    icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> },
+    { id: 'gustos',    label: 'Gustos',    icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> },
+    { id: 'purchases', label: 'Compras',   icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> },
     { id: 'security',  label: 'Seguridad', icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> },
   ];
 
@@ -243,6 +299,9 @@ export default function ProfilePage() {
               {isAdmin && (
                 <span style={{ padding: '2px 10px', borderRadius: '20px', background: 'rgba(180,20,20,0.15)', border: '1px solid rgba(180,20,20,0.4)', color: '#ff8080', fontSize: '0.65rem', fontFamily: 'var(--font-display)', letterSpacing: '1.5px' }}>ADMIN</span>
               )}
+              {user?.isLeader && (
+                <span style={{ padding: '2px 10px', borderRadius: '20px', background: 'rgba(80,200,120,0.15)', border: '1px solid rgba(80,200,120,0.4)', color: '#50c878', fontSize: '0.65rem', fontFamily: 'var(--font-display)', letterSpacing: '1.5px' }}>LÍDER</span>
+              )}
               {user?.isPremium && (
                 <span style={{ padding: '2px 10px', borderRadius: '20px', background: 'rgba(255,215,0,0.12)', border: '1px solid rgba(255,215,0,0.4)', color: '#FFD700', fontSize: '0.65rem', fontFamily: 'var(--font-display)', letterSpacing: '1.5px' }}>★ PREMIUM</span>
               )}
@@ -296,23 +355,6 @@ export default function ProfilePage() {
               </div>
             </Section>
 
-            <Section title="Ejército & estilo de juego" icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>} accent="#87CEFA">
-              <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.35)', marginBottom: '1rem' }}>Selecciona tu facción favorita:</p>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                {FACTIONS.map(f => (
-                  <button key={f.id} type="button" onClick={() => setFaction(faction === f.id ? '' : f.id)} style={{
-                    padding: '6px 14px', borderRadius: '20px', cursor: 'pointer',
-                    background: faction === f.id ? `${f.color}20` : 'rgba(255,255,255,0.04)',
-                    border: `1px solid ${faction === f.id ? f.color : 'rgba(255,255,255,0.1)'}`,
-                    color: faction === f.id ? f.color : 'rgba(255,255,255,0.4)',
-                    fontSize: '0.8rem', transition: 'all 0.15s', fontWeight: faction === f.id ? 600 : 400,
-                  }}>
-                    {f.label}
-                  </button>
-                ))}
-              </div>
-            </Section>
-
             {/* Save bar */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
               <AnimatePresence>
@@ -335,6 +377,168 @@ export default function ProfilePage() {
                   display: 'flex', alignItems: 'center', gap: '0.5rem',
                 }}>
                 {saving ? (<><motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 0.8, ease: 'linear' }} style={{ width: '14px', height: '14px', border: '2px solid rgba(0,0,0,0.2)', borderTop: '2px solid rgba(0,0,0,0.7)', borderRadius: '50%' }} />Guardando...</>) : 'Guardar cambios'}
+              </motion.button>
+            </div>
+          </div>
+        )}
+
+        {/* ── TAB: GUSTOS ── */}
+        {activeTab === 'gustos' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+
+            {/* Juego favorito */}
+            <Section
+              title="Juego favorito"
+              accent="#cc2222"
+              icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M14.5 10c-.83 0-1.5-.67-1.5-1.5v-5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5z"/><path d="M20.5 10H19V8.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/><path d="M9.5 14c.83 0 1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5S8 21.33 8 20.5v-5c0-.83.67-1.5 1.5-1.5z"/><path d="M3.5 14H5v1.5c0 .83-.67 1.5-1.5 1.5S2 16.33 2 15.5 2.67 14 3.5 14z"/><path d="M14 14.5c0-.83.67-1.5 1.5-1.5h5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5h-5c-.83 0-1.5-.67-1.5-1.5z"/><path d="M15.5 9H14V7.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5S16.33 9 15.5 9z"/><path d="M10 9.5C10 8.67 9.33 8 8.5 8h-5C2.67 8 2 8.67 2 9.5S2.67 11 3.5 11h5c.83 0 1.5-.67 1.5-1.5z"/><path d="M8.5 15H10v1.5c0 .83-.67 1.5-1.5 1.5S7 17.33 7 16.5 7.67 15 8.5 15z"/></svg>}
+            >
+              <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.35)', marginBottom: '1rem' }}>
+                Selecciona el juego al que más juegas o más te gusta:
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.6rem' }}>
+                <style>{`@media(min-width:600px){.games-grid{grid-template-columns:repeat(3,1fr)!important}}`}</style>
+                {GAMES.map(game => {
+                  const selected = favoriteGame === game.id;
+                  return (
+                    <motion.button
+                      key={game.id}
+                      className="games-grid"
+                      onClick={() => setFavoriteGame(selected ? '' : game.id)}
+                      whileHover={{ y: -2 }}
+                      whileTap={{ scale: 0.97 }}
+                      style={{
+                        padding: '1rem 0.75rem',
+                        borderRadius: '14px',
+                        cursor: 'pointer',
+                        border: `1px solid ${selected ? game.color : 'rgba(255,255,255,0.09)'}`,
+                        background: selected ? `${game.color}18` : 'rgba(255,255,255,0.03)',
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem',
+                        transition: 'all 0.15s',
+                        boxShadow: selected ? `0 0 16px ${game.color}30` : 'none',
+                      }}
+                    >
+                      <span style={{ fontSize: '1.6rem', lineHeight: 1 }}>{game.icon}</span>
+                      <span style={{
+                        fontFamily: 'var(--font-display)', fontSize: '0.65rem',
+                        letterSpacing: '1px', textTransform: 'uppercase',
+                        color: selected ? game.color : 'rgba(255,255,255,0.45)',
+                        textAlign: 'center', lineHeight: 1.3,
+                      }}>
+                        {game.label}
+                      </span>
+                    </motion.button>
+                  );
+                })}
+              </div>
+            </Section>
+
+            {/* Ejércitos favoritos */}
+            <Section
+              title="Ejércitos favoritos"
+              accent="var(--color-primary)"
+              icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>}
+            >
+              <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.35)', marginBottom: '0.6rem' }}>
+                Warhammer 40,000
+              </p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '1.25rem' }}>
+                {ARMIES_40K.map(army => {
+                  const sel = favoriteArmies.includes(army);
+                  return (
+                    <button key={army} onClick={() => toggleArmy(army)} style={{
+                      padding: '5px 12px', borderRadius: '20px', cursor: 'pointer',
+                      fontSize: '0.75rem', transition: 'all 0.15s',
+                      border: `1px solid ${sel ? 'rgba(0,212,255,0.6)' : 'rgba(255,255,255,0.1)'}`,
+                      background: sel ? 'rgba(0,212,255,0.14)' : 'rgba(255,255,255,0.03)',
+                      color: sel ? 'var(--color-primary)' : 'rgba(255,255,255,0.4)',
+                      fontWeight: sel ? 600 : 400,
+                    }}>
+                      {army}
+                    </button>
+                  );
+                })}
+              </div>
+              <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.35)', marginBottom: '0.6rem' }}>
+                Age of Sigmar
+              </p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+                {ARMIES_AOS.map(army => {
+                  const sel = favoriteArmies.includes(army);
+                  return (
+                    <button key={army} onClick={() => toggleArmy(army)} style={{
+                      padding: '5px 12px', borderRadius: '20px', cursor: 'pointer',
+                      fontSize: '0.75rem', transition: 'all 0.15s',
+                      border: `1px solid ${sel ? 'rgba(0,212,255,0.6)' : 'rgba(255,255,255,0.1)'}`,
+                      background: sel ? 'rgba(0,212,255,0.14)' : 'rgba(255,255,255,0.03)',
+                      color: sel ? 'var(--color-primary)' : 'rgba(255,255,255,0.4)',
+                      fontWeight: sel ? 600 : 400,
+                    }}>
+                      {army}
+                    </button>
+                  );
+                })}
+              </div>
+            </Section>
+
+            {/* Tipo de jugador */}
+            <Section
+              title="Tipo de jugador"
+              accent="#9944cc"
+              icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>}
+            >
+              <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.35)', marginBottom: '1rem' }}>
+                ¿Cómo defines tu estilo de juego? (puedes seleccionar varios)
+              </p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                {PLAYER_TYPES.map(pt => {
+                  const sel = playerTypes.includes(pt.id);
+                  return (
+                    <motion.button
+                      key={pt.id}
+                      onClick={() => togglePlayerType(pt.id)}
+                      whileHover={{ y: -1 }}
+                      whileTap={{ scale: 0.96 }}
+                      style={{
+                        padding: '8px 18px', borderRadius: '24px', cursor: 'pointer',
+                        fontSize: '0.82rem', transition: 'all 0.15s',
+                        border: `1px solid ${sel ? 'rgba(153,68,204,0.6)' : 'rgba(255,255,255,0.1)'}`,
+                        background: sel ? 'rgba(153,68,204,0.18)' : 'rgba(255,255,255,0.03)',
+                        color: sel ? '#cc88ff' : 'rgba(255,255,255,0.4)',
+                        fontWeight: sel ? 600 : 400,
+                        display: 'flex', alignItems: 'center', gap: '0.4rem',
+                        boxShadow: sel ? '0 0 12px rgba(153,68,204,0.25)' : 'none',
+                      }}
+                    >
+                      <span>{pt.icon}</span>
+                      <span>{pt.label}</span>
+                    </motion.button>
+                  );
+                })}
+              </div>
+            </Section>
+
+            {/* Save prefs bar */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+              <AnimatePresence>
+                {savePrefsMsg && (
+                  <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                    style={{ fontSize: '0.83rem', color: savePrefsMsg.startsWith('✓') ? '#50c878' : '#ff8080' }}>
+                    {savePrefsMsg}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+              <motion.button onClick={handleSavePrefs} disabled={savingPrefs}
+                whileHover={!savingPrefs ? { y: -2 } : {}} whileTap={!savingPrefs ? { scale: 0.97 } : {}}
+                style={{
+                  padding: '0.8rem 2rem',
+                  background: savingPrefs ? 'rgba(0,212,255,0.12)' : 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+                  border: 'none', borderRadius: '12px',
+                  color: savingPrefs ? 'rgba(255,255,255,0.4)' : '#000',
+                  fontFamily: 'var(--font-display)', fontSize: '0.8rem', fontWeight: 700,
+                  letterSpacing: '2px', textTransform: 'uppercase', cursor: savingPrefs ? 'not-allowed' : 'pointer',
+                  display: 'flex', alignItems: 'center', gap: '0.5rem',
+                }}>
+                {savingPrefs ? (<><motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 0.8, ease: 'linear' }} style={{ width: '14px', height: '14px', border: '2px solid rgba(0,0,0,0.2)', borderTop: '2px solid rgba(0,0,0,0.7)', borderRadius: '50%' }} />Guardando...</>) : 'Guardar preferencias'}
               </motion.button>
             </div>
           </div>

@@ -550,6 +550,9 @@ class UserProfile(models.Model):
     favorite_faction = models.CharField(max_length=100, blank=True)
     player_types = models.CharField(max_length=200, blank=True)   # comma-separated
     is_premium = models.BooleanField(default=False)
+    favorite_game = models.CharField(max_length=50, blank=True)    # 40k, aos, horus_heresy, necromunda, kill_team, warcry
+    favorite_armies = models.TextField(blank=True)                  # comma-separated army names
+    is_leader = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = 'Perfil de usuario'

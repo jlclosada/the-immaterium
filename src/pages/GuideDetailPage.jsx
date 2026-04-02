@@ -91,8 +91,8 @@ const GuideDetailPage = () => {
   const isPremium = guide.isPremium || guide.is_premium;
   const isPurchased = purchases.includes(String(guide.id));
   const userIsPremium = user?.isPremium || false;
-  // Premium users get all guides; individual purchases also unlock
-  const isLocked = isPremium && !userIsPremium && !isPurchased;
+  // Premium users, admins and leaders get all guides; individual purchases also unlock
+  const isLocked = isPremium && !userIsPremium && !isPurchased && !user?.isAdmin && !user?.isLeader;
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-darker)', display: 'flex', flexDirection: 'column' }}>

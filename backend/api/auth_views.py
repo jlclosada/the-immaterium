@@ -34,6 +34,9 @@ def _serialize_user(user):
         'favorite_faction': profile.favorite_faction if profile else '',
         'player_types': profile.player_types if profile else '',
         'isPremium': profile.is_premium if profile else False,
+        'favorite_game': profile.favorite_game if profile else '',
+        'favorite_armies': profile.favorite_armies if profile else '',
+        'isLeader': profile.is_leader if profile else False,
     }
 
 
@@ -364,7 +367,7 @@ def update_profile_view(request):
 
     # Update Profile fields
     changed = []
-    for field in ('avatar_url', 'bio', 'favorite_faction', 'player_types'):
+    for field in ('avatar_url', 'bio', 'favorite_faction', 'player_types', 'favorite_game', 'favorite_armies'):
         if field in data:
             setattr(profile, field, data[field])
             changed.append(field)

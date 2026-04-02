@@ -482,7 +482,7 @@ export default function UserAuthPage() {
       </div>
 
       {/* ══ RIGHT PANEL — form ═══════════════════════════════════════════════ */}
-      <div style={{
+      <div className="auth-right-panel" style={{
         flex: 1, display: 'flex', flexDirection: 'column',
         alignItems: 'center', justifyContent: 'center',
         padding: 'clamp(1.5rem, 4vw, 3rem)',
@@ -498,7 +498,7 @@ export default function UserAuthPage() {
         >
           {/* Mobile logo */}
           <div style={{ textAlign: 'center', marginBottom: '1.75rem' }} className="auth-mobile-logo">
-            <style>{`.auth-mobile-logo{display:block;}@media(min-width:900px){.auth-mobile-logo{display:none;}}`}</style>
+            <style>{`.auth-mobile-logo{display:block;}@media(min-width:900px){.auth-mobile-logo{display:none;}}@media(max-width:540px){.auth-right-panel{padding:1rem!important}.auth-plan-grid{flex-direction:column!important}}`}</style>
             <Link to="/" style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', letterSpacing: '3px', background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', textDecoration: 'none' }}>
               THE IMMATERIUM
             </Link>
@@ -755,7 +755,7 @@ export default function UserAuthPage() {
                 </div>
 
                 {/* Plan cards */}
-                <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                <div className="auth-plan-grid" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                   {PLANS.map(plan => (
                     <PlanCard
                       key={plan.id}

@@ -23,6 +23,11 @@ const SCAN_CSS = `
   98%           { opacity: 1; }
   99%           { opacity: 0.6; }
 }
+@media(max-width:600px){
+  .admin-login-root{flex-direction:column!important}
+  .admin-form-panel{max-width:100%!important;padding:1.5rem!important;justify-content:flex-start!important;padding-top:3rem!important}
+  .admin-form-card{padding:1.5rem!important}
+}
 `;
 
 function injectCSS(id, css) {
@@ -66,7 +71,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div style={{
+    <div className="admin-login-root" style={{
       minHeight: '100vh',
       background: '#04010a',
       display: 'flex',
@@ -174,7 +179,7 @@ export default function LoginPage() {
       </div>
 
       {/* ── Right panel — form ── */}
-      <div style={{
+      <div className="admin-form-panel" style={{
         flex: 1, display: 'flex', flexDirection: 'column',
         alignItems: 'center', justifyContent: 'center',
         padding: 'clamp(1.5rem, 5vw, 3rem)',
@@ -224,7 +229,7 @@ export default function LoginPage() {
           </div>
 
           {/* Form card */}
-          <div style={{
+          <div className="admin-form-card" style={{
             background: 'rgba(20,5,5,0.9)',
             border: '1px solid rgba(180,20,20,0.3)',
             borderRadius: '4px',
