@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { api } from '../services/api';
 import { useStore } from '../stores/useStore';
 import { useTranslation } from '../i18n/translations';
-import Header from '../components/UI/Header';
+import Navbar from '../components/UI/Navbar';
 import Footer from '../components/UI/Footer';
 import { renderMarkdown } from '../utils/renderMarkdown';
 
@@ -53,7 +53,7 @@ const LoreDetailPage = () => {
   if (!lore) {
     return (
       <div style={{ minHeight: '100vh', background: 'var(--color-darker)', padding: '4rem 2rem', color: 'var(--color-light)', textAlign: 'center' }}>
-        <Header />
+        <Navbar />
         <h1 style={{ marginTop: '6rem', color: 'rgba(255,255,255,0.5)' }}>Entrada no encontrada</h1>
         <Link to="/lore" style={{ color: 'var(--color-primary)', textDecoration: 'none' }}>← {t('backToLore')}</Link>
       </div>
@@ -64,7 +64,7 @@ const LoreDetailPage = () => {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-darker)', display: 'flex', flexDirection: 'column' }}>
-      <Header />
+      <Navbar />
 
       <div style={{
         flex: 1,

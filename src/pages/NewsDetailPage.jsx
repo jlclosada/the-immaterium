@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { api } from '../services/api';
-import Header from '../components/UI/Header';
+import Navbar from '../components/UI/Navbar';
 import Footer from '../components/UI/Footer';
 import { renderMarkdown } from '../utils/renderMarkdown';
 
@@ -42,7 +42,7 @@ const NewsDetailPage = () => {
   if (!article) {
     return (
       <div style={{ minHeight: '100vh', background: 'var(--color-darker)', padding: '6rem 2rem', textAlign: 'center', color: 'rgba(255,255,255,0.5)' }}>
-        <Header />
+        <Navbar />
         <h1 style={{ marginTop: '4rem' }}>Artículo no encontrado</h1>
         <Link to="/news" style={{ color: 'var(--color-primary)', textDecoration: 'none' }}>← Volver a Noticias</Link>
       </div>
@@ -51,7 +51,7 @@ const NewsDetailPage = () => {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-darker)', display: 'flex', flexDirection: 'column' }}>
-      <Header />
+      <Navbar />
 
       <div style={{
         flex: 1,

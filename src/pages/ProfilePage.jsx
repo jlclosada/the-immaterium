@@ -6,7 +6,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useStore } from '../stores/useStore';
 import { api } from '../services/api';
-import Header from '../components/UI/Header';
+import Navbar from '../components/UI/Navbar';
 import Footer from '../components/UI/Footer';
 
 const GAMES = [
@@ -204,7 +204,7 @@ export default function ProfilePage() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-darker)', display: 'flex', flexDirection: 'column' }}>
-      <Header />
+      <Navbar />
 
       {/* Hero banner */}
       <div style={{

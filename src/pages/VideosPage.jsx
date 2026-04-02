@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import Header from '../components/UI/Header';
+import Navbar from '../components/UI/Navbar';
 import Footer from '../components/UI/Footer';
 import { useStore } from '../stores/useStore';
 import { useTranslation } from '../i18n/translations';
@@ -168,7 +168,7 @@ const VideosPage = () => {
         flexDirection: 'column',
       }}
     >
-      <Header />
+      <Navbar />
 
       {/* Hero Section */}
       <section

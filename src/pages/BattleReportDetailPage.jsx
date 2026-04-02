@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { api } from '../services/api';
 import { useStore } from '../stores/useStore';
-import Header from '../components/UI/Header';
+import Navbar from '../components/UI/Navbar';
 import Footer from '../components/UI/Footer';
 
 const BattleReportDetailPage = () => {
@@ -41,7 +41,7 @@ const BattleReportDetailPage = () => {
   if (!report) {
     return (
       <div style={{ minHeight: '100vh', background: 'var(--color-darker)', padding: '4rem 2rem', color: 'var(--color-light)', textAlign: 'center' }}>
-        <Header />
+        <Navbar />
         <h1 style={{ marginTop: '6rem', color: 'rgba(255,255,255,0.5)' }}>Informe no encontrado</h1>
         <Link to="/battle-reports" style={{ color: 'var(--color-primary)', textDecoration: 'none' }}>← Volver a Informes</Link>
       </div>
@@ -55,7 +55,7 @@ const BattleReportDetailPage = () => {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-darker)', display: 'flex', flexDirection: 'column' }}>
-      <Header />
+      <Navbar />
 
       <div style={{
         flex: 1,

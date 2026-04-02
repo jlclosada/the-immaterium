@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../services/api';
-import Header from '../components/UI/Header';
+import Navbar from '../components/UI/Navbar';
 import Footer from '../components/UI/Footer';
 
 const TYPE_LABELS = {
@@ -223,7 +223,7 @@ export default function SearchPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-bg)', color: '#fff' }}>
-      <Header />
+      <Navbar />
 
       <main style={{ paddingTop: '100px', paddingBottom: '4rem', maxWidth: '800px', margin: '0 auto', padding: '100px 1.5rem 4rem' }}>
 

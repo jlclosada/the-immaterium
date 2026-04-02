@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { api } from '../services/api';
 import { useStore } from '../stores/useStore';
-import Header from '../components/UI/Header';
+import Navbar from '../components/UI/Navbar';
 import Footer from '../components/UI/Footer';
 import ImageModal from '../components/Gallery/ImageModal';
 import PremiumGate from '../components/Auth/PremiumGate';
@@ -80,7 +80,7 @@ const GuideDetailPage = () => {
   if (!guide) {
     return (
       <div style={{ minHeight: '100vh', background: 'var(--color-darker)', padding: '4rem 2rem', color: 'var(--color-light)', textAlign: 'center' }}>
-        <Header />
+        <Navbar />
         <h1 style={{ marginTop: '6rem', color: 'rgba(255,255,255,0.5)' }}>Guía no encontrada</h1>
         <Link to="/guides" style={{ color: 'var(--color-primary)', textDecoration: 'none' }}>← Volver a Guías</Link>
       </div>
@@ -96,7 +96,7 @@ const GuideDetailPage = () => {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-darker)', display: 'flex', flexDirection: 'column' }}>
-      <Header />
+      <Navbar />
 
       {selectedImage && (
         <ImageModal isOpen onClose={() => setSelectedImage(null)} imageSrc={selectedImage} />

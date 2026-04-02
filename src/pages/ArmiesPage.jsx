@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import { useStore } from '../stores/useStore';
 import { useTranslation } from '../i18n/translations';
-import Header from '../components/UI/Header';
+import Navbar from '../components/UI/Navbar';
 import Footer from '../components/UI/Footer';
 import { useTheme } from '../hooks/useTheme';
 
@@ -89,7 +89,7 @@ const ArmiesPage = () => {
       '--page-secondary': secondaryColor,
       transition: 'background 0.5s ease',
     }}>
-      <Header />
+      <Navbar />
 
       <div style={{
         flex: 1,

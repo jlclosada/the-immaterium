@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../services/api';
 import { useStore } from '../stores/useStore';
 import { useTranslation } from '../i18n/translations';
-import Header from '../components/UI/Header';
+import Navbar from '../components/UI/Navbar';
 import Footer from '../components/UI/Footer';
 
 /* ─── Related content card ─────────────────────────────────── */
@@ -193,7 +193,7 @@ const ArmyDetailPage = () => {
   if (!army) {
     return (
       <div style={{ minHeight: '100vh', background: 'var(--color-darker)', padding: '4rem 2rem', color: 'var(--color-light)', textAlign: 'center' }}>
-        <Header />
+        <Navbar />
         <h1 style={{ marginTop: '6rem', color: 'rgba(255,255,255,0.5)' }}>Ejército no encontrado</h1>
         <Link to="/armies" style={{ color: 'var(--color-primary)', textDecoration: 'none' }}>← Volver a Ejércitos</Link>
       </div>
@@ -202,7 +202,7 @@ const ArmyDetailPage = () => {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-darker)', display: 'flex', flexDirection: 'column' }}>
-      <Header />
+      <Navbar />
 
       {/* ══ HERO ══════════════════════════════════════════════════ */}
       <section style={{
