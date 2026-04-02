@@ -23,6 +23,7 @@ const GuidesPage = () => {
   const [guides, setGuides] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [activeFilter, setActiveFilter] = useState('all');
 
   useEffect(() => {
     document.title = 'Guías de Pintura | The Immaterium';
@@ -44,11 +45,18 @@ const GuidesPage = () => {
 
   const filteredGuides = guides.filter(g => {
     const term = searchTerm.toLowerCase();
-    return (
+    const matchesSearch = (
       g.title.toLowerCase().includes(term) ||
       (g.faction?.name || '').toLowerCase().includes(term) ||
       (g.difficulty || '').toLowerCase().includes(term)
     );
+    const isPremium = g.isPremium || g.is_premium;
+    const matchesFilter =
+      activeFilter === 'all' ? true :
+      activeFilter === 'premium' ? isPremium :
+      activeFilter === 'free' ? !isPremium :
+      (g.difficulty || '').toLowerCase() === activeFilter;
+    return matchesSearch && matchesFilter;
   });
 
   return (
@@ -93,7 +101,7 @@ const GuidesPage = () => {
             Painting Guides
           </h1>
           <p style={{ color: isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.4)', fontSize: '0.9rem', letterSpacing: '1px' }}>
-            {guides.length > 0 ? `${guides.length} guías disponibles` : ''}
+            {guides.length > 0 ? `${filteredGuides.length} de ${guides.length} guías` : ''}
           </p>
         </motion.div>
 
@@ -120,6 +128,40 @@ const GuidesPage = () => {
               style={{ paddingLeft: '2.5rem' }}
             />
           </div>
+        </motion.div>
+
+        {/* Filter row */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', justifyContent: 'center', marginTop: '-1rem', marginBottom: 'clamp(1.5rem, 4vw, 2.5rem)' }}
+        >
+          {[
+            { id: 'all', label: 'Todas' },
+            { id: 'beginner', label: 'Principiante' },
+            { id: 'intermediate', label: 'Intermedio' },
+            { id: 'advanced', label: 'Avanzado' },
+            { id: 'premium', label: '★ Premium' },
+            { id: 'free', label: 'Gratis' },
+          ].map(f => (
+            <button key={f.id} onClick={() => setActiveFilter(f.id)} style={{
+              padding: '0.38rem 1rem', borderRadius: '20px', cursor: 'pointer',
+              fontFamily: 'var(--font-display)', fontSize: '0.7rem', letterSpacing: '1px',
+              border: `1px solid ${activeFilter === f.id
+                ? (f.id === 'premium' ? 'rgba(255,215,0,0.6)' : f.id === 'free' ? 'rgba(80,200,120,0.6)' : 'rgba(135,206,250,0.6)')
+                : (isLight ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.12)')}`,
+              background: activeFilter === f.id
+                ? (f.id === 'premium' ? 'rgba(255,215,0,0.12)' : f.id === 'free' ? 'rgba(80,200,120,0.12)' : 'rgba(135,206,250,0.12)')
+                : (isLight ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.04)'),
+              color: activeFilter === f.id
+                ? (f.id === 'premium' ? '#FFD700' : f.id === 'free' ? '#50c878' : 'var(--color-secondary)')
+                : (isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.45)'),
+              transition: 'all 0.2s',
+            }}>
+              {f.label}
+            </button>
+          ))}
         </motion.div>
 
         {loading ? (

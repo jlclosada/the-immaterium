@@ -13,6 +13,7 @@ const BattleReportsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [activeFilter, setActiveFilter] = useState('all');
 
   useEffect(() => {
     document.title = 'Battle Reports | The Immaterium';
@@ -36,12 +37,16 @@ const BattleReportsPage = () => {
 
   const filteredReports = reports.filter(r => {
     const term = searchTerm.toLowerCase();
-    return (
+    const matchesSearch = (
       (r.title || '').toLowerCase().includes(term) ||
       (r.mission || '').toLowerCase().includes(term) ||
       (r.armies?.player1?.name || '').toLowerCase().includes(term) ||
       (r.armies?.player2?.name || '').toLowerCase().includes(term)
     );
+    const matchesFilter =
+      activeFilter === 'all' ? true :
+      String(r.points) === activeFilter;
+    return matchesSearch && matchesFilter;
   });
 
   return (
@@ -86,7 +91,7 @@ const BattleReportsPage = () => {
             Battle Reports
           </h1>
           <p style={{ color: isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.4)', fontSize: '0.9rem', letterSpacing: '1px' }}>
-            {reports.length > 0 ? `${reports.length} batallas registradas` : ''}
+            {reports.length > 0 ? `${filteredReports.length} de ${reports.length} batallas` : ''}
           </p>
         </motion.div>
 
@@ -113,6 +118,33 @@ const BattleReportsPage = () => {
               style={{ paddingLeft: '2.5rem' }}
             />
           </div>
+        </motion.div>
+
+        {/* Filter row */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', justifyContent: 'center', marginTop: '-1rem', marginBottom: 'clamp(1.5rem, 4vw, 2.5rem)' }}
+        >
+          {[
+            { id: 'all', label: 'Todos' },
+            { id: '500', label: '500 pts' },
+            { id: '1000', label: '1.000 pts' },
+            { id: '1500', label: '1.500 pts' },
+            { id: '2000', label: '2.000 pts' },
+          ].map(f => (
+            <button key={f.id} onClick={() => setActiveFilter(f.id)} style={{
+              padding: '0.38rem 1rem', borderRadius: '20px', cursor: 'pointer',
+              fontFamily: 'var(--font-display)', fontSize: '0.7rem', letterSpacing: '1px',
+              border: `1px solid ${activeFilter === f.id ? 'rgba(255,100,100,0.6)' : (isLight ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.12)')}`,
+              background: activeFilter === f.id ? 'rgba(255,100,100,0.12)' : (isLight ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.04)'),
+              color: activeFilter === f.id ? '#ff6464' : (isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.45)'),
+              transition: 'all 0.2s',
+            }}>
+              {f.label}
+            </button>
+          ))}
         </motion.div>
 
         {loading ? (

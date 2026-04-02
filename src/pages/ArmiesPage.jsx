@@ -66,6 +66,11 @@ const ArmiesPage = () => {
   const { isLight } = useTheme();
   const secondaryColor = selectedGame?.secondaryColor || '#7b2fff';
 
+  const { user } = useStore(s => ({ user: s.user }));
+  const favoriteArmyNames = user?.favorite_armies
+    ? user.favorite_armies.split(',').filter(Boolean).map(s => s.trim().toLowerCase())
+    : [];
+
   const filteredArmies = armies.filter(army => {
     // Filter by game
     if (selectedGameId && army.gameId && army.gameId !== selectedGameId) return false;
@@ -77,6 +82,17 @@ const ArmiesPage = () => {
     const name = (language === 'es' && army.nameEs ? army.nameEs : army.name) || '';
     const desc = (language === 'es' && army.descriptionEs ? army.descriptionEs : army.description) || '';
     return name.toLowerCase().includes(term) || desc.toLowerCase().includes(term);
+  });
+
+  // Sort: favorites first
+  const sortedArmies = [...filteredArmies].sort((a, b) => {
+    const aName = (a.name || '').toLowerCase();
+    const bName = (b.name || '').toLowerCase();
+    const aFav = favoriteArmyNames.some(f => aName.includes(f) || f.includes(aName));
+    const bFav = favoriteArmyNames.some(f => bName.includes(f) || f.includes(bName));
+    if (aFav && !bFav) return -1;
+    if (!aFav && bFav) return 1;
+    return 0;
   });
 
   return (
@@ -131,7 +147,7 @@ const ArmiesPage = () => {
             {t('armiesTitle')}
           </h1>
           <p style={{ color: isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.4)', fontSize: '0.9rem', letterSpacing: '1px' }}>
-            {filteredArmies.length > 0 ? `${filteredArmies.length} facciones registradas` : ''}
+            {sortedArmies.length > 0 ? `${sortedArmies.length} facciones registradas` : ''}
           </p>
         </motion.div>
 
@@ -211,7 +227,7 @@ const ArmiesPage = () => {
 
         {loading ? (
           <div className="loading-spinner" style={{ margin: '5rem auto' }} />
-        ) : filteredArmies.length === 0 ? (
+        ) : sortedArmies.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '5rem 2rem', color: 'rgba(255,255,255,0.3)' }}>
             <div style={{ marginBottom: '1rem', opacity: 0.25 }}>
               <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -228,19 +244,25 @@ const ArmiesPage = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3 }}
-              className="cards-grid"
             >
-              {filteredArmies.map((army, index) => (
-                <ArmyCard
-                  key={army.id}
-                  army={army}
-                  index={index}
-                  language={language}
-                  theme={theme}
-                  accentColor={accentColor}
-                  onClick={() => navigate(`/armies/${army.id}`)}
-                />
-              ))}
+              {favoriteArmyNames.length > 0 && filteredArmies.some(a => favoriteArmyNames.some(f => (a.name||'').toLowerCase().includes(f))) && (
+                <div style={{ marginBottom: '1rem', padding: '0.6rem 1rem', borderRadius: '10px', background: 'rgba(255,215,0,0.07)', border: '1px solid rgba(255,215,0,0.2)', fontSize: '0.75rem', color: '#FFD700', fontFamily: 'var(--font-display)', letterSpacing: '1px' }}>
+                  ⭐ Tus ejércitos favoritos aparecen primero
+                </div>
+              )}
+              <div className="cards-grid">
+                {sortedArmies.map((army, index) => (
+                  <ArmyCard
+                    key={army.id}
+                    army={army}
+                    index={index}
+                    language={language}
+                    theme={theme}
+                    accentColor={accentColor}
+                    onClick={() => navigate(`/armies/${army.id}`)}
+                  />
+                ))}
+              </div>
             </motion.div>
           </AnimatePresence>
         )}

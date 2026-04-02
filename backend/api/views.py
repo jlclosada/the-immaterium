@@ -825,6 +825,25 @@ def user_toggle_active(request, user_id):
     return Response({'id': user.id, 'isActive': user.is_active})
 
 
+@api_view(['POST'])
+def user_toggle_leader(request, user_id):
+    """Toggle a user's leader (is_leader) status. Requires superuser token."""
+    from .models import UserProfile
+    requesting_user, err = _get_authenticated_user(request)
+    if err:
+        return err
+    if not requesting_user.is_superuser:
+        return Response({'error': 'Solo el superusuario puede asignar líderes'}, status=status.HTTP_403_FORBIDDEN)
+    if requesting_user.id == user_id:
+        return Response({'error': 'No puedes modificar tu propia cuenta'}, status=status.HTTP_400_BAD_REQUEST)
+
+    user = get_object_or_404(User, id=user_id)
+    profile, _ = UserProfile.objects.get_or_create(user=user)
+    profile.is_leader = not profile.is_leader
+    profile.save(update_fields=['is_leader'])
+    return Response({'id': user.id, 'isLeader': profile.is_leader})
+
+
 # ────────────────────────────────────────
 # Marketplace
 # ────────────────────────────────────────

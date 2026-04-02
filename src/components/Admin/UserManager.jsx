@@ -93,6 +93,19 @@ const UserManager = () => {
         }
     };
 
+    const handleToggleLeader = async (user) => {
+        try {
+            const result = await api.toggleUserLeader(user.id, token);
+            setUsers(prev => prev.map(u => u.id === user.id ? { ...u, is_leader: result.is_leader } : u));
+            toast(
+                result.is_leader ? `${user.username} es ahora Líder` : `${user.username} ya no es Líder`,
+                result.is_leader ? 'success' : 'info'
+            );
+        } catch (e) {
+            toast('Error: ' + e.message, 'error');
+        }
+    };
+
     const handleDelete = async (user) => {
         if (!window.confirm(`¿Eliminar al administrador "${user.username}"? Esta acción no se puede deshacer.`)) return;
         try {
@@ -350,9 +363,24 @@ const UserManager = () => {
                                             {user.username.charAt(0).toUpperCase()}
                                         </div>
                                         <div style={{ minWidth: 0 }}>
-                                            <div style={{ color: 'var(--color-light)', fontSize: '0.92rem', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                            <div style={{ color: 'var(--color-light)', fontSize: '0.92rem', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                                                 {user.username}
-                                                {isMe && <span style={{ marginLeft: '0.4rem', color: '#f59e0b', fontSize: '0.7rem' }}>(tú)</span>}
+                                                {isMe && <span style={{ color: '#f59e0b', fontSize: '0.7rem' }}>(tú)</span>}
+                                                {user.is_leader && (
+                                                    <span style={{
+                                                        padding: '1px 6px',
+                                                        borderRadius: '20px',
+                                                        fontSize: '0.62rem',
+                                                        fontFamily: 'var(--font-display)',
+                                                        letterSpacing: '0.5px',
+                                                        color: '#50c878',
+                                                        background: 'rgba(80,200,120,0.1)',
+                                                        border: '1px solid rgba(80,200,120,0.3)',
+                                                        flexShrink: 0,
+                                                    }}>
+                                                        LÍDER
+                                                    </span>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
@@ -381,6 +409,25 @@ const UserManager = () => {
                                     <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'flex-end' }}>
                                         {isLeader && !isMe && !user.isSuperuser && (
                                             <>
+                                                <button
+                                                    onClick={() => handleToggleLeader(user)}
+                                                    title={user.is_leader ? 'Quitar rol de Líder' : 'Asignar rol de Líder'}
+                                                    style={{
+                                                        padding: '0.35rem 0.8rem',
+                                                        borderRadius: '7px',
+                                                        border: '1px solid',
+                                                        fontSize: '0.78rem',
+                                                        cursor: 'pointer',
+                                                        whiteSpace: 'nowrap',
+                                                        transition: 'all 0.2s',
+                                                        ...(user.is_leader
+                                                            ? { background: 'rgba(80,200,120,0.08)', borderColor: 'rgba(80,200,120,0.3)', color: '#50c878' }
+                                                            : { background: 'rgba(80,200,120,0.04)', borderColor: 'rgba(80,200,120,0.15)', color: 'rgba(80,200,120,0.5)' }
+                                                        ),
+                                                    }}
+                                                >
+                                                    {user.is_leader ? 'Líder ✓' : 'Líder'}
+                                                </button>
                                                 <button
                                                     onClick={() => handleToggleActive(user)}
                                                     title={user.isActive ? 'Desactivar acceso' : 'Activar acceso'}

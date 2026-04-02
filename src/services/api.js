@@ -279,6 +279,16 @@ export const api = {
     return json
   },
 
+  toggleUserLeader: async (userId, token) => {
+    const res = await fetch(`${API_URL}/api/auth/users/${userId}/toggle-leader/`, {
+      method: 'POST',
+      headers: { 'Authorization': `Token ${token}`, 'Content-Type': 'application/json' },
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Error');
+    return data;
+  },
+
   getGames: async () => {
     const response = await fetch(`${API_URL}/api/games/`)
     if (!response.ok) throw new Error('Failed to fetch games')
