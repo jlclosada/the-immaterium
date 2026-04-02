@@ -7,6 +7,7 @@ import { useTranslation } from '../i18n/translations';
 import Navbar from '../components/UI/Navbar';
 import Footer from '../components/UI/Footer';
 import { renderMarkdown } from '../utils/renderMarkdown';
+import ShareButton from '../components/UI/ShareButton';
 
 const CATEGORY_COLORS = {
   historia: '#a78bfa',
@@ -76,18 +77,21 @@ const LoreDetailPage = () => {
         padding: 'clamp(5rem, 10vw, 6.5rem) clamp(1rem, 4vw, 2rem) clamp(2rem, 4vw, 3rem)',
         width: '100%',
       }}>
-        {/* Back */}
-        <Link to="/lore" style={{
-          display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
-          color: 'rgba(255,255,255,0.4)', textDecoration: 'none',
-          fontSize: '0.85rem', letterSpacing: '1px', marginBottom: '2rem',
-          transition: 'color 0.2s',
-        }}
-          onMouseEnter={e => e.currentTarget.style.color = 'var(--color-primary)'}
-          onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}
-        >
-          ← {t('backToLore')}
-        </Link>
+        {/* Back + Share */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+          <Link to="/lore" style={{
+            display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+            color: 'rgba(255,255,255,0.4)', textDecoration: 'none',
+            fontSize: '0.85rem', letterSpacing: '1px',
+            transition: 'color 0.2s',
+          }}
+            onMouseEnter={e => e.currentTarget.style.color = 'var(--color-primary)'}
+            onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}
+          >
+            ← {t('backToLore')}
+          </Link>
+          <ShareButton label="Compartir" />
+        </div>
 
         {/* Header card */}
         <motion.div

@@ -5,6 +5,7 @@ import { api } from '../services/api';
 import { useStore } from '../stores/useStore';
 import Navbar from '../components/UI/Navbar';
 import Footer from '../components/UI/Footer';
+import ShareButton from '../components/UI/ShareButton';
 
 const BattleReportDetailPage = () => {
   const { id } = useParams();
@@ -67,18 +68,21 @@ const BattleReportDetailPage = () => {
         padding: 'clamp(5rem, 10vw, 6.5rem) clamp(1rem, 4vw, 2rem) clamp(2rem, 4vw, 3rem)',
         width: '100%',
       }}>
-        {/* Back */}
-        <Link to="/battle-reports" style={{
-          display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
-          color: 'rgba(255,255,255,0.4)', textDecoration: 'none',
-          fontSize: '0.85rem', letterSpacing: '1px', marginBottom: '2rem',
-          transition: 'color 0.2s',
-        }}
-          onMouseEnter={e => e.currentTarget.style.color = '#f9cb28'}
-          onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}
-        >
-          ← Volver a Informes
-        </Link>
+        {/* Back + Share */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+          <Link to="/battle-reports" style={{
+            display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+            color: 'rgba(255,255,255,0.4)', textDecoration: 'none',
+            fontSize: '0.85rem', letterSpacing: '1px',
+            transition: 'color 0.2s',
+          }}
+            onMouseEnter={e => e.currentTarget.style.color = '#f9cb28'}
+            onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}
+          >
+            ← Volver a Informes
+          </Link>
+          <ShareButton label="Compartir" />
+        </div>
 
         {/* Hero: VS section */}
         <motion.div

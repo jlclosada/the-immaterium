@@ -7,6 +7,7 @@ import Navbar from '../components/UI/Navbar';
 import Footer from '../components/UI/Footer';
 import ImageModal from '../components/Gallery/ImageModal';
 import PremiumGate from '../components/Auth/PremiumGate';
+import ShareButton from '../components/UI/ShareButton';
 
 // ── YouTube helpers ────────────────────────────────────────────────────────────
 function getYouTubeId(url) {
@@ -112,18 +113,21 @@ const GuideDetailPage = () => {
         padding: 'clamp(5rem, 10vw, 6.5rem) clamp(1rem, 4vw, 2rem) clamp(2rem, 4vw, 3rem)',
         width: '100%',
       }}>
-        {/* Back */}
-        <Link to="/guides" style={{
-          display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
-          color: 'rgba(255,255,255,0.4)', textDecoration: 'none',
-          fontSize: '0.85rem', letterSpacing: '1px', marginBottom: '2rem',
-          transition: 'color 0.2s',
-        }}
-          onMouseEnter={e => e.currentTarget.style.color = 'var(--color-secondary)'}
-          onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}
-        >
-          ← Volver a Guías
-        </Link>
+        {/* Back + Share */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+          <Link to="/guides" style={{
+            display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+            color: 'rgba(255,255,255,0.4)', textDecoration: 'none',
+            fontSize: '0.85rem', letterSpacing: '1px',
+            transition: 'color 0.2s',
+          }}
+            onMouseEnter={e => e.currentTarget.style.color = 'var(--color-secondary)'}
+            onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}
+          >
+            ← Volver a Guías
+          </Link>
+          <ShareButton label="Compartir" />
+        </div>
 
         {/* Header card */}
         <motion.div
