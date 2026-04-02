@@ -1,1392 +1,999 @@
-import { AnimatePresence, motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
+/**
+ * LANDING PAGE — Full redesign
+ * Apple-quality, content-first, immersive
+ */
+import { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
+import Navbar from '../components/UI/Navbar';
 import Footer from '../components/UI/Footer';
 import { useTheme } from '../hooks/useTheme';
 import { useTranslation } from '../i18n/translations';
 import { api } from '../services/api';
 import { useStore } from '../stores/useStore';
 
-// Row 1: Marketplace, Pintura, Batallas
-// [Featured marketplace products]
-// Row 2: Ejércitos, Videos, Noticias
-// Row 3: Army Builder, Lore
-const NAV_ROW1 = [
-  {
-    to: '/marketplace',
-    titleKey: 'marketplaceTitle',
-    subtitleKey: 'marketplaceSubtitle',
-    color: '#10b981',
-    icon: (
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
-        <line x1="3" y1="6" x2="21" y2="6"/>
-        <path d="M16 10a4 4 0 0 1-8 0"/>
-      </svg>
-    ),
-  },
-  {
-    to: '/guides',
-    titleKey: 'paintingTitle',
-    subtitleKey: 'paintingSubtitle',
-    color: 'var(--color-secondary)',
-    icon: (
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 19l7-7 3 3-7 7-3-3z" />
-        <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" />
-        <circle cx="11" cy="11" r="2" />
-      </svg>
-    ),
-  },
-  {
-    to: '/battle-reports',
-    titleKey: 'battlesTitle',
-    subtitleKey: 'battlesSubtitle',
-    color: '#ff6464',
-    icon: (
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5" />
-        <line x1="13" y1="19" x2="19" y2="13" />
-        <line x1="16" y1="16" x2="20" y2="20" />
-        <line x1="19" y1="21" x2="21" y2="19" />
-        <polyline points="14.5 6.5 18 3 21 3 21 6 17.5 9.5" />
-      </svg>
-    ),
-  },
-];
+/* ── animation variants ─────────────────────────────────────────────────── */
+const fadeUp = {
+  hidden:  { opacity: 0, y: 28 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.65, ease: [0.16, 1, 0.3, 1] } },
+};
+const stagger = {
+  visible: { transition: { staggerChildren: 0.1 } },
+};
 
-const NAV_ROW2 = [
-  {
-    to: '/armies',
-    titleKey: 'armiesTitle',
-    subtitleKey: 'armiesSubtitle',
-    color: 'var(--color-primary)',
-    icon: (
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-      </svg>
-    ),
-  },
-  {
-    to: '/videos',
-    titleKey: 'videosTitle',
-    subtitleKey: 'videosSubtitle',
-    color: '#ff4444',
-    icon: (
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <polygon points="23 7 16 12 23 17 23 7" />
-        <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
-      </svg>
-    ),
-  },
-  {
-    to: '/news',
-    titleKey: 'newsTitle',
-    subtitleKey: 'newsSubtitle',
-    color: '#f59e0b',
-    icon: (
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a4 4 0 0 1-4 4z"/>
-        <path d="M8 6h12"/><path d="M8 10h12"/><path d="M8 14h8"/>
-      </svg>
-    ),
-  },
-];
+/* ── tiny helpers ────────────────────────────────────────────────────────── */
+const STATE_LABEL = { new: 'Nuevo', used: 'Usado', excellent: 'Excelente', good: 'Bueno' };
 
-const NAV_ROW3 = [
-  {
-    to: '/army-builder',
-    titleKey: 'builderTitle',
-    subtitleKey: 'builderSubtitle',
-    color: '#6366f1',
-    icon: (
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="2" y="3" width="20" height="14" rx="2"/>
-        <path d="M8 21h8M12 17v4"/>
-        <path d="M7 8h3m4 0h3M7 12h10"/>
-      </svg>
-    ),
-  },
-  {
-    to: '/lore',
-    titleKey: 'loreTitle',
-    subtitleKey: 'loreSubtitle',
-    color: 'var(--color-accent)',
-    icon: (
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-        <path d="M8 7h8" /><path d="M8 11h8" /><path d="M8 15h6" />
-      </svg>
-    ),
-  },
-];
+function useCountUp(target, duration = 1600) {
+  const [count, setCount] = useState(0);
+  const startRef = useRef(null);
+  const triggered = useRef(false);
+  const start = () => {
+    if (triggered.current) return;
+    triggered.current = true;
+    const startTime = performance.now();
+    const step = (now) => {
+      const pct = Math.min((now - startTime) / duration, 1);
+      const ease = 1 - Math.pow(1 - pct, 3);
+      setCount(Math.round(ease * target));
+      if (pct < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  };
+  return [count, start, startRef];
+}
 
-// Keep a flat list for any legacy use
-const NAV_ITEMS = [...NAV_ROW1, ...NAV_ROW2, ...NAV_ROW3];
+/* ────────────────────────────────────────────────────────────────────────── */
+/*  SUB-COMPONENTS                                                            */
+/* ────────────────────────────────────────────────────────────────────────── */
 
-const quickBtnStyle = (color) => ({
-  padding: '0.6rem 1.4rem',
-  borderRadius: '50px',
-  background: `${color}11`,
-  border: `1px solid ${color}44`,
-  color: color,
-  textDecoration: 'none',
-  fontSize: '0.9rem',
-  fontFamily: 'var(--font-body)',
-  display: 'flex',
-  alignItems: 'center',
-  gap: '0.5rem',
-  transition: 'all 0.2s',
-  backdropFilter: 'blur(4px)',
-});
+/* Gradient chip label */
+function Chip({ color, children }) {
+  return (
+    <span style={{
+      display: 'inline-flex', alignItems: 'center', gap: '0.3rem',
+      padding: '3px 10px', borderRadius: '20px',
+      background: `${color}18`, border: `1px solid ${color}40`,
+      color, fontSize: '0.65rem', fontFamily: 'var(--font-display)',
+      letterSpacing: '1.5px', textTransform: 'uppercase',
+    }}>
+      {children}
+    </span>
+  );
+}
 
-const LandingPage = () => {
+/* Content card — used for guides, reports, news */
+function ContentCard({ badge, badgeColor, title, subtitle, to, cover, meta, isLight }) {
+  const navigate = useNavigate();
+  return (
+    <motion.div
+      whileHover={{ y: -6, scale: 1.015 }}
+      whileTap={{ scale: 0.98 }}
+      onClick={() => navigate(to)}
+      style={{
+        cursor: 'pointer', borderRadius: '20px', overflow: 'hidden',
+        background: isLight ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.04)',
+        border: `1px solid ${isLight ? 'rgba(0,0,0,0.07)' : 'rgba(255,255,255,0.08)'}`,
+        boxShadow: isLight ? '0 4px 24px rgba(0,0,0,0.07)' : '0 4px 24px rgba(0,0,0,0.3)',
+        transition: 'box-shadow 0.3s',
+        display: 'flex', flexDirection: 'column',
+        minWidth: 0,
+      }}
+    >
+      {/* Cover */}
+      <div style={{ aspectRatio: '16/9', overflow: 'hidden', background: isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.03)', position: 'relative', flexShrink: 0 }}>
+        {cover ? (
+          <img src={cover} alt={title} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.4s ease' }}
+            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
+            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'} />
+        ) : (
+          <div style={{ width: '100%', height: '100%', background: `linear-gradient(135deg, ${badgeColor}22, ${badgeColor}08)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: `${badgeColor}22`, border: `1px solid ${badgeColor}40`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={badgeColor} strokeWidth="1.5" strokeLinecap="round">
+                <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
+              </svg>
+            </div>
+          </div>
+        )}
+        <div style={{ position: 'absolute', top: '0.65rem', left: '0.65rem' }}>
+          <Chip color={badgeColor}>{badge}</Chip>
+        </div>
+      </div>
+      {/* Body */}
+      <div style={{ padding: '1rem 1.1rem 1.2rem', flex: 1, display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+        <h3 style={{
+          fontFamily: 'var(--font-display)', fontSize: '0.88rem',
+          letterSpacing: '0.5px', lineHeight: 1.35,
+          color: isLight ? 'var(--text-primary)' : 'rgba(255,255,255,0.9)',
+          margin: 0,
+          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
+        }}>{title}</h3>
+        {subtitle && (
+          <p style={{ fontSize: '0.78rem', color: isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.38)', margin: 0, lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+            {subtitle}
+          </p>
+        )}
+        {meta && (
+          <div style={{ marginTop: 'auto', paddingTop: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            {meta}
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
+}
+
+/* Bento feature card */
+function FeatureCard({ to, title, subtitle, color, icon, size = 'normal', isLight }) {
+  const navigate = useNavigate();
+  const [hov, setHov] = useState(false);
+  return (
+    <motion.div
+      whileHover={{ y: -5, scale: size === 'large' ? 1.01 : 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      onHoverStart={() => setHov(true)}
+      onHoverEnd={() => setHov(false)}
+      onClick={() => navigate(to)}
+      style={{
+        cursor: 'pointer', borderRadius: '24px', overflow: 'hidden', position: 'relative',
+        padding: size === 'large' ? '2rem' : '1.5rem',
+        background: isLight ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.04)',
+        border: `1px solid ${hov ? color + '50' : (isLight ? 'rgba(0,0,0,0.07)' : 'rgba(255,255,255,0.08)')}`,
+        boxShadow: hov
+          ? `0 12px 48px ${color}20, 0 4px 16px rgba(0,0,0,0.2)`
+          : (isLight ? '0 4px 20px rgba(0,0,0,0.06)' : '0 4px 20px rgba(0,0,0,0.25)'),
+        transition: 'box-shadow 0.3s, border-color 0.3s',
+        height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+      }}
+    >
+      {/* Background gradient glow */}
+      <div style={{
+        position: 'absolute', inset: 0, opacity: hov ? 0.08 : 0.04,
+        background: `radial-gradient(circle at 30% 40%, ${color}, transparent 70%)`,
+        transition: 'opacity 0.3s', pointerEvents: 'none',
+      }} />
+
+      <div style={{ position: 'relative', zIndex: 1 }}>
+        <div style={{
+          width: size === 'large' ? '52px' : '44px',
+          height: size === 'large' ? '52px' : '44px',
+          borderRadius: '14px',
+          background: `${color}18`,
+          border: `1px solid ${color}35`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          marginBottom: size === 'large' ? '1.25rem' : '1rem',
+          color,
+          transition: 'background 0.2s',
+        }}>
+          {icon}
+        </div>
+        <h3 style={{
+          fontFamily: 'var(--font-display)',
+          fontSize: size === 'large' ? '1.05rem' : '0.88rem',
+          letterSpacing: size === 'large' ? '2px' : '1.5px',
+          color: isLight ? 'var(--text-primary)' : '#fff',
+          margin: '0 0 0.4rem', textTransform: 'uppercase',
+        }}>{title}</h3>
+        <p style={{ fontSize: '0.8rem', color: isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.4)', margin: 0, lineHeight: 1.55 }}>
+          {subtitle}
+        </p>
+      </div>
+
+      <div style={{ position: 'relative', zIndex: 1, marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '0.35rem', color, fontSize: '0.75rem', fontFamily: 'var(--font-display)', letterSpacing: '1px' }}>
+        Explorar
+        <motion.svg
+          animate={{ x: hov ? 4 : 0 }} transition={{ duration: 0.2 }}
+          width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
+        >
+          <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+        </motion.svg>
+      </div>
+    </motion.div>
+  );
+}
+
+/* Stat counter */
+function StatCard({ value, suffix = '', label, color, isLight }) {
+  const ref = useRef(null);
+  const [count, setCount] = useState(0);
+  const done = useRef(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && !done.current) {
+        done.current = true;
+        const dur = 1400;
+        const start = performance.now();
+        const step = (now) => {
+          const pct = Math.min((now - start) / dur, 1);
+          const ease = 1 - Math.pow(1 - pct, 3);
+          setCount(Math.round(ease * value));
+          if (pct < 1) requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+      }
+    }, { threshold: 0.3 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [value]);
+  return (
+    <div ref={ref} style={{ textAlign: 'center', padding: '1.5rem 2rem' }}>
+      <div style={{
+        fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem, 5vw, 3rem)',
+        fontWeight: 900, letterSpacing: '2px', lineHeight: 1,
+        background: `linear-gradient(135deg, ${color}, ${color}88)`,
+        WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+        backgroundClip: 'text', marginBottom: '0.4rem',
+      }}>
+        {count}{suffix}
+      </div>
+      <div style={{ fontSize: '0.75rem', color: isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-display)', letterSpacing: '2px', textTransform: 'uppercase' }}>
+        {label}
+      </div>
+    </div>
+  );
+}
+
+/* Section header */
+function SectionHeader({ eyebrow, title, subtitle, accent = 'var(--color-primary)', isLight, align = 'left' }) {
+  return (
+    <motion.div
+      variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.3 }}
+      style={{ textAlign: align, marginBottom: 'clamp(2rem, 4vw, 3rem)' }}
+    >
+      {eyebrow && (
+        <p style={{
+          fontFamily: 'var(--font-display)', fontSize: '0.65rem', letterSpacing: '5px',
+          color: accent, textTransform: 'uppercase', opacity: 0.85,
+          marginBottom: '0.6rem',
+        }}>{eyebrow}</p>
+      )}
+      <h2 style={{
+        fontFamily: 'var(--font-display)',
+        fontSize: 'clamp(1.6rem, 4vw, 2.4rem)',
+        letterSpacing: 'clamp(1px, 0.4vw, 3px)',
+        color: isLight ? 'var(--text-primary)' : '#fff',
+        textTransform: 'uppercase', lineHeight: 1.15,
+        marginBottom: subtitle ? '0.75rem' : 0,
+      }}>{title}</h2>
+      {subtitle && (
+        <p style={{ fontSize: 'clamp(0.88rem, 1.5vw, 1rem)', color: isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.42)', lineHeight: 1.7, maxWidth: '560px', marginLeft: align === 'center' ? 'auto' : 0, marginRight: align === 'center' ? 'auto' : 0 }}>
+          {subtitle}
+        </p>
+      )}
+    </motion.div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*  MAIN PAGE                                                                  */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+export default function LandingPage() {
   const { fetchInitialData, language, token, user, logout } = useStore();
   const t = useTranslation(language);
-  const { isLight, toggleTheme } = useTheme();
+  const { isLight } = useTheme();
   const navigate = useNavigate();
-  const [navOpen, setNavOpen] = useState(false);
-  const [selectedListing, setSelectedListing] = useState(null);
-  const [featuredNews,     setFeaturedNews]     = useState(null);
-  const [featuredGuide,    setFeaturedGuide]    = useState(null);
-  const [featuredReport,   setFeaturedReport]   = useState(null);
+
+  /* Hero parallax */
+  const heroRef = useRef(null);
+  const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
+  const heroY = useTransform(scrollYProgress, [0, 1], ['0%', '30%']);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
+
+  /* Content */
+  const [featuredNews,     setFeaturedNews]     = useState([]);
+  const [featuredGuides,   setFeaturedGuides]   = useState([]);
+  const [featuredReports,  setFeaturedReports]  = useState([]);
   const [featuredListings, setFeaturedListings] = useState([]);
+  const [selectedListing,  setSelectedListing]  = useState(null);
+  const [loadingContent,   setLoadingContent]   = useState(true);
 
   useEffect(() => {
     document.title = 'The Immaterium | Comunidad Warhammer 40,000 en Español';
     fetchInitialData();
-    loadFeaturedContent();
+    loadContent();
   }, []);
 
-  const loadFeaturedContent = async () => {
-    const [newsRes, guidesRes, reportsRes, listingsRes] = await Promise.allSettled([
-      api.getNewsArticles(),
-      api.getPaintingGuides(),
-      api.getBattleReports(),
-      api.getListings({ status: 'available' }),
-    ]);
-    const safe = (res) => (res.status === 'fulfilled' ? (Array.isArray(res.value) ? res.value : []) : []);
-    const news     = safe(newsRes);
-    const guides   = safe(guidesRes);
-    const reports  = safe(reportsRes);
-    const listings = safe(listingsRes);
-    if (news.length    > 0) setFeaturedNews(news[0]);
-    if (guides.length  > 0) setFeaturedGuide(guides[0]);
-    if (reports.length > 0) setFeaturedReport(reports[0]);
-    // Show up to 3 available listings as featured
-    setFeaturedListings(listings.slice(0, 3));
+  const loadContent = async () => {
+    setLoadingContent(true);
+    try {
+      const [newsRes, guidesRes, reportsRes, listingsRes] = await Promise.allSettled([
+        api.getNewsArticles(),
+        api.getPaintingGuides(),
+        api.getBattleReports(),
+        api.getListings({ status: 'available' }),
+      ]);
+      const safe = r => r.status === 'fulfilled' && Array.isArray(r.value) ? r.value : [];
+      setFeaturedNews(safe(newsRes).slice(0, 4));
+      setFeaturedGuides(safe(guidesRes).slice(0, 4));
+      setFeaturedReports(safe(reportsRes).slice(0, 3));
+      setFeaturedListings(safe(listingsRes).slice(0, 4));
+    } finally {
+      setLoadingContent(false);
+    }
   };
 
-  return (
-    <div className="landing-root" style={{
-      color: isLight ? 'var(--text-primary)' : 'white',
-      background: isLight
-        ? 'radial-gradient(ellipse at 50% -10%, #b8dcf8 0%, #ddeeff 30%, #eef2fb 65%, #f4f7ff 100%)'
-        : 'radial-gradient(ellipse at 50% 0%, #1a1a2e 0%, #050510 60%)',
-      minHeight: '100vh',
-      display: 'flex',
-      flexDirection: 'column',
-      overflowX: 'hidden',
-      position: 'relative',
-    }}>
-      {!isLight && <div className="scanline-overlay" />}
-      {/* Aurora orbs — dark mode */}
-      {!isLight && <>
-        <div className="aurora-orb aurora-orb-1" />
-        <div className="aurora-orb aurora-orb-2" />
-        <div className="aurora-orb aurora-orb-3" />
-      </>}
-      {/* Aurora orbs — light mode */}
-      {isLight && <>
-        <div className="aurora-orb-light aurora-orb-l1" />
-        <div className="aurora-orb-light aurora-orb-l2" />
-      </>}
+  /* Styles */
+  const bg = isLight
+    ? 'radial-gradient(ellipse 120% 60% at 50% -5%, #c4dcf5 0%, #ddeeff 25%, #eef2fb 55%, #f4f7ff 100%)'
+    : 'radial-gradient(ellipse 120% 60% at 50% 0%, #0a0a2a 0%, #04040f 55%)';
 
-      {/* ── HERO ── */}
-      <section style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 'clamp(1.5rem, 3vw, 2.5rem)',
-        padding: 'clamp(5rem, 12vw, 10rem) clamp(1.5rem, 5vw, 3rem) clamp(4rem, 8vw, 6rem)',
+  const sectionPad = 'clamp(4rem, 8vw, 7rem) clamp(1.25rem, 5vw, 3rem)';
+
+  const BENTO_ITEMS = [
+    { to: '/armies',        title: 'Ejércitos',         subtitle: 'Explora los ejércitos de Warhammer 40K con lore, estadísticas y galería de miniaturas.',       color: 'var(--color-primary)',    size: 'large',
+      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> },
+    { to: '/guides',        title: 'Guías de Pintura',  subtitle: 'Técnicas paso a paso para todos los niveles. Accede a contenido premium exclusivo.',            color: 'var(--color-secondary)',  size: 'normal',
+      icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><circle cx="11" cy="11" r="2"/></svg> },
+    { to: '/battle-reports',title: 'Informes de Batalla', subtitle: 'Crónicas de batallas épicas de la comunidad con análisis tácticos.',                         color: '#ff6464',                 size: 'normal',
+      icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" y1="19" x2="19" y2="13"/><line x1="16" y1="16" x2="20" y2="20"/></svg> },
+    { to: '/marketplace',   title: 'Marketplace',        subtitle: 'Compra y vende miniaturas con la comunidad. Miles de artículos disponibles.',                  color: '#10b981',                 size: 'normal',
+      icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg> },
+    { to: '/army-builder',  title: 'Army Builder',       subtitle: 'Construye y gestiona tus listas de ejército para cualquier formato.',                          color: '#6366f1',                 size: 'normal',
+      icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M7 8h3m4 0h3M7 12h10"/></svg> },
+    { to: '/lore',          title: 'Lore',               subtitle: 'Sumérgete en la rica historia del universo de Warhammer 40,000.',                              color: 'var(--color-accent)',     size: 'normal',
+      icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M8 7h8"/><path d="M8 11h8"/><path d="M8 15h6"/></svg> },
+    { to: '/videos',        title: 'Videos',             subtitle: 'Canal de vídeos con batallas, tutoriales y torneos en español.',                               color: '#ff4444',                 size: 'normal',
+      icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg> },
+    { to: '/news',          title: 'Noticias',           subtitle: 'Últimas novedades del hobby: lanzamientos, torneos y eventos de la comunidad.',                color: '#f59e0b',                 size: 'normal',
+      icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a4 4 0 0 1-4 4z"/><path d="M8 6h12"/><path d="M8 10h12"/><path d="M8 14h8"/></svg> },
+  ];
+
+  const PREMIUM_PERKS = [
+    { icon: '🎨', title: 'Todas las guías', desc: 'Acceso completo a todas las guías de pintura premium sin restricciones.' },
+    { icon: '🎬', title: 'Vídeos exclusivos', desc: 'Canal privado con técnicas avanzadas y content exclusivo.' },
+    { icon: '🏷️', title: '10% en Marketplace', desc: 'Descuento en tu primera compra dentro de la comunidad.' },
+    { icon: '⭐', title: 'Badge Premium', desc: 'Identificación exclusiva en tu perfil dentro de la comunidad.' },
+  ];
+
+  return (
+    <div style={{ background: bg, minHeight: '100vh', color: isLight ? 'var(--text-primary)' : '#fff', overflowX: 'hidden' }}>
+
+      {/* ── Ambient orbs ── */}
+      {!isLight && (
+        <div aria-hidden style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0 }}>
+          <div style={{ position: 'absolute', top: '-15%', left: '-10%', width: 'min(700px,90vw)', height: 'min(700px,90vw)', borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,212,255,0.06) 0%, transparent 70%)', filter: 'blur(80px)', animation: 'aurora-drift 14s ease-in-out infinite alternate' }} />
+          <div style={{ position: 'absolute', top: '25%', right: '-12%', width: 'min(550px,70vw)', height: 'min(550px,70vw)', borderRadius: '50%', background: 'radial-gradient(circle, rgba(100,0,200,0.06) 0%, transparent 70%)', filter: 'blur(80px)', animation: 'aurora-drift 20s ease-in-out infinite alternate', animationDelay: '-8s' }} />
+          <div style={{ position: 'absolute', bottom: '10%', left: '15%', width: 'min(400px,55vw)', height: 'min(400px,55vw)', borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,80,220,0.04) 0%, transparent 70%)', filter: 'blur(80px)', animation: 'aurora-drift 26s ease-in-out infinite alternate', animationDelay: '-14s' }} />
+        </div>
+      )}
+
+      {/* ────────────── NAVBAR ────────────── */}
+      <Navbar />
+
+      {/* ════════════════════════════════════
+          HERO
+          ════════════════════════════════════ */}
+      <section ref={heroRef} style={{
+        position: 'relative', minHeight: '100svh',
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
         textAlign: 'center',
-        position: 'relative',
-        minHeight: '100vh',
+        padding: 'clamp(5rem, 15vw, 10rem) clamp(1.25rem, 5vw, 3rem) clamp(3rem, 8vw, 6rem)',
+        overflow: 'hidden', zIndex: 1,
       }}>
-        {/* Decorative grid pattern */}
-        <div style={{
-          position: 'absolute', inset: 0, zIndex: 0,
+        {/* Subtle grid */}
+        <div aria-hidden style={{
+          position: 'absolute', inset: 0, pointerEvents: 'none',
           backgroundImage: isLight
-            ? 'linear-gradient(rgba(0,120,200,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(0,120,200,0.06) 1px, transparent 1px)'
-            : `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-          backgroundSize: isLight ? '50px 50px' : undefined,
-          maskImage: isLight ? 'radial-gradient(ellipse 90% 70% at 50% 0%, black 0%, transparent 100%)' : undefined,
-          WebkitMaskImage: isLight ? 'radial-gradient(ellipse 90% 70% at 50% 0%, black 0%, transparent 100%)' : undefined,
-          pointerEvents: 'none',
+            ? 'linear-gradient(rgba(0,100,200,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(0,100,200,0.05) 1px,transparent 1px)'
+            : 'linear-gradient(rgba(0,212,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.03) 1px,transparent 1px)',
+          backgroundSize: '60px 60px',
+          maskImage: 'radial-gradient(ellipse 80% 70% at 50% 20%, black 0%, transparent 100%)',
+          WebkitMaskImage: 'radial-gradient(ellipse 80% 70% at 50% 20%, black 0%, transparent 100%)',
         }} />
         {/* Center glow */}
-        <div style={{
-          position: 'absolute', top: '50%', left: '50%',
-          transform: 'translate(-50%, -60%)',
-          width: 'min(700px, 100vw)', height: 'min(700px, 100vw)',
-          borderRadius: '50%',
-          background: isLight
-            ? 'radial-gradient(circle, rgba(0,120,220,0.08) 0%, transparent 70%)'
-            : 'radial-gradient(circle, rgba(0,212,255,0.06) 0%, transparent 70%)',
-          pointerEvents: 'none', zIndex: 0,
-        }} />
+        <div aria-hidden style={{ position: 'absolute', top: '45%', left: '50%', transform: 'translate(-50%,-50%)', width: 'min(800px,100vw)', height: 'min(800px,100vw)', borderRadius: '50%', background: isLight ? 'radial-gradient(circle, rgba(0,100,220,0.06) 0%, transparent 65%)' : 'radial-gradient(circle, rgba(0,212,255,0.05) 0%, transparent 65%)', pointerEvents: 'none' }} />
 
-        {/* Title */}
-        <motion.div
-          initial={{ opacity: 0, y: -40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, ease: 'easeOut' }}
-          style={{ zIndex: 1, marginBottom: '2rem' }}
-        >
-          <p style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(0.6rem, 1.5vw, 0.75rem)',
-            letterSpacing: '6px',
-            color: 'var(--color-primary)',
-            textTransform: 'uppercase',
-            marginBottom: '1rem',
-            opacity: 0.8,
-          }}>
-            Wargame portal
-          </p>
-          <h1 style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(2.2rem, 9vw, 6.5rem)',
-            letterSpacing: 'clamp(0.1rem, 2vw, 0.6rem)',
-            backgroundImage: isLight
-              ? 'linear-gradient(180deg, #0d1333 0%, #2a4080 60%, #0099cc 100%)'
-              : 'linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.6) 100%)',
+        <motion.div style={{ y: heroY, opacity: heroOpacity, zIndex: 1, width: '100%', maxWidth: '900px' }}>
+          {/* Eyebrow */}
+          <motion.div variants={fadeUp} initial="hidden" animate="visible">
+            <span style={{
+              display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+              padding: '5px 16px', borderRadius: '20px',
+              background: isLight ? 'rgba(0,153,204,0.1)' : 'rgba(0,212,255,0.08)',
+              border: isLight ? '1px solid rgba(0,153,204,0.25)' : '1px solid rgba(0,212,255,0.2)',
+              color: 'var(--color-primary)', fontSize: '0.7rem',
+              fontFamily: 'var(--font-display)', letterSpacing: '4px', textTransform: 'uppercase',
+              marginBottom: '1.5rem',
+            }}>
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--color-primary)', boxShadow: '0 0 8px var(--color-primary)', animation: 'pulse-dot 2s infinite' }} />
+              Comunidad Warhammer 40,000 en Español
+            </span>
+          </motion.div>
 
-            WebkitBackgroundClip: 'text',
-            backgroundClip: 'text',
-
-            WebkitTextFillColor: 'transparent',
-            color: 'transparent', // 🔥 ESTA LÍNEA ES LA CLAVE
-
-            lineHeight: 1.1,
-            marginBottom: '1.5rem',
-            textShadow: 'none',
-          }}>
-            THE<br />IMMATERIUM
-          </h1>
-          {/* Divider */}
-          <div style={{
-            width: 'clamp(80px, 15vw, 180px)',
-            height: '2px',
-            background: 'linear-gradient(90deg, transparent, var(--color-primary), transparent)',
-            margin: '0 auto',
-          }} />
-        </motion.div>
-
-        {/* Subtitle */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5, duration: 0.9 }}
-          style={{
-            fontSize: 'clamp(0.95rem, 2vw, 1.15rem)',
-            maxWidth: '640px',
-            marginBottom: 'clamp(2rem, 5vw, 3rem)',
-            color: isLight ? 'var(--text-secondary)' : 'rgba(255,255,255,0.5)',
-            zIndex: 1,
-            lineHeight: 1.8,
-            letterSpacing: '0.3px',
-          }}
-        >
-          {t('description')}
-        </motion.p>
-
-        {/* ── Auth CTA ── */}
-        {!token ? (
-          /* ─── Not logged in: prominent login / register CTA ─── */
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.62, duration: 0.5 }}
+          {/* Main title */}
+          <motion.h1
+            variants={fadeUp} initial="hidden" animate="visible"
+            transition={{ delay: 0.1 }}
             style={{
-              zIndex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '1rem',
-              marginBottom: 'clamp(0.5rem, 2vw, 1rem)',
-              width: '100%',
-              maxWidth: '480px',
+              fontFamily: 'var(--font-display)',
+              fontSize: 'clamp(3rem, 10vw, 7.5rem)',
+              letterSpacing: 'clamp(0.15rem, 2vw, 0.8rem)',
+              lineHeight: 1.05, margin: '0 0 1.5rem',
+              background: isLight
+                ? 'linear-gradient(180deg, #0a1232 0%, #1a3580 55%, #0077bb 100%)'
+                : 'linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.5) 100%)',
+              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
             }}
           >
-            {/* Invitation text */}
-            <p style={{
-              fontSize: 'clamp(0.8rem, 1.8vw, 0.9rem)',
-              color: isLight ? 'var(--text-secondary)' : 'rgba(255,255,255,0.45)',
-              letterSpacing: '1px',
-              margin: 0,
-            }}>
-              Únete a la mayor comunidad Warhammer en español
-            </p>
-            {/* Buttons */}
-            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-              <Link
-                to="/signin"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.45rem',
-                  padding: '0.75rem 1.8rem',
-                  background: 'linear-gradient(135deg, var(--color-primary) 0%, #0099cc 100%)',
-                  color: '#fff',
-                  fontFamily: 'var(--font-display)',
-                  fontWeight: 700,
-                  fontSize: 'clamp(0.78rem, 1.8vw, 0.88rem)',
-                  letterSpacing: '2px',
-                  textTransform: 'uppercase',
-                  textDecoration: 'none',
-                  borderRadius: '50px',
-                  boxShadow: '0 4px 20px rgba(0,190,255,0.3)',
+            THE<br />IMMATERIUM
+          </motion.h1>
+
+          {/* Divider */}
+          <motion.div variants={fadeUp} initial="hidden" animate="visible" transition={{ delay: 0.18 }}
+            style={{ width: 'clamp(60px, 12vw, 140px)', height: '2px', background: 'linear-gradient(90deg, transparent, var(--color-primary), transparent)', margin: '0 auto 1.75rem' }} />
+
+          {/* Subtitle */}
+          <motion.p
+            variants={fadeUp} initial="hidden" animate="visible" transition={{ delay: 0.25 }}
+            style={{ fontSize: 'clamp(1rem, 2vw, 1.2rem)', maxWidth: '580px', margin: '0 auto 2.5rem', color: isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.45)', lineHeight: 1.8, letterSpacing: '0.3px' }}
+          >
+            Guías de pintura, ejércitos, informes de batalla, marketplace y comunidad.
+            Todo lo que necesitas para el hobby en un solo lugar.
+          </motion.p>
+
+          {/* Auth CTA */}
+          <motion.div variants={fadeUp} initial="hidden" animate="visible" transition={{ delay: 0.32 }}>
+            {!token ? (
+              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+                <Link to="/signin?mode=register" style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                  padding: '0.85rem 2.2rem', borderRadius: '50px',
+                  background: 'linear-gradient(135deg, var(--color-primary) 0%, #0055cc 100%)',
+                  color: '#fff', fontFamily: 'var(--font-display)', fontWeight: 700,
+                  fontSize: '0.85rem', letterSpacing: '2px', textTransform: 'uppercase',
+                  textDecoration: 'none', boxShadow: '0 6px 28px rgba(0,190,255,0.35)',
                   transition: 'transform 0.2s, box-shadow 0.2s',
                 }}
-                onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.04)'; e.currentTarget.style.boxShadow = '0 6px 28px rgba(0,190,255,0.45)'; }}
-                onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,190,255,0.3)'; }}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
-                  <polyline points="10 17 15 12 10 7"/>
-                  <line x1="15" y1="12" x2="3" y2="12"/>
-                </svg>
-                Iniciar sesión
-              </Link>
-              <Link
-                to="/signin?mode=register"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.45rem',
-                  padding: '0.75rem 1.8rem',
+                  onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.04)'; e.currentTarget.style.boxShadow = '0 8px 36px rgba(0,190,255,0.5)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 6px 28px rgba(0,190,255,0.35)'; }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  Unirte gratis
+                </Link>
+                <Link to="/signin" style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                  padding: '0.85rem 2.2rem', borderRadius: '50px',
                   background: 'transparent',
                   color: isLight ? 'var(--color-primary)' : 'rgba(255,255,255,0.85)',
-                  fontFamily: 'var(--font-display)',
-                  fontWeight: 700,
-                  fontSize: 'clamp(0.78rem, 1.8vw, 0.88rem)',
-                  letterSpacing: '2px',
-                  textTransform: 'uppercase',
+                  fontFamily: 'var(--font-display)', fontWeight: 700,
+                  fontSize: '0.85rem', letterSpacing: '2px', textTransform: 'uppercase',
                   textDecoration: 'none',
-                  borderRadius: '50px',
-                  border: isLight ? '1.5px solid var(--color-primary)' : '1.5px solid rgba(255,255,255,0.25)',
-                  transition: 'transform 0.2s, border-color 0.2s, background 0.2s',
+                  border: isLight ? '1.5px solid var(--color-primary)' : '1.5px solid rgba(255,255,255,0.22)',
+                  transition: 'transform 0.2s, background 0.2s',
                 }}
-                onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.04)'; e.currentTarget.style.background = isLight ? 'rgba(0,120,200,0.08)' : 'rgba(255,255,255,0.07)'; }}
-                onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.background = 'transparent'; }}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                  <circle cx="12" cy="7" r="4"/>
-                </svg>
-                Crear cuenta gratis
-              </Link>
-            </div>
-          </motion.div>
-        ) : (
-          /* ─── Logged in: personalized welcome card ─── */
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.62, duration: 0.5 }}
-            style={{
-              zIndex: 1,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '1rem',
-              background: isLight ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.05)',
-              border: isLight ? '1px solid rgba(0,153,204,0.2)' : '1px solid rgba(0,212,255,0.18)',
-              borderRadius: '20px',
-              padding: '1rem 1.5rem',
-              backdropFilter: 'blur(12px)',
-              boxShadow: isLight ? '0 4px 20px rgba(0,0,0,0.08)' : '0 4px 24px rgba(0,0,0,0.3)',
-              maxWidth: '420px',
-              width: '100%',
-              marginBottom: 'clamp(0.5rem, 2vw, 1rem)',
-            }}
-          >
-            {/* Avatar */}
-            <div style={{
-              width: '52px',
-              height: '52px',
-              flexShrink: 0,
-              borderRadius: '50%',
-              background: 'linear-gradient(135deg, var(--color-primary) 0%, #0099cc 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontFamily: 'var(--font-display)',
-              fontWeight: 800,
-              fontSize: '1.2rem',
-              color: '#fff',
-              boxShadow: '0 0 16px rgba(0,190,255,0.35)',
-              border: '2px solid rgba(0,212,255,0.3)',
-            }}>
-              {(user?.username || user?.name || 'U')[0].toUpperCase()}
-            </div>
-            {/* Info */}
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                <p style={{
-                  fontFamily: 'var(--font-display)',
-                  fontSize: 'clamp(0.82rem, 2vw, 0.95rem)',
-                  color: isLight ? 'var(--text-primary)' : 'rgba(255,255,255,0.9)',
-                  margin: 0,
-                  letterSpacing: '1px',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                }}>
-                  {user?.username || user?.name || 'Comandante'}
-                </p>
-                {user?.isPremium && (
-                  <span style={{
-                    fontSize: '0.6rem',
-                    fontFamily: 'var(--font-display)',
-                    letterSpacing: '2px',
-                    color: '#FFD700',
-                    background: 'rgba(255,215,0,0.12)',
-                    border: '1px solid rgba(255,215,0,0.3)',
-                    borderRadius: '6px',
-                    padding: '1px 6px',
-                    textTransform: 'uppercase',
-                  }}>
-                    ★ Premium
-                  </span>
-                )}
+                  onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.04)'; e.currentTarget.style.background = isLight ? 'rgba(0,120,200,0.07)' : 'rgba(255,255,255,0.06)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.background = 'transparent'; }}
+                >
+                  Iniciar sesión
+                </Link>
               </div>
-              <p style={{
-                fontSize: '0.75rem',
-                color: isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.35)',
-                margin: '0.2rem 0 0',
+            ) : (
+              /* Logged-in welcome card */
+              <div style={{
+                display: 'inline-flex', alignItems: 'center', gap: '1rem',
+                padding: '0.9rem 1.5rem', borderRadius: '20px',
+                background: isLight ? 'rgba(255,255,255,0.75)' : 'rgba(255,255,255,0.05)',
+                border: isLight ? '1px solid rgba(0,153,204,0.2)' : '1px solid rgba(0,212,255,0.15)',
+                backdropFilter: 'blur(12px)',
+                boxShadow: isLight ? '0 4px 24px rgba(0,0,0,0.08)' : '0 4px 24px rgba(0,0,0,0.3)',
               }}>
-                Bienvenido de vuelta a The Immaterium
-              </p>
-            </div>
-            {/* Profile link */}
-            <Link
-              to="/profile"
-              style={{
-                flexShrink: 0,
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.3rem',
-                padding: '0.5rem 1rem',
-                background: isLight ? 'rgba(0,153,204,0.1)' : 'rgba(0,212,255,0.1)',
-                border: '1px solid rgba(0,212,255,0.25)',
-                borderRadius: '12px',
-                color: 'var(--color-primary)',
-                fontFamily: 'var(--font-display)',
-                fontSize: '0.7rem',
-                letterSpacing: '1.5px',
-                textTransform: 'uppercase',
-                textDecoration: 'none',
-                transition: 'background 0.2s',
-              }}
-              onMouseEnter={e => { e.currentTarget.style.background = isLight ? 'rgba(0,153,204,0.2)' : 'rgba(0,212,255,0.2)'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = isLight ? 'rgba(0,153,204,0.1)' : 'rgba(0,212,255,0.1)'; }}
-            >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
-              </svg>
-              Perfil
-            </Link>
-          </motion.div>
-        )}
-
-        {/* ── Row 1: Marketplace · Pintura · Batallas ── */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.75, duration: 0.6 }}
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: 'clamp(1rem, 2.5vw, 1.5rem)',
-            width: '100%',
-            maxWidth: '1100px',
-            zIndex: 1,
-          }}
-          className="nav-grid"
-        >
-          {NAV_ROW1.map((item) => (
-            <SectionCard key={item.to} item={item} t={t} />
-          ))}
-        </motion.div>
-
-        {/* ── Featured marketplace listings (inline, below row 1) ── */}
-        {featuredListings.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.9, duration: 0.6 }}
-            style={{
-              width: '100%', maxWidth: '1100px', zIndex: 1,
-              background: 'rgba(16,185,129,0.04)',
-              border: '1px solid rgba(16,185,129,0.18)',
-              borderRadius: '20px',
-              padding: 'clamp(1.25rem,3vw,1.75rem)',
-            }}
-          >
-            {/* Section header */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                <div style={{ width: '46px', height: '46px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--color-primary), #0055cc)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: '1.1rem', color: '#fff', flexShrink: 0, boxShadow: '0 0 16px rgba(0,190,255,0.3)' }}>
+                  {(user?.username || 'U')[0].toUpperCase()}
                 </div>
-                <div>
-                  <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.62rem', letterSpacing: '3px', color: '#10b981', textTransform: 'uppercase', margin: 0, opacity: 0.85 }}>
-                    Marketplace · En venta ahora
-                  </p>
-                  <p style={{ fontSize: '0.78rem', color: isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.35)', margin: 0, marginTop: '1px' }}>
-                    Miniaturas de la comunidad disponibles
-                  </p>
+                <div style={{ textAlign: 'left' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', color: isLight ? 'var(--text-primary)' : '#fff', letterSpacing: '1px' }}>
+                      {user?.username || user?.name}
+                    </span>
+                    {user?.isPremium && <span style={{ fontSize: '0.6rem', color: '#FFD700', fontFamily: 'var(--font-display)', letterSpacing: '2px', background: 'rgba(255,215,0,0.1)', border: '1px solid rgba(255,215,0,0.3)', borderRadius: '6px', padding: '1px 6px' }}>★ PREMIUM</span>}
+                  </div>
+                  <p style={{ fontSize: '0.75rem', color: isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.35)', margin: '2px 0 0' }}>Bienvenido de vuelta</p>
                 </div>
+                <Link to="/profile" style={{ marginLeft: '0.5rem', padding: '0.45rem 1rem', borderRadius: '12px', background: isLight ? 'rgba(0,153,204,0.1)' : 'rgba(0,212,255,0.1)', border: '1px solid rgba(0,212,255,0.25)', color: 'var(--color-primary)', fontFamily: 'var(--font-display)', fontSize: '0.68rem', letterSpacing: '1.5px', textTransform: 'uppercase', textDecoration: 'none', transition: 'background 0.2s', flexShrink: 0 }}
+                  onMouseEnter={e => e.currentTarget.style.background = isLight ? 'rgba(0,153,204,0.18)' : 'rgba(0,212,255,0.18)'}
+                  onMouseLeave={e => e.currentTarget.style.background = isLight ? 'rgba(0,153,204,0.1)' : 'rgba(0,212,255,0.1)'}
+                >Mi perfil</Link>
               </div>
-              <Link
-                to="/marketplace"
-                style={{ fontFamily: 'var(--font-display)', fontSize: '0.68rem', letterSpacing: '2px', color: '#10b981', textDecoration: 'none', textTransform: 'uppercase', border: '1px solid rgba(16,185,129,0.3)', borderRadius: '8px', padding: '0.4rem 0.85rem', transition: 'all 0.2s', background: 'rgba(16,185,129,0.07)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(16,185,129,0.15)'; e.currentTarget.style.borderColor = 'rgba(16,185,129,0.5)'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(16,185,129,0.07)'; e.currentTarget.style.borderColor = 'rgba(16,185,129,0.3)'; }}
-              >
-                Ver todo →
-              </Link>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 'clamp(0.75rem, 2vw, 1.25rem)', maxWidth: `${featuredListings.length * 290}px` }} className="mp-featured-grid">
-              {featuredListings.map(listing => (
-                <MarketplaceListingCard key={listing.id} listing={listing} onSelect={setSelectedListing} />
-              ))}
-            </div>
+            )}
           </motion.div>
-        )}
-
-        {/* ── Row 2: Ejércitos · Videos · Noticias ── */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.0, duration: 0.6 }}
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: 'clamp(1rem, 2.5vw, 1.5rem)',
-            width: '100%',
-            maxWidth: '1100px',
-            zIndex: 1,
-          }}
-          className="nav-grid"
-        >
-          {NAV_ROW2.map((item) => (
-            <SectionCard key={item.to} item={item} t={t} />
-          ))}
         </motion.div>
 
-        {/* ── Row 3: Army Builder · Lore ── */}
+        {/* Scroll indicator */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.1, duration: 0.6 }}
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(2, 1fr)',
-            gap: 'clamp(1rem, 2.5vw, 1.5rem)',
-            width: '100%',
-            maxWidth: '1100px',
-            zIndex: 1,
-          }}
-          className="nav-grid two-col"
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }}
+          style={{ position: 'absolute', bottom: '2.5rem', left: '50%', transform: 'translateX(-50%)', zIndex: 1 }}
         >
-          {NAV_ROW3.map((item) => (
-            <SectionCard key={item.to} item={item} t={t} />
-          ))}
+          <motion.div
+            animate={{ y: [0, 10, 0] }} transition={{ repeat: Infinity, duration: 2.2, ease: 'easeInOut' }}
+            style={{ width: '28px', height: '44px', borderRadius: '14px', border: `2px solid ${isLight ? 'rgba(0,153,204,0.3)' : 'rgba(255,255,255,0.15)'}`, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '6px 0', cursor: 'pointer' }}
+            onClick={() => window.scrollBy({ top: window.innerHeight, behavior: 'smooth' })}
+          >
+            <motion.div
+              animate={{ y: [0, 12, 0], opacity: [1, 0, 1] }}
+              transition={{ repeat: Infinity, duration: 2.2, ease: 'easeInOut' }}
+              style={{ width: '5px', height: '5px', borderRadius: '50%', background: isLight ? 'rgba(0,153,204,0.6)' : 'rgba(255,255,255,0.5)' }}
+            />
+          </motion.div>
         </motion.div>
       </section>
 
-      {/* ── FEATURED CONTENT ── */}
-      {(featuredNews || featuredGuide || featuredReport) && (
-        <section style={{
-          maxWidth: '1100px',
-          margin: '0 auto',
-          padding: 'clamp(2rem, 5vw, 4rem) clamp(1.5rem, 4vw, 2rem)',
-          width: '100%',
-        }}>
-          {/* Section header */}
-          <div style={{ textAlign: 'center', marginBottom: 'clamp(2rem, 5vw, 3rem)' }}>
-            <p style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: '0.7rem',
-              letterSpacing: '4px',
-              color: 'var(--color-primary)',
-              textTransform: 'uppercase',
-              opacity: 0.7,
-              marginBottom: '0.5rem',
-            }}>
-              Últimas publicaciones
-            </p>
-            <h2 style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: 'clamp(1.4rem, 4vw, 2rem)',
-              color: isLight ? 'var(--text-primary)' : 'rgba(255,255,255,0.9)',
-              letterSpacing: '3px',
-              textTransform: 'uppercase',
-            }}>
-              {t('featuredIntel')}
-            </h2>
-          </div>
+      {/* ════════════════════════════════════
+          STATS BAR
+          ════════════════════════════════════ */}
+      <section style={{
+        position: 'relative', zIndex: 1,
+        borderTop: isLight ? '1px solid rgba(0,0,0,0.07)' : '1px solid rgba(255,255,255,0.06)',
+        borderBottom: isLight ? '1px solid rgba(0,0,0,0.07)' : '1px solid rgba(255,255,255,0.06)',
+        background: isLight ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.025)',
+        backdropFilter: 'blur(12px)',
+      }}>
+        <div style={{ maxWidth: '900px', margin: '0 auto', display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 0 }}>
+          {[
+            { value: 40000, suffix: '+', label: 'Años de lore', color: 'var(--color-primary)' },
+            { value: 18,    suffix: '',  label: 'Facciones',    color: '#ff6464' },
+            { value: 9,     suffix: '+', label: 'Secciones',    color: '#10b981' },
+            { value: 100,   suffix: '%', label: 'En Español',   color: '#f59e0b' },
+          ].map((s, i) => (
+            <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1, duration: 0.6 }}
+              style={{ flex: '1 1 150px', borderRight: i < 3 ? (isLight ? '1px solid rgba(0,0,0,0.07)' : '1px solid rgba(255,255,255,0.06)') : 'none' }}>
+              <StatCard value={s.value} suffix={s.suffix} label={s.label} color={s.color} isLight={isLight} />
+            </motion.div>
+          ))}
+        </div>
+      </section>
 
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-            gap: 'clamp(1rem, 2.5vw, 1.5rem)',
-          }}>
-            {featuredReport && (
-              <FeaturedCard
-                to={`/battle-reports/${featuredReport.id}`}
-                badge={language === 'es' ? 'Último Informe de Batalla' : 'Latest Battle Report'}
-                badgeColor="#ff6464"
-                title={featuredReport.title}
-                excerpt={(featuredReport.summary || featuredReport.description)?.substring(0, 110)}
-                linkLabel={t('viewReport')}
-                linkColor="#ff6464"
-                accentColor="rgba(255,100,100,0.08)"
-                borderColor="rgba(255,100,100,0.18)"
-              />
-            )}
-            {featuredGuide && (
-              <FeaturedCard
-                to={`/guides/${featuredGuide.id}`}
-                badge={language === 'es' ? 'Última Guía de Pintura' : 'Latest Painting Guide'}
-                badgeColor="var(--color-secondary)"
-                title={featuredGuide.title}
-                excerpt={featuredGuide.description?.substring(0, 110)}
-                linkLabel={t('viewGuide')}
-                linkColor="var(--color-secondary)"
-                accentColor="rgba(135,206,250,0.08)"
-                borderColor="rgba(135,206,250,0.18)"
-              />
-            )}
-            {featuredNews && (
-              <FeaturedCard
-                to={`/news/${featuredNews.id}`}
-                badge={language === 'es' ? 'Última Noticia' : 'Latest News'}
-                badgeColor="#f59e0b"
-                title={featuredNews.title}
-                excerpt={(featuredNews.excerpt || featuredNews.content)?.substring(0, 110)}
-                linkLabel={language === 'es' ? 'Leer noticia' : 'Read news'}
-                linkColor="#f59e0b"
-                accentColor="rgba(245,158,11,0.08)"
-                borderColor="rgba(245,158,11,0.18)"
-              />
-            )}
+      {/* ════════════════════════════════════
+          BENTO FEATURES GRID
+          ════════════════════════════════════ */}
+      <section style={{ position: 'relative', zIndex: 1, padding: sectionPad }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <SectionHeader
+            eyebrow="Explora la plataforma"
+            title="Todo lo que necesitas"
+            subtitle="Una plataforma completa para el aficionado a Warhammer 40,000. Desde ejércitos hasta marketplace, todo en español."
+            isLight={isLight}
+            align="center"
+          />
+
+          {/* Bento grid */}
+          <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: 'repeat(4, 1fr)', gridTemplateRows: 'auto', gridAutoRows: '220px' }} className="bento-grid">
+            {/* Large card - armies */}
+            <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }}
+              style={{ gridColumn: 'span 2', gridRow: 'span 2' }}>
+              <FeatureCard {...BENTO_ITEMS[0]} isLight={isLight} />
+            </motion.div>
+            {/* Guides */}
+            <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} transition={{ delay: 0.05 }}
+              style={{ gridColumn: 'span 1' }}>
+              <FeatureCard {...BENTO_ITEMS[1]} isLight={isLight} />
+            </motion.div>
+            {/* Batallas */}
+            <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} transition={{ delay: 0.1 }}
+              style={{ gridColumn: 'span 1' }}>
+              <FeatureCard {...BENTO_ITEMS[2]} isLight={isLight} />
+            </motion.div>
+            {/* Marketplace */}
+            <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} transition={{ delay: 0.08 }}
+              style={{ gridColumn: 'span 1' }}>
+              <FeatureCard {...BENTO_ITEMS[3]} isLight={isLight} />
+            </motion.div>
+            {/* Army Builder */}
+            <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} transition={{ delay: 0.12 }}
+              style={{ gridColumn: 'span 1' }}>
+              <FeatureCard {...BENTO_ITEMS[4]} isLight={isLight} />
+            </motion.div>
+            {/* Lore */}
+            <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} transition={{ delay: 0.14 }}
+              style={{ gridColumn: 'span 1' }}>
+              <FeatureCard {...BENTO_ITEMS[5]} isLight={isLight} />
+            </motion.div>
+            {/* Videos */}
+            <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} transition={{ delay: 0.16 }}
+              style={{ gridColumn: 'span 1' }}>
+              <FeatureCard {...BENTO_ITEMS[6]} isLight={isLight} />
+            </motion.div>
+            {/* Noticias */}
+            <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} transition={{ delay: 0.18 }}
+              style={{ gridColumn: 'span 1' }}>
+              <FeatureCard {...BENTO_ITEMS[7]} isLight={isLight} />
+            </motion.div>
           </div>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════
+          LATEST GUIDES
+          ════════════════════════════════════ */}
+      {(featuredGuides.length > 0 || loadingContent) && (
+        <section style={{ position: 'relative', zIndex: 1, padding: sectionPad, background: isLight ? 'rgba(0,0,0,0.015)' : 'rgba(255,255,255,0.015)' }}>
+          <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', marginBottom: 'clamp(1.5rem, 3vw, 2.5rem)' }}>
+              <SectionHeader
+                eyebrow="Hobby & técnica"
+                title="Guías de Pintura"
+                isLight={isLight}
+              />
+              <Link to="/guides" style={{ flexShrink: 0, padding: '0.5rem 1.2rem', borderRadius: '20px', border: `1px solid ${isLight ? 'rgba(153,0,204,0.3)' : 'rgba(255,0,255,0.25)'}`, color: 'var(--color-secondary)', textDecoration: 'none', fontSize: '0.78rem', fontFamily: 'var(--font-display)', letterSpacing: '1.5px', transition: 'background 0.2s', marginBottom: 'clamp(1.5rem, 3vw, 2.5rem)' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(153,0,204,0.07)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+              >
+                Ver todas →
+              </Link>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '1.25rem' }}>
+              {loadingContent
+                ? Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} style={{ borderRadius: '20px', background: isLight ? 'rgba(0,0,0,0.04)' : 'rgba(255,255,255,0.03)', aspectRatio: '3/4', animation: 'skeleton-pulse 1.6s ease-in-out infinite' }} />
+                ))
+                : featuredGuides.map((guide, i) => (
+                  <motion.div key={guide.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.07 }}>
+                    <ContentCard
+                      badge={guide.isPremium || guide.is_premium ? '★ Premium' : 'Libre'}
+                      badgeColor={guide.isPremium || guide.is_premium ? '#FFD700' : 'var(--color-secondary)'}
+                      title={guide.title}
+                      subtitle={guide.description}
+                      to={`/guides/${guide.id}`}
+                      cover={guide.coverImage || guide.cover_image}
+                      isLight={isLight}
+                      meta={
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                          {guide.difficulty && <span style={{ fontSize: '0.7rem', color: isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.35)', fontFamily: 'var(--font-display)', letterSpacing: '1px' }}>{guide.difficulty}</span>}
+                          {(guide.isPremium || guide.is_premium) && guide.price && (
+                            <span style={{ fontSize: '0.75rem', color: '#FFD700', fontFamily: 'var(--font-display)', fontWeight: 700 }}>
+                              {(guide.price / 100).toFixed(2)} €
+                            </span>
+                          )}
+                        </div>
+                      }
+                    />
+                  </motion.div>
+                ))
+              }
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ════════════════════════════════════
+          BATTLE REPORTS
+          ════════════════════════════════════ */}
+      {(featuredReports.length > 0 || loadingContent) && (
+        <section style={{ position: 'relative', zIndex: 1, padding: sectionPad }}>
+          <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', marginBottom: 'clamp(1.5rem, 3vw, 2.5rem)' }}>
+              <SectionHeader eyebrow="Crónicas de guerra" title="Informes de Batalla" isLight={isLight} />
+              <Link to="/battle-reports" style={{ flexShrink: 0, padding: '0.5rem 1.2rem', borderRadius: '20px', border: '1px solid rgba(255,100,100,0.3)', color: '#ff6464', textDecoration: 'none', fontSize: '0.78rem', fontFamily: 'var(--font-display)', letterSpacing: '1.5px', transition: 'background 0.2s', marginBottom: 'clamp(1.5rem, 3vw, 2.5rem)' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,100,100,0.07)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+              >Ver todos →</Link>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.25rem' }}>
+              {loadingContent
+                ? Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} style={{ borderRadius: '20px', background: isLight ? 'rgba(0,0,0,0.04)' : 'rgba(255,255,255,0.03)', height: '240px', animation: 'skeleton-pulse 1.6s ease-in-out infinite' }} />
+                ))
+                : featuredReports.map((report, i) => (
+                  <motion.div key={report.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}>
+                    <ContentCard
+                      badge="Batalla"
+                      badgeColor="#ff6464"
+                      title={report.title}
+                      subtitle={report.summary || report.description}
+                      to={`/battle-reports/${report.id}`}
+                      cover={report.images?.[0]}
+                      isLight={isLight}
+                      meta={
+                        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                          {report.player1_faction && <Chip color="#ff6464">{report.player1_faction}</Chip>}
+                          {report.player2_faction && <Chip color="#6366f1">{report.player2_faction}</Chip>}
+                        </div>
+                      }
+                    />
+                  </motion.div>
+                ))
+              }
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ════════════════════════════════════
+          MARKETPLACE PREVIEW
+          ════════════════════════════════════ */}
+      {featuredListings.length > 0 && (
+        <section style={{ position: 'relative', zIndex: 1, padding: sectionPad, background: isLight ? 'rgba(16,185,129,0.03)' : 'rgba(16,185,129,0.025)' }}>
+          <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', marginBottom: 'clamp(1.5rem, 3vw, 2.5rem)' }}>
+              <SectionHeader eyebrow="Compra & vende" title="Marketplace" isLight={isLight} accent="#10b981" />
+              <Link to="/marketplace" style={{ flexShrink: 0, padding: '0.5rem 1.2rem', borderRadius: '20px', border: '1px solid rgba(16,185,129,0.35)', color: '#10b981', textDecoration: 'none', fontSize: '0.78rem', fontFamily: 'var(--font-display)', letterSpacing: '1.5px', transition: 'background 0.2s', marginBottom: 'clamp(1.5rem, 3vw, 2.5rem)' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(16,185,129,0.08)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+              >Ver todo →</Link>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1.25rem' }}>
+              {featuredListings.map((listing, i) => (
+                <motion.div key={listing.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.07 }}
+                  onClick={() => setSelectedListing(listing)}
+                  whileHover={{ y: -6, scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                  style={{
+                    cursor: 'pointer', borderRadius: '20px', overflow: 'hidden',
+                    background: isLight ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.04)',
+                    border: `1px solid ${isLight ? 'rgba(16,185,129,0.15)' : 'rgba(16,185,129,0.12)'}`,
+                    boxShadow: isLight ? '0 4px 20px rgba(0,0,0,0.06)' : '0 4px 20px rgba(0,0,0,0.25)',
+                    transition: 'box-shadow 0.3s',
+                  }}
+                >
+                  <div style={{ aspectRatio: '4/3', overflow: 'hidden', background: 'rgba(16,185,129,0.06)', position: 'relative' }}>
+                    {listing.images?.[0] ? (
+                      <img src={listing.images[0]} alt={listing.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(16,185,129,0.4)" strokeWidth="1.5"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                      </div>
+                    )}
+                    <div style={{ position: 'absolute', top: '0.65rem', right: '0.65rem', background: 'rgba(16,185,129,0.92)', color: '#fff', padding: '3px 10px', borderRadius: '20px', fontFamily: 'var(--font-display)', fontSize: '0.72rem', fontWeight: 700 }}>
+                      {listing.price ? `${listing.price} €` : 'Consultar'}
+                    </div>
+                  </div>
+                  <div style={{ padding: '0.85rem 1rem' }}>
+                    <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.82rem', color: isLight ? 'var(--text-primary)' : '#fff', margin: '0 0 0.3rem', letterSpacing: '0.5px', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{listing.title}</p>
+                    <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+                      {listing.faction && <Chip color="#10b981">{listing.faction}</Chip>}
+                      {listing.state && <span style={{ fontSize: '0.68rem', color: isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.35)' }}>{STATE_LABEL[listing.state] || listing.state}</span>}
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ════════════════════════════════════
+          LATEST NEWS
+          ════════════════════════════════════ */}
+      {featuredNews.length > 0 && (
+        <section style={{ position: 'relative', zIndex: 1, padding: sectionPad }}>
+          <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', marginBottom: 'clamp(1.5rem, 3vw, 2.5rem)' }}>
+              <SectionHeader eyebrow="Actualidad" title="Últimas Noticias" isLight={isLight} accent="#f59e0b" />
+              <Link to="/news" style={{ flexShrink: 0, padding: '0.5rem 1.2rem', borderRadius: '20px', border: '1px solid rgba(245,158,11,0.35)', color: '#f59e0b', textDecoration: 'none', fontSize: '0.78rem', fontFamily: 'var(--font-display)', letterSpacing: '1.5px', transition: 'background 0.2s', marginBottom: 'clamp(1.5rem, 3vw, 2.5rem)' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(245,158,11,0.08)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+              >Ver todas →</Link>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {featuredNews.map((news, i) => (
+                <motion.div key={news.id} initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.07 }}>
+                  <Link to={`/news/${news.id}`} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '1.25rem', padding: '1rem 1.25rem', borderRadius: '16px', background: isLight ? 'rgba(255,255,255,0.75)' : 'rgba(255,255,255,0.03)', border: `1px solid ${isLight ? 'rgba(245,158,11,0.12)' : 'rgba(255,255,255,0.06)'}`, transition: 'border-color 0.2s, background 0.2s' }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(245,158,11,0.35)'; e.currentTarget.style.background = isLight ? 'rgba(255,255,255,0.9)' : 'rgba(245,158,11,0.04)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = isLight ? 'rgba(245,158,11,0.12)' : 'rgba(255,255,255,0.06)'; e.currentTarget.style.background = isLight ? 'rgba(255,255,255,0.75)' : 'rgba(255,255,255,0.03)'; }}
+                  >
+                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#f59e0b', flexShrink: 0, boxShadow: '0 0 8px rgba(245,158,11,0.6)' }} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '0.88rem', letterSpacing: '0.5px', color: isLight ? 'var(--text-primary)' : 'rgba(255,255,255,0.9)', margin: 0, display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{news.title}</h3>
+                      {(news.excerpt || news.content) && (
+                        <p style={{ fontSize: '0.78rem', color: isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.35)', margin: '2px 0 0', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                          {(news.excerpt || news.content)?.replace(/<[^>]+>/g, '').substring(0, 120)}
+                        </p>
+                      )}
+                    </div>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" style={{ flexShrink: 0, opacity: 0.7 }}><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ════════════════════════════════════
+          PREMIUM SECTION
+          ════════════════════════════════════ */}
+      {!user?.isPremium && (
+        <section style={{
+          position: 'relative', zIndex: 1,
+          padding: 'clamp(4rem, 8vw, 7rem) clamp(1.25rem, 5vw, 3rem)',
+          background: isLight
+            ? 'linear-gradient(135deg, rgba(40,20,0,0.04), rgba(255,215,0,0.06))'
+            : 'linear-gradient(135deg, rgba(30,15,0,0.8), rgba(15,10,0,0.95))',
+          borderTop: isLight ? '1px solid rgba(255,215,0,0.15)' : '1px solid rgba(255,215,0,0.12)',
+          borderBottom: isLight ? '1px solid rgba(255,215,0,0.15)' : '1px solid rgba(255,215,0,0.12)',
+          overflow: 'hidden',
+        }}>
+          {/* Gold ambient glow */}
+          <div aria-hidden style={{ position: 'absolute', top: '-30%', right: '-10%', width: '500px', height: '500px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,215,0,0.08) 0%, transparent 65%)', pointerEvents: 'none' }} />
+          <div aria-hidden style={{ position: 'absolute', bottom: '-20%', left: '5%', width: '350px', height: '350px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,160,0,0.06) 0%, transparent 65%)', pointerEvents: 'none' }} />
+
+          <div style={{ maxWidth: '1100px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
+            <motion.div variants={stagger} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }}
+              style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'clamp(2rem, 5vw, 5rem)', alignItems: 'center' }} className="premium-grid">
+              {/* Left text */}
+              <div>
+                <motion.div variants={fadeUp}>
+                  <span style={{ display: 'inline-block', padding: '4px 14px', borderRadius: '20px', background: 'rgba(255,215,0,0.12)', border: '1px solid rgba(255,215,0,0.3)', color: '#FFD700', fontSize: '0.65rem', fontFamily: 'var(--font-display)', letterSpacing: '4px', marginBottom: '1.25rem' }}>
+                    ★ PREMIUM
+                  </span>
+                </motion.div>
+                <motion.h2 variants={fadeUp} style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.8rem, 4vw, 2.6rem)', letterSpacing: '2px', textTransform: 'uppercase', lineHeight: 1.15, marginBottom: '1rem', color: isLight ? 'var(--text-primary)' : '#fff' }}>
+                  Desbloquea el<br /><span style={{ color: '#FFD700' }}>potencial completo</span>
+                </motion.h2>
+                <motion.p variants={fadeUp} style={{ fontSize: '0.95rem', color: isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.42)', lineHeight: 1.7, marginBottom: '2rem' }}>
+                  Accede a todas las guías de pintura premium, vídeos exclusivos del canal y ventajas especiales en la comunidad.
+                </motion.p>
+                <motion.div variants={fadeUp}>
+                  <Link to="/signin?mode=register" style={{
+                    display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                    padding: '0.85rem 2rem', borderRadius: '50px',
+                    background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
+                    color: '#000', fontFamily: 'var(--font-display)', fontWeight: 700,
+                    fontSize: '0.82rem', letterSpacing: '2px', textTransform: 'uppercase',
+                    textDecoration: 'none',
+                    boxShadow: '0 6px 28px rgba(255,200,0,0.35)',
+                    transition: 'transform 0.2s, box-shadow 0.2s',
+                  }}
+                    onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.04)'; e.currentTarget.style.boxShadow = '0 8px 36px rgba(255,200,0,0.5)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 6px 28px rgba(255,200,0,0.35)'; }}
+                  >
+                    ★ Empezar Premium
+                  </Link>
+                </motion.div>
+              </div>
+              {/* Right perks */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+                {PREMIUM_PERKS.map((perk, i) => (
+                  <motion.div key={i} variants={fadeUp} transition={{ delay: i * 0.07 }}
+                    style={{
+                      display: 'flex', alignItems: 'flex-start', gap: '1rem',
+                      padding: '1rem 1.25rem', borderRadius: '16px',
+                      background: isLight ? 'rgba(255,255,255,0.7)' : 'rgba(255,215,0,0.04)',
+                      border: isLight ? '1px solid rgba(255,215,0,0.2)' : '1px solid rgba(255,215,0,0.1)',
+                    }}
+                  >
+                    <span style={{ fontSize: '1.4rem', flexShrink: 0 }}>{perk.icon}</span>
+                    <div>
+                      <h4 style={{ fontFamily: 'var(--font-display)', fontSize: '0.8rem', letterSpacing: '1px', color: isLight ? 'var(--text-primary)' : '#FFD700', margin: '0 0 0.2rem', textTransform: 'uppercase' }}>{perk.title}</h4>
+                      <p style={{ fontSize: '0.78rem', color: isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.38)', margin: 0, lineHeight: 1.5 }}>{perk.desc}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        </section>
+      )}
+
+      {/* ════════════════════════════════════
+          FINAL CTA (only guests)
+          ════════════════════════════════════ */}
+      {!token && (
+        <section style={{ position: 'relative', zIndex: 1, padding: 'clamp(5rem, 10vw, 9rem) clamp(1.25rem, 5vw, 3rem)', textAlign: 'center' }}>
+          <div aria-hidden style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 'min(600px,90vw)', height: 'min(600px,90vw)', borderRadius: '50%', background: isLight ? 'radial-gradient(circle, rgba(0,100,220,0.06) 0%, transparent 65%)' : 'radial-gradient(circle, rgba(0,212,255,0.05) 0%, transparent 65%)', pointerEvents: 'none' }} />
+          <motion.div variants={stagger} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.3 }} style={{ position: 'relative', zIndex: 1 }}>
+            <motion.p variants={fadeUp} style={{ fontFamily: 'var(--font-display)', fontSize: '0.65rem', letterSpacing: '5px', color: 'var(--color-primary)', textTransform: 'uppercase', marginBottom: '1rem' }}>
+              Únete a la comunidad
+            </motion.p>
+            <motion.h2 variants={fadeUp} style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem, 6vw, 4.5rem)', letterSpacing: 'clamp(1px, 1vw, 4px)', color: isLight ? 'var(--text-primary)' : '#fff', lineHeight: 1.1, marginBottom: '1.25rem', textTransform: 'uppercase' }}>
+              El hobby te espera
+            </motion.h2>
+            <motion.p variants={fadeUp} style={{ fontSize: 'clamp(0.95rem, 2vw, 1.1rem)', color: isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.42)', lineHeight: 1.7, maxWidth: '520px', margin: '0 auto 2.5rem' }}>
+              Regístrate gratis y accede a toda la comunidad Warhammer 40,000 en español. Guías, batallas, ejércitos y mucho más.
+            </motion.p>
+            <motion.div variants={fadeUp} style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <Link to="/signin?mode=register" style={{
+                display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                padding: '0.9rem 2.5rem', borderRadius: '50px',
+                background: 'linear-gradient(135deg, var(--color-primary), #0055cc)',
+                color: '#fff', fontFamily: 'var(--font-display)', fontWeight: 700,
+                fontSize: '0.85rem', letterSpacing: '2px', textTransform: 'uppercase',
+                textDecoration: 'none', boxShadow: '0 6px 28px rgba(0,190,255,0.35)',
+                transition: 'transform 0.2s, box-shadow 0.2s',
+              }}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.04)'; e.currentTarget.style.boxShadow = '0 8px 36px rgba(0,190,255,0.5)'; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 6px 28px rgba(0,190,255,0.35)'; }}
+              >
+                Crear cuenta gratis
+              </Link>
+              <Link to="/signin" style={{
+                display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                padding: '0.9rem 2.5rem', borderRadius: '50px', background: 'transparent',
+                color: isLight ? 'var(--color-primary)' : 'rgba(255,255,255,0.75)',
+                fontFamily: 'var(--font-display)', fontWeight: 700,
+                fontSize: '0.85rem', letterSpacing: '2px', textTransform: 'uppercase',
+                textDecoration: 'none',
+                border: isLight ? '1.5px solid var(--color-primary)' : '1.5px solid rgba(255,255,255,0.2)',
+                transition: 'transform 0.2s, background 0.2s',
+              }}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.04)'; e.currentTarget.style.background = isLight ? 'rgba(0,120,200,0.07)' : 'rgba(255,255,255,0.06)'; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.background = 'transparent'; }}
+              >
+                Ya tengo cuenta
+              </Link>
+            </motion.div>
+          </motion.div>
         </section>
       )}
 
       <Footer />
 
-      {/* ── Floating nav + theme toggle bar ── */}
-      <div style={{
-        position: 'fixed',
-        top: '1rem',
-        right: '1rem',
-        zIndex: 200,
-        display: 'flex',
-        alignItems: 'center',
-        gap: '0.5rem',
-      }}>
-        {/* Theme toggle — hidden on mobile (toggle is inside burger menu) */}
-        <div className="landing-hide-mobile">
-          <motion.button
-            onClick={toggleTheme}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            title={isLight ? 'Modo oscuro' : 'Modo claro'}
-            style={{
-              width: '42px',
-              height: '42px',
-              borderRadius: '50%',
-              background: isLight ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.08)',
-              border: isLight ? '1px solid rgba(0,153,204,0.3)' : '1px solid rgba(255,255,255,0.15)',
-              backdropFilter: 'blur(12px)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: isLight ? '0 2px 16px rgba(0,0,0,0.12)' : '0 2px 16px rgba(0,0,0,0.4)',
-              color: isLight ? '#b45309' : 'rgba(200,220,255,0.9)',
-              transition: 'all 0.3s',
-            }}
-          >
-            {isLight ? (
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                <circle cx="12" cy="12" r="4"/>
-                <line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/>
-                <line x1="4.22" y1="4.22" x2="6.34" y2="6.34"/><line x1="17.66" y1="17.66" x2="19.78" y2="19.78"/>
-                <line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/>
-                <line x1="4.22" y1="19.78" x2="6.34" y2="17.66"/><line x1="17.66" y1="6.34" x2="19.78" y2="4.22"/>
-              </svg>
-            ) : (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-              </svg>
-            )}
-          </motion.button>
-        </div>
-
-        {/* Burger button */}
-        <motion.button
-          onClick={() => setNavOpen(v => !v)}
-          whileHover={{ scale: 1.08 }}
-          whileTap={{ scale: 0.92 }}
-          style={{
-            width: '42px',
-            height: '42px',
-            borderRadius: '50%',
-            background: navOpen
-              ? (isLight ? 'rgba(0,153,204,0.15)' : 'rgba(0,212,255,0.15)')
-              : (isLight ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.08)'),
-            border: navOpen
-              ? '1px solid var(--color-primary)'
-              : (isLight ? '1px solid rgba(0,153,204,0.3)' : '1px solid rgba(255,255,255,0.15)'),
-            backdropFilter: 'blur(12px)',
-            cursor: 'pointer',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '5px',
-            boxShadow: isLight ? '0 2px 16px rgba(0,0,0,0.12)' : '0 2px 16px rgba(0,0,0,0.4)',
-            transition: 'all 0.3s',
-          }}
-        >
-          <motion.span animate={{ rotate: navOpen ? 45 : 0, y: navOpen ? 6 : 0 }}
-            style={{ display: 'block', width: '16px', height: '2px', background: navOpen ? 'var(--color-primary)' : (isLight ? '#0d1333' : '#fff'), borderRadius: '2px', transformOrigin: 'center' }} />
-          <motion.span animate={{ opacity: navOpen ? 0 : 1 }}
-            style={{ display: 'block', width: '16px', height: '2px', background: isLight ? '#0d1333' : '#fff', borderRadius: '2px' }} />
-          <motion.span animate={{ rotate: navOpen ? -45 : 0, y: navOpen ? -6 : 0 }}
-            style={{ display: 'block', width: '16px', height: '2px', background: navOpen ? 'var(--color-primary)' : (isLight ? '#0d1333' : '#fff'), borderRadius: '2px', transformOrigin: 'center' }} />
-        </motion.button>
-      </div>
-
-      {/* ── Navigation slide panel ── */}
-      <AnimatePresence>
-        {navOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              onClick={() => setNavOpen(false)}
-              style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)', zIndex: 210 }}
-            />
-            <motion.div
-              initial={{ x: '100%', opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: '100%', opacity: 0 }}
-              transition={{ type: 'spring', damping: 28, stiffness: 260 }}
-              style={{
-                position: 'fixed', top: 0, right: 0, bottom: 0,
-                width: 'min(85vw, 300px)',
-                background: isLight ? 'rgba(238,242,251,0.97)' : 'rgba(8,8,20,0.97)',
-                backdropFilter: 'blur(24px)',
-                borderLeft: '1px solid rgba(0,212,255,0.2)',
-                boxShadow: '-10px 0 50px rgba(0,0,0,0.5)',
-                zIndex: 220, display: 'flex', flexDirection: 'column',
-                padding: '1.5rem',
-                overflowY: 'auto',
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', paddingBottom: '1rem', borderBottom: '1px solid rgba(0,212,255,0.15)' }}>
-                <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: '4px', color: 'var(--color-primary)', textTransform: 'uppercase' }}>
-                  Navegación
-                </span>
-                <motion.button whileTap={{ scale: 0.9 }} onClick={() => setNavOpen(false)}
-                  style={{ background: 'rgba(255,255,255,0.08)', border: 'none', color: 'var(--text-primary)', width: '34px', height: '34px', borderRadius: '50%', cursor: 'pointer', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</motion.button>
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1 }}>
-                {[
-                  { to: '/', label: 'Inicio', color: 'var(--color-primary)' },
-                  { to: '/armies', label: 'Ejércitos', color: 'var(--color-primary)' },
-                  { to: '/guides', label: 'Guías de Pintura', color: 'var(--color-secondary)' },
-                  { to: '/battle-reports', label: 'Informes de Batalla', color: '#ff6464' },
-                  { to: '/marketplace', label: 'Marketplace', color: '#10b981' },
-                  { to: '/army-builder', label: 'Army Builder', color: '#6366f1' },
-                  { to: '/lore', label: 'Lore', color: 'var(--color-accent)' },
-                  { to: '/news', label: 'Noticias', color: '#f59e0b' },
-                  { to: '/videos', label: 'Videos', color: '#ff4444' },
-                ].map(item => (
-                  <motion.button
-                    key={item.to}
-                    whileHover={{ x: 6 }}
-                    whileTap={{ scale: 0.97 }}
-                    onClick={() => { navigate(item.to); setNavOpen(false); }}
-                    style={{
-                      background: 'transparent',
-                      border: `1px solid transparent`,
-                      borderRadius: '12px',
-                      padding: '0.75rem 1rem',
-                      color: 'var(--text-primary)',
-                      fontFamily: 'var(--font-display)',
-                      fontSize: '0.82rem',
-                      letterSpacing: '1.5px',
-                      textTransform: 'uppercase',
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                      transition: 'all 0.15s',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.75rem',
-                    }}
-                    onMouseEnter={e => {
-                      e.currentTarget.style.background = `${item.color}12`;
-                      e.currentTarget.style.borderColor = `${item.color}40`;
-                      e.currentTarget.style.color = item.color;
-                    }}
-                    onMouseLeave={e => {
-                      e.currentTarget.style.background = 'transparent';
-                      e.currentTarget.style.borderColor = 'transparent';
-                      e.currentTarget.style.color = 'var(--text-primary)';
-                    }}
-                  >
-                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: item.color, flexShrink: 0, boxShadow: `0 0 6px ${item.color}` }} />
-                    {item.label}
-                  </motion.button>
-                ))}
-              </div>
-
-              {/* ── Auth section ── */}
-              <div style={{ paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-                {!token ? (
-                  /* Not logged in */
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    <p style={{ fontSize: '0.68rem', color: 'var(--text-faint)', fontFamily: 'var(--font-display)', letterSpacing: '1px', margin: '0 0 0.25rem', textTransform: 'uppercase' }}>
-                      Tu cuenta
-                    </p>
-                    <motion.button
-                      whileHover={{ x: 4 }}
-                      whileTap={{ scale: 0.97 }}
-                      onClick={() => { navigate('/signin'); setNavOpen(false); }}
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: '0.6rem',
-                        padding: '0.7rem 1rem',
-                        background: 'linear-gradient(135deg, var(--color-primary) 0%, #0099cc 100%)',
-                        border: 'none',
-                        borderRadius: '12px',
-                        color: '#fff',
-                        fontFamily: 'var(--font-display)',
-                        fontSize: '0.78rem',
-                        letterSpacing: '1.5px',
-                        textTransform: 'uppercase',
-                        cursor: 'pointer',
-                        width: '100%',
-                        boxShadow: '0 4px 16px rgba(0,190,255,0.25)',
-                      }}
-                    >
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
-                        <polyline points="10 17 15 12 10 7"/>
-                        <line x1="15" y1="12" x2="3" y2="12"/>
-                      </svg>
-                      Iniciar sesión
-                    </motion.button>
-                    <motion.button
-                      whileHover={{ x: 4 }}
-                      whileTap={{ scale: 0.97 }}
-                      onClick={() => { navigate('/signin?mode=register'); setNavOpen(false); }}
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: '0.6rem',
-                        padding: '0.7rem 1rem',
-                        background: 'transparent',
-                        border: '1px solid rgba(0,212,255,0.3)',
-                        borderRadius: '12px',
-                        color: 'var(--color-primary)',
-                        fontFamily: 'var(--font-display)',
-                        fontSize: '0.78rem',
-                        letterSpacing: '1.5px',
-                        textTransform: 'uppercase',
-                        cursor: 'pointer',
-                        width: '100%',
-                      }}
-                    >
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                        <circle cx="12" cy="7" r="4"/>
-                      </svg>
-                      Crear cuenta gratis
-                    </motion.button>
-                  </div>
-                ) : (
-                  /* Logged in: user card + actions */
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    {/* User info row */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem', background: isLight ? 'rgba(0,153,204,0.07)' : 'rgba(0,212,255,0.06)', borderRadius: '12px', border: '1px solid rgba(0,212,255,0.12)' }}>
-                      <div style={{
-                        width: '40px', height: '40px', flexShrink: 0,
-                        borderRadius: '50%',
-                        background: 'linear-gradient(135deg, var(--color-primary) 0%, #0099cc 100%)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1rem', color: '#fff',
-                        boxShadow: '0 0 10px rgba(0,190,255,0.3)',
-                      }}>
-                        {(user?.username || user?.name || 'U')[0].toUpperCase()}
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.82rem', color: isLight ? 'var(--text-primary)' : 'rgba(255,255,255,0.9)', margin: 0, letterSpacing: '0.5px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {user?.username || user?.name || 'Comandante'}
-                        </p>
-                        {user?.isPremium && (
-                          <span style={{ fontSize: '0.58rem', fontFamily: 'var(--font-display)', letterSpacing: '1.5px', color: '#FFD700', textTransform: 'uppercase' }}>★ Premium</span>
-                        )}
-                      </div>
-                    </div>
-                    {/* Profile */}
-                    <motion.button
-                      whileHover={{ x: 4 }}
-                      whileTap={{ scale: 0.97 }}
-                      onClick={() => { navigate('/profile'); setNavOpen(false); }}
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: '0.6rem',
-                        padding: '0.6rem 1rem',
-                        background: 'transparent',
-                        border: '1px solid rgba(0,212,255,0.2)',
-                        borderRadius: '10px',
-                        color: 'var(--text-primary)',
-                        fontFamily: 'var(--font-display)',
-                        fontSize: '0.75rem',
-                        letterSpacing: '1.5px',
-                        textTransform: 'uppercase',
-                        cursor: 'pointer',
-                        width: '100%',
-                        textAlign: 'left',
-                      }}
-                    >
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                        <circle cx="12" cy="7" r="4"/>
-                      </svg>
-                      Mi perfil
-                    </motion.button>
-                    {/* Logout */}
-                    <motion.button
-                      whileHover={{ x: 4 }}
-                      whileTap={{ scale: 0.97 }}
-                      onClick={() => { logout(); setNavOpen(false); }}
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: '0.6rem',
-                        padding: '0.6rem 1rem',
-                        background: 'rgba(255,60,60,0.07)',
-                        border: '1px solid rgba(255,60,60,0.2)',
-                        borderRadius: '10px',
-                        color: '#ff6464',
-                        fontFamily: 'var(--font-display)',
-                        fontSize: '0.75rem',
-                        letterSpacing: '1.5px',
-                        textTransform: 'uppercase',
-                        cursor: 'pointer',
-                        width: '100%',
-                        textAlign: 'left',
-                      }}
-                    >
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                        <polyline points="16 17 21 12 16 7"/>
-                        <line x1="21" y1="12" x2="9" y2="12"/>
-                      </svg>
-                      Cerrar sesión
-                    </motion.button>
-                  </div>
-                )}
-              </div>
-
-              {/* ── Theme toggle ── */}
-              <div style={{ paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-faint)', fontFamily: 'var(--font-display)', letterSpacing: '1px' }}>TEMA</span>
-                <motion.button
-                  onClick={toggleTheme}
-                  whileTap={{ scale: 0.9 }}
-                  style={{
-                    padding: '0.4rem 0.9rem',
-                    borderRadius: '20px',
-                    background: isLight ? 'rgba(0,153,204,0.12)' : 'rgba(255,255,255,0.08)',
-                    border: '1px solid rgba(0,212,255,0.25)',
-                    color: 'var(--color-primary)',
-                    fontFamily: 'var(--font-display)',
-                    fontSize: '0.68rem',
-                    letterSpacing: '1px',
-                    cursor: 'pointer',
-                  }}
-                >
-                  {isLight ? '☀ CLARO' : '☽ OSCURO'}
-                </motion.button>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-
       {/* ── Listing Quick View Modal ── */}
       <AnimatePresence>
         {selectedListing && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             onClick={() => setSelectedListing(null)}
-            style={{
-              position: 'fixed', inset: 0,
-              background: 'rgba(0,0,0,0.75)',
-              backdropFilter: 'blur(8px)',
-              zIndex: 300,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              padding: '1rem',
-            }}
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.92, y: 24 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.92, y: 24 }}
-              transition={{ duration: 0.22, ease: 'easeOut' }}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+            <motion.div initial={{ opacity: 0, scale: 0.92, y: 24 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.92, y: 24 }} transition={{ duration: 0.22 }}
               onClick={e => e.stopPropagation()}
-              style={{
-                background: isLight ? 'rgba(238,242,251,0.98)' : 'rgba(10,10,22,0.98)',
-                border: '1px solid rgba(0,212,255,0.2)',
-                borderRadius: '20px',
-                width: '100%',
-                maxWidth: '560px',
-                maxHeight: '90vh',
-                overflowY: 'auto',
-                position: 'relative',
-                boxShadow: '0 24px 64px rgba(0,0,0,0.6)',
-              }}
-            >
-              {/* Close */}
-              <button onClick={() => setSelectedListing(null)} style={{
-                position: 'absolute', top: '1rem', right: '1rem', zIndex: 10,
-                background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)',
-                borderRadius: '50%', width: '34px', height: '34px',
-                cursor: 'pointer', color: 'var(--text-primary)', fontSize: '1rem',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>✕</button>
-
-              {/* Image */}
+              style={{ background: isLight ? 'rgba(245,248,255,0.98)' : 'rgba(8,8,22,0.98)', border: '1px solid rgba(0,212,255,0.2)', borderRadius: '24px', width: '100%', maxWidth: '540px', maxHeight: '90vh', overflowY: 'auto', position: 'relative', boxShadow: '0 24px 64px rgba(0,0,0,0.6)' }}>
+              <button onClick={() => setSelectedListing(null)} style={{ position: 'absolute', top: '1rem', right: '1rem', zIndex: 10, background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '50%', width: '34px', height: '34px', cursor: 'pointer', color: isLight ? 'var(--text-primary)' : '#fff', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
               {selectedListing.images?.[0] && (
-                <div style={{ width: '100%', aspectRatio: '16/9', overflow: 'hidden', borderRadius: '20px 20px 0 0' }}>
-                  <img src={selectedListing.images[0]} alt={selectedListing.title}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <div style={{ width: '100%', aspectRatio: '16/9', overflow: 'hidden', borderRadius: '24px 24px 0 0' }}>
+                  <img src={selectedListing.images[0]} alt={selectedListing.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </div>
               )}
-
-              {/* Content */}
               <div style={{ padding: '1.5rem' }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem', marginBottom: '1rem' }}>
-                  <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.1rem, 3vw, 1.4rem)', color: 'var(--text-primary)', margin: 0, lineHeight: 1.3 }}>
-                    {selectedListing.title}
-                  </h2>
-                  <div style={{ background: 'rgba(10,185,100,0.9)', color: '#fff', padding: '4px 12px', borderRadius: '20px', fontFamily: 'var(--font-display)', fontSize: '0.85rem', fontWeight: 700, flexShrink: 0 }}>
+                  <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.1rem, 3vw, 1.4rem)', color: isLight ? 'var(--text-primary)' : '#fff', margin: 0, lineHeight: 1.3 }}>{selectedListing.title}</h2>
+                  <div style={{ background: 'rgba(16,185,129,0.9)', color: '#fff', padding: '4px 12px', borderRadius: '20px', fontFamily: 'var(--font-display)', fontSize: '0.85rem', fontWeight: 700, flexShrink: 0 }}>
                     {selectedListing.price ? `${selectedListing.price} €` : 'Consultar'}
                   </div>
                 </div>
-
                 <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
-                  {selectedListing.faction && (
-                    <span style={{ fontSize: '0.75rem', color: 'var(--color-primary)', background: 'rgba(0,212,255,0.1)', border: '1px solid rgba(0,212,255,0.2)', borderRadius: '6px', padding: '2px 8px', fontFamily: 'var(--font-display)' }}>
-                      {selectedListing.faction}
-                    </span>
-                  )}
-                  {selectedListing.state && (
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '6px', padding: '2px 8px', fontFamily: 'var(--font-display)' }}>
-                      {STATE_LABEL[selectedListing.state] || selectedListing.state}
-                    </span>
-                  )}
+                  {selectedListing.faction && <Chip color="#10b981">{selectedListing.faction}</Chip>}
+                  {selectedListing.state && <span style={{ fontSize: '0.75rem', color: isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.35)', fontFamily: 'var(--font-display)' }}>{STATE_LABEL[selectedListing.state] || selectedListing.state}</span>}
                 </div>
-
-                {selectedListing.description && (
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.7, marginBottom: '1.5rem' }}>
-                    {selectedListing.description}
-                  </p>
-                )}
-
-                <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-                  <motion.button
-                    whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-                    onClick={() => { navigate('/marketplace'); setSelectedListing(null); }}
-                    style={{
-                      flex: 1, padding: '0.75rem 1.25rem',
-                      background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
-                      border: 'none', borderRadius: '12px', color: '#000',
-                      fontFamily: 'var(--font-display)', fontSize: '0.8rem',
-                      letterSpacing: '1.5px', textTransform: 'uppercase',
-                      cursor: 'pointer', fontWeight: 700,
-                    }}
-                  >
-                    Ver en Marketplace →
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-                    onClick={() => setSelectedListing(null)}
-                    style={{
-                      padding: '0.75rem 1.25rem',
-                      background: 'transparent',
-                      border: '1px solid rgba(255,255,255,0.15)', borderRadius: '12px',
-                      color: 'var(--text-secondary)',
-                      fontFamily: 'var(--font-display)', fontSize: '0.8rem',
-                      letterSpacing: '1.5px', textTransform: 'uppercase',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    Cerrar
-                  </motion.button>
-                </div>
+                {selectedListing.description && <p style={{ color: isLight ? 'var(--text-secondary)' : 'rgba(255,255,255,0.55)', fontSize: '0.9rem', lineHeight: 1.7, marginBottom: '1.5rem' }}>{selectedListing.description}</p>}
+                <button onClick={() => { navigate('/marketplace'); setSelectedListing(null); }}
+                  style={{ width: '100%', padding: '0.85rem', background: 'linear-gradient(135deg, #10b981, #059669)', border: 'none', borderRadius: '14px', color: '#fff', fontFamily: 'var(--font-display)', fontSize: '0.8rem', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', cursor: 'pointer' }}>
+                  Ver en Marketplace →
+                </button>
               </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Global CSS for this page */}
+      <style>{`
+        @keyframes pulse-dot {
+          0%,100%{opacity:1;box-shadow:0 0 8px var(--color-primary)}
+          50%{opacity:0.5;box-shadow:0 0 16px var(--color-primary)}
+        }
+        @keyframes skeleton-pulse {
+          0%,100%{opacity:0.4}50%{opacity:0.7}
+        }
+        @media(max-width:900px){
+          .bento-grid{
+            grid-template-columns:repeat(2,1fr)!important;
+            grid-auto-rows:180px!important;
+          }
+          .bento-grid>div:first-child{
+            grid-column:span 2!important;
+            grid-row:span 1!important;
+          }
+          .premium-grid{
+            grid-template-columns:1fr!important;
+          }
+        }
+        @media(max-width:540px){
+          .bento-grid{
+            grid-template-columns:1fr!important;
+            grid-auto-rows:160px!important;
+          }
+          .bento-grid>div:first-child{
+            grid-column:span 1!important;
+          }
+        }
+      `}</style>
     </div>
   );
-};
-
-const SectionCard = ({ item, t }) => {
-  const accentHex = item.color.startsWith('var(') ? null : item.color;
-  return (
-    <Link to={item.to} style={{ textDecoration: 'none' }}>
-      <motion.div
-        whileHover={{ y: -5, scale: 1.018 }}
-        whileTap={{ scale: 0.975 }}
-        transition={{ duration: 0.28, ease: [0.34, 1.56, 0.64, 1] }}
-        className="section-card-inner"
-        style={{
-          padding: 'clamp(1.75rem, 3.5vw, 2.5rem) clamp(1.25rem, 2.5vw, 1.75rem)',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          textAlign: 'center',
-          background: 'var(--sc-bg)',
-          border: '1px solid var(--sc-border)',
-          borderRadius: '20px',
-          cursor: 'pointer',
-          position: 'relative',
-          overflow: 'hidden',
-          backdropFilter: 'blur(28px)',
-          WebkitBackdropFilter: 'blur(28px)',
-          transition: 'box-shadow 0.3s ease, transform 0.28s ease',
-        }}
-      >
-        {/* Accent radial glow from top — always visible, subtle */}
-        <div style={{
-          position: 'absolute', top: 0, left: 0, right: 0,
-          height: '60%',
-          background: accentHex
-            ? `radial-gradient(ellipse 70% 80% at 50% -20%, ${accentHex}28 0%, transparent 70%)`
-            : `radial-gradient(ellipse 70% 80% at 50% -20%, ${item.color}28 0%, transparent 70%)`,
-          pointerEvents: 'none',
-        }} />
-
-        {/* Hover glow — intensifies on hover */}
-        <div className="card-glow" style={{
-          position: 'absolute', inset: 0, pointerEvents: 'none', borderRadius: 'inherit',
-          background: accentHex
-            ? `radial-gradient(ellipse 80% 70% at 50% 0%, ${accentHex}20 0%, transparent 65%)`
-            : `radial-gradient(ellipse 80% 70% at 50% 0%, ${item.color}20 0%, transparent 65%)`,
-          opacity: 0, transition: 'opacity 0.35s ease',
-        }} />
-
-        {/* Icon container — opacity trick so CSS vars work correctly */}
-        <div style={{
-          width: '64px', height: '64px',
-          borderRadius: '16px',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          position: 'relative',
-          marginBottom: '1.2rem',
-          color: item.color,
-          filter: accentHex
-            ? `drop-shadow(0 2px 10px ${accentHex}60)`
-            : `drop-shadow(0 2px 10px ${item.color})`,
-          transition: 'filter 0.3s, transform 0.3s',
-          zIndex: 1,
-          flexShrink: 0,
-        }}>
-          {/* Tinted background */}
-          <div style={{
-            position: 'absolute', inset: 0, borderRadius: 'inherit',
-            background: item.color, opacity: 0.13, pointerEvents: 'none',
-          }} />
-          {/* Border ring */}
-          <div style={{
-            position: 'absolute', inset: 0, borderRadius: 'inherit',
-            border: `1px solid ${item.color}`, opacity: 0.35, pointerEvents: 'none',
-          }} />
-          {item.icon}
-        </div>
-
-        <h2 style={{
-          fontFamily: 'var(--font-display)',
-          fontSize: 'clamp(0.82rem, 1.8vw, 1rem)',
-          color: 'var(--text-primary)',
-          letterSpacing: '2px',
-          margin: '0 0 0.4rem',
-          textTransform: 'uppercase',
-          fontWeight: 700,
-          lineHeight: 1.2,
-          zIndex: 1,
-        }}>
-          {t(item.titleKey)}
-        </h2>
-
-        <span style={{
-          fontFamily: 'var(--font-display)',
-          fontSize: 'clamp(0.6rem, 1vw, 0.68rem)',
-          color: 'var(--text-secondary)',
-          textTransform: 'uppercase',
-          letterSpacing: '1.8px',
-          fontWeight: 500,
-          opacity: 0.85,
-          zIndex: 1,
-        }}>
-          {t(item.subtitleKey)}
-        </span>
-      </motion.div>
-    </Link>
-  );
-};
-
-const STATE_LABEL = { sin_montar: 'Sin montar', montada: 'Montada', imprimada: 'Imprimada', pintada_parcial: 'Pintada parcial', pintada: 'Pintada', conversion: 'Conversión' };
-const STATE_COLOR = { sin_montar: '#b0b0b8', montada: '#6ab0f5', imprimada: '#f0924a', pintada_parcial: '#e8d040', pintada: '#40c878', conversion: '#c078f0' };
-
-const MarketplaceListingCard = ({ listing, onSelect }) => {
-  const img = listing.images?.[0];
-  const stateColor = STATE_COLOR[listing.state] || '#aaa';
-  return (
-    <motion.div
-      whileHover={{ y: -4, scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ duration: 0.18 }}
-      onClick={() => onSelect(listing)}
-      style={{
-        background: 'rgba(16,185,129,0.04)',
-        border: '1px solid rgba(16,185,129,0.15)',
-        borderRadius: '14px',
-        overflow: 'hidden',
-        cursor: 'pointer',
-        position: 'relative',
-      }}
-    >
-      {/* Image — compact 16/9 */}
-      <div style={{ width: '100%', aspectRatio: '16/9', background: 'rgba(0,0,0,0.3)', overflow: 'hidden', position: 'relative' }}>
-        {img
-          ? <img src={img} alt={listing.title} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.3s' }} />
-          : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.15 }}>
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-            </div>
-        }
-        {/* Price badge */}
-        <div style={{ position: 'absolute', top: '0.4rem', right: '0.4rem', background: 'rgba(10,185,100,0.92)', color: '#fff', padding: '2px 8px', borderRadius: '20px', fontFamily: 'var(--font-display)', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.5px', backdropFilter: 'blur(4px)' }}>
-          {listing.price ? `${listing.price} €` : 'Consultar'}
-        </div>
-      </div>
-      {/* Info — compact */}
-      <div style={{ padding: '0.6rem 0.75rem 0.7rem' }}>
-        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '0.82rem', color: 'var(--text-primary)', margin: '0 0 0.3rem', letterSpacing: '0.3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {listing.title}
-        </h3>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
-          {listing.faction && <span style={{ fontSize: '0.67rem', color: 'var(--text-dim)', fontFamily: 'var(--font-display)', letterSpacing: '0.3px' }}>{listing.faction}</span>}
-          <span style={{ fontSize: '0.65rem', color: stateColor, background: `${stateColor}15`, border: `1px solid ${stateColor}35`, borderRadius: '5px', padding: '1px 6px', fontFamily: 'var(--font-display)', letterSpacing: '0.3px' }}>
-            {STATE_LABEL[listing.state] || listing.state}
-          </span>
-        </div>
-      </div>
-      {/* Bottom accent */}
-      <div style={{ position: 'absolute', bottom: 0, left: '20%', right: '20%', height: '1.5px', background: 'linear-gradient(90deg, transparent, #10b981, transparent)', opacity: 0.5 }} />
-    </motion.div>
-  );
-};
-
-const FeaturedCard = ({ to, badge, badgeColor, title, excerpt, linkLabel, linkColor, accentColor, borderColor }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true }}
-    transition={{ duration: 0.5 }}
-    whileHover={{ y: -6, transition: { duration: 0.2, ease: [0.34,1.56,0.64,1] } }}
-    style={{
-      background: `var(--surface-card, ${accentColor})`,
-      border: `1px solid ${borderColor}`,
-      borderRadius: 'var(--radius-xl)',
-      padding: 'clamp(1.5rem, 3vw, 2rem)',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '0.75rem',
-      backdropFilter: 'blur(12px)',
-      transition: 'box-shadow 0.3s',
-      position: 'relative',
-      overflow: 'hidden',
-    }}
-  >
-    <div style={{
-      position: 'absolute', top: 0, left: 0, right: 0, height: '1px',
-      background: `linear-gradient(90deg, transparent, ${borderColor}, transparent)`,
-      opacity: 0.8,
-    }} />
-    <span style={{
-      display: 'inline-block',
-      background: badgeColor,
-      color: badgeColor === 'var(--color-primary)' ? '#000' : '#fff',
-      padding: '3px 10px',
-      fontSize: '0.68rem',
-      fontWeight: 700,
-      borderRadius: 'var(--radius-full)',
-      textTransform: 'uppercase',
-      letterSpacing: '1px',
-      alignSelf: 'flex-start',
-    }}>
-      {badge}
-    </span>
-    <h3 style={{
-      fontFamily: 'var(--font-display)',
-      fontSize: 'clamp(1.1rem, 3vw, 1.4rem)',
-      color: 'var(--text-primary)',
-      lineHeight: 1.3,
-      margin: 0,
-    }}>
-      {title}
-    </h3>
-    {excerpt && (
-      <p style={{
-        color: 'var(--text-secondary)',
-        fontSize: '0.9rem',
-        lineHeight: 1.7,
-        margin: 0,
-        flex: 1,
-      }}>
-        {excerpt}…
-      </p>
-    )}
-    <Link to={to} style={{
-      color: linkColor,
-      textDecoration: 'none',
-      fontSize: '0.85rem',
-      fontWeight: 600,
-      letterSpacing: '0.5px',
-      display: 'inline-flex',
-      alignItems: 'center',
-      gap: '0.3rem',
-      transition: 'gap 0.2s',
-      alignSelf: 'flex-start',
-    }}
-      onMouseEnter={e => e.currentTarget.style.gap = '0.6rem'}
-      onMouseLeave={e => e.currentTarget.style.gap = '0.3rem'}
-    >
-      {linkLabel} →
-    </Link>
-  </motion.div>
-);
-
-export default LandingPage;
+}
