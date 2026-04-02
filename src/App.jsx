@@ -39,6 +39,7 @@ import PaymentSuccessPage from './pages/PaymentSuccessPage';
 import PaymentCancelPage from './pages/PaymentCancelPage';
 import UserAuthPage from './pages/UserAuthPage';
 import ProfilePage from './pages/ProfilePage';
+import NotFoundPage from './pages/NotFoundPage';
 
 import './styles/index.css';
 import './index.css';
@@ -118,7 +119,7 @@ function App() {
           </Route>
 
           {/* Fallback */}
-          <Route path="*" element={<AnimatedPage><LandingPage /></AnimatedPage>} />
+          <Route path="*" element={<AnimatedPage><NotFoundPage /></AnimatedPage>} />
         </Routes>
       </AnimatePresence>
     </>

@@ -239,6 +239,23 @@ export default function Navbar() {
 
         {/* ── Desktop right side ── */}
         <div className="nb-right" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginLeft: 'auto' }}>
+          {/* Search button */}
+          <motion.button
+            onClick={() => navigate('/search')} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
+            title="Búsqueda global"
+            style={{
+              width: '34px', height: '34px', borderRadius: '50%', border: 'none',
+              background: isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.07)',
+              cursor: 'pointer', color: isLight ? '#555' : 'rgba(200,220,255,0.8)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'background 0.2s',
+            }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </motion.button>
+
           {/* Theme toggle */}
           <motion.button
             onClick={toggleTheme} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
@@ -352,6 +369,20 @@ export default function Navbar() {
 
         {/* ── Mobile: quick auth + hamburger ── */}
         <div className="nb-mobile" style={{ display: 'none', alignItems: 'center', gap: '0.5rem', marginLeft: 'auto' }}>
+          {/* Mobile search icon */}
+          <button
+            onClick={() => navigate('/search')}
+            style={{
+              width: '32px', height: '32px', borderRadius: '50%', border: 'none',
+              background: isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.07)',
+              cursor: 'pointer', color: isLight ? '#555' : 'rgba(200,220,255,0.8)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </button>
           {!token ? (
             <Link to="/signin" style={{
               padding: '0.38rem 0.9rem', borderRadius: '16px',

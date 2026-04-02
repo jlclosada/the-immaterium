@@ -2,14 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { api } from '../../services/api';
+import { useStore } from '../../stores/useStore';
 
 const AdminDashboard = () => {
+    const { token } = useStore();
     const [stats, setStats] = useState({
         armies: 0,
         guides: 0,
         reports: 0,
         lore: 0,
         news: 0,
+        users: 0,
+        listings: 0,
+        purchaseRequests: 0,
     });
     const [loading, setLoading] = useState(true);
 
@@ -18,34 +23,32 @@ const AdminDashboard = () => {
     }, []);
 
     const loadStats = async () => {
-        const [armiesRes, guidesRes, reportsRes, loreRes, newsRes] = await Promise.allSettled([
+        const results = await Promise.allSettled([
             api.getArmies(),
             api.getPaintingGuides(),
             api.getBattleReports(),
             api.getLoreEntries(),
             api.getNewsArticles(),
+            api.getUsers(token),
+            api.getListings(),
+            api.getPurchaseRequests(token),
         ]);
 
-        const safe = (res) => {
-            if (res.status === 'fulfilled') {
-                const d = res.value;
-                return Array.isArray(d) ? d : (d?.results || []);
-            }
-            return [];
+        const safeLen = (res) => {
+            if (res.status !== 'fulfilled') return 0;
+            const d = res.value;
+            return Array.isArray(d) ? d.length : (d?.results?.length ?? 0);
         };
 
-        const armiesList = safe(armiesRes);
-        const guidesList = safe(guidesRes);
-        const reportsList = safe(reportsRes);
-        const loreList = safe(loreRes);
-        const newsList = safe(newsRes);
-
         setStats({
-            armies: armiesList.length,
-            guides: guidesList.length,
-            reports: reportsList.length,
-            lore: loreList.length,
-            news: newsList.length,
+            armies: safeLen(results[0]),
+            guides: safeLen(results[1]),
+            reports: safeLen(results[2]),
+            lore: safeLen(results[3]),
+            news: safeLen(results[4]),
+            users: safeLen(results[5]),
+            listings: safeLen(results[6]),
+            purchaseRequests: safeLen(results[7]),
         });
         setLoading(false);
     };
@@ -54,38 +57,70 @@ const AdminDashboard = () => {
         {
             title: 'Ejércitos',
             value: stats.armies,
-            icon: <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
+            icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
             color: 'var(--color-primary)',
-            link: '/admin/armies'
+            link: '/admin/armies',
         },
         {
             title: 'Guías de Pintura',
             value: stats.guides,
-            icon: <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18.37 2.63 14 7l-1.59-1.59a2 2 0 0 0-2.82 0L8 7l9 9 1.59-1.59a2 2 0 0 0 0-2.82L17 10l4.37-4.37a2.12 2.12 0 1 0-3-3z"/><path d="M9 8c-2 3-4 3.5-7 4l8 10c2-1 6-5 6-7"/><path d="M14.5 17.5 4.5 15"/></svg>,
+            icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18.37 2.63 14 7l-1.59-1.59a2 2 0 0 0-2.82 0L8 7l9 9 1.59-1.59a2 2 0 0 0 0-2.82L17 10l4.37-4.37a2.12 2.12 0 1 0-3-3z"/><path d="M9 8c-2 3-4 3.5-7 4l8 10c2-1 6-5 6-7"/></svg>,
             color: 'var(--color-secondary)',
-            link: '/admin/guides'
+            link: '/admin/guides',
         },
         {
             title: 'Informes de Batalla',
             value: stats.reports,
-            icon: <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" y1="19" x2="19" y2="13"/><line x1="16" y1="16" x2="20" y2="20"/><line x1="19" y1="21" x2="21" y2="19"/></svg>,
+            icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" y1="19" x2="19" y2="13"/><line x1="16" y1="16" x2="20" y2="20"/><line x1="19" y1="21" x2="21" y2="19"/></svg>,
             color: '#ff0064',
-            link: '/admin/reports'
+            link: '/admin/reports',
         },
         {
             title: 'Entradas de Lore',
             value: stats.lore,
-            icon: <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>,
+            icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>,
             color: '#a855f7',
-            link: '/admin/lore'
+            link: '/admin/lore',
         },
         {
             title: 'Noticias',
             value: stats.news,
-            icon: <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a4 4 0 0 1-4 4z"/><path d="M8 6h12"/><path d="M8 10h12"/><path d="M8 14h8"/></svg>,
+            icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a4 4 0 0 1-4 4z"/><path d="M8 6h12"/><path d="M8 10h12"/><path d="M8 14h8"/></svg>,
             color: '#f59e0b',
-            link: '/admin/news'
+            link: '/admin/news',
         },
+        {
+            title: 'Usuarios',
+            value: stats.users,
+            icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
+            color: '#6366f1',
+            link: '/admin/users',
+        },
+        {
+            title: 'Marketplace',
+            value: stats.listings,
+            icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>,
+            color: '#10b981',
+            link: '/admin/marketplace',
+        },
+        {
+            title: 'Solicitudes de Compra',
+            value: stats.purchaseRequests,
+            icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>,
+            color: '#ec4899',
+            link: '/admin/marketplace',
+            badge: stats.purchaseRequests > 0 ? stats.purchaseRequests : null,
+        },
+    ];
+
+    const quickActions = [
+        { label: '+ Nuevo Ejército', to: '/admin/armies', color: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))' },
+        { label: '+ Nueva Guía', to: '/admin/guides', color: 'linear-gradient(135deg, var(--color-secondary), #a855f7)' },
+        { label: '+ Nuevo Informe', to: '/admin/reports', color: 'linear-gradient(135deg, #ff0064, #ff6600)' },
+        { label: '+ Nuevo Lore', to: '/admin/lore', color: 'linear-gradient(135deg, #a855f7, #6366f1)' },
+        { label: '+ Nueva Noticia', to: '/admin/news', color: 'linear-gradient(135deg, #f59e0b, #d97706)' },
+        { label: 'Gestionar Usuarios', to: '/admin/users', color: 'linear-gradient(135deg, #6366f1, #8b5cf6)' },
+        { label: 'Marketplace', to: '/admin/marketplace', color: 'linear-gradient(135deg, #10b981, #059669)' },
     ];
 
     if (loading) {
@@ -98,200 +133,149 @@ const AdminDashboard = () => {
 
     return (
         <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
-            <motion.div
-                initial={{ y: -20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-            >
+            {/* Header */}
+            <motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} style={{ marginBottom: '2.5rem' }}>
                 <h1 style={{
                     fontFamily: 'var(--font-display)',
-                    fontSize: '3rem',
-                    marginBottom: '1rem',
+                    fontSize: 'clamp(1.8rem, 4vw, 3rem)',
+                    marginBottom: '0.5rem',
                     background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
                     WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent'
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
                 }}>
                     Panel de Administración
                 </h1>
-                <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '1.2rem', marginBottom: '3rem' }}>
-                    Gestiona todo el contenido de Warhammer Galaxy desde aquí
+                <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '1rem', margin: 0 }}>
+                    Gestiona todo el contenido de The Immaterium desde aquí
                 </p>
             </motion.div>
 
+            {/* Stats grid */}
             <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-                gap: '2rem',
-                marginBottom: '3rem'
+                gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+                gap: '1rem',
+                marginBottom: '2.5rem',
             }}>
-                {statCards.map((card, index) => {
-                    const content = (
+                {statCards.map((card, index) => (
+                    <Link key={card.title} to={card.link} style={{ textDecoration: 'none' }}>
                         <motion.div
-                            key={card.title}
                             initial={{ y: 20, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
-                            transition={{ delay: index * 0.1 }}
-                            className="glass-panel"
+                            transition={{ delay: index * 0.06 }}
+                            whileHover={{ y: -3, transition: { duration: 0.15 } }}
                             style={{
-                                padding: '2rem',
-                                cursor: card.link ? 'pointer' : 'default',
-                                border: `2px solid ${card.color}33`,
-                                transition: 'all 0.3s ease'
+                                padding: '1.5rem',
+                                background: 'rgba(255,255,255,0.025)',
+                                border: `1px solid ${card.color}28`,
+                                borderRadius: '16px',
+                                cursor: 'pointer',
+                                transition: 'border-color 0.2s, box-shadow 0.2s',
+                                position: 'relative',
+                                overflow: 'hidden',
                             }}
-                            whileHover={card.link ? { scale: 1.05, borderColor: card.color } : {}}
-                            onClick={card.link ? () => window.location.href = card.link : undefined}
+                            onMouseEnter={e => {
+                                e.currentTarget.style.borderColor = `${card.color}60`;
+                                e.currentTarget.style.boxShadow = `0 8px 24px rgba(0,0,0,0.3), 0 0 0 1px ${card.color}20`;
+                            }}
+                            onMouseLeave={e => {
+                                e.currentTarget.style.borderColor = `${card.color}28`;
+                                e.currentTarget.style.boxShadow = 'none';
+                            }}
                         >
+                            {/* Glow background */}
                             <div style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                                marginBottom: '1rem'
-                            }}>
-                                <span style={{ display: 'flex', opacity: 0.9 }}>{card.icon}</span>
-                                {card.link && (
-                                    <span style={{ color: card.color, fontSize: '1.5rem' }}>→</span>
-                                )}
+                                position: 'absolute', top: 0, right: 0,
+                                width: '80px', height: '80px',
+                                borderRadius: '50%',
+                                background: `${card.color}10`,
+                                filter: 'blur(20px)',
+                                pointerEvents: 'none',
+                            }} />
+
+                            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                                <div style={{
+                                    padding: '0.6rem',
+                                    borderRadius: '10px',
+                                    background: `${card.color}14`,
+                                    border: `1px solid ${card.color}28`,
+                                    color: card.color,
+                                    display: 'flex',
+                                }}>
+                                    {card.icon}
+                                </div>
+                                <span style={{ color: card.color, fontSize: '1.1rem', opacity: 0.6 }}>→</span>
                             </div>
-                            <h3 style={{
-                                fontSize: '2.5rem',
-                                margin: '0.5rem 0',
+
+                            <div style={{
+                                fontFamily: 'var(--font-display)',
+                                fontSize: '2.2rem',
+                                fontWeight: 700,
                                 color: card.color,
-                                fontFamily: 'var(--font-display)'
+                                lineHeight: 1,
+                                marginBottom: '0.4rem',
                             }}>
                                 {card.value}
-                            </h3>
-                            <p style={{
-                                color: 'rgba(255,255,255,0.7)',
-                                margin: 0,
-                                fontSize: '1.1rem'
-                            }}>
+                            </div>
+                            <div style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.88rem', fontWeight: 500 }}>
                                 {card.title}
-                            </p>
+                            </div>
                         </motion.div>
-                    );
-
-                    return card.link ? (
-                        <Link key={card.title} to={card.link} style={{ textDecoration: 'none' }}>
-                            {content}
-                        </Link>
-                    ) : content;
-                })}
+                    </Link>
+                ))}
             </div>
 
+            {/* Quick actions */}
             <motion.div
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.5 }}
-                className="glass-panel"
-                style={{ padding: '2rem' }}
+                style={{
+                    background: 'rgba(255,255,255,0.02)',
+                    border: '1px solid rgba(255,255,255,0.07)',
+                    borderRadius: '20px',
+                    padding: '1.75rem',
+                }}
             >
                 <h2 style={{
                     fontFamily: 'var(--font-display)',
-                    fontSize: '1.8rem',
-                    marginBottom: '1.5rem',
-                    color: 'var(--color-primary)'
+                    fontSize: '1rem',
+                    letterSpacing: '2px',
+                    textTransform: 'uppercase',
+                    color: 'rgba(255,255,255,0.45)',
+                    marginBottom: '1.25rem',
                 }}>
                     Acciones Rápidas
                 </h2>
                 <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                    gap: '1rem'
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: '0.65rem',
                 }}>
-                    <Link to="/admin/armies" style={{ textDecoration: 'none' }}>
-                        <button style={{
-                            width: '100%',
-                            padding: '1rem',
-                            background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
-                            border: 'none',
-                            borderRadius: '12px',
-                            color: 'var(--color-light)',
-                            fontFamily: 'var(--font-display)',
-                            fontSize: '1rem',
-                            cursor: 'pointer',
-                            transition: 'transform 0.2s'
-                        }}
-                            onMouseEnter={e => e.target.style.transform = 'translateY(-2px)'}
-                            onMouseLeave={e => e.target.style.transform = 'translateY(0)'}
-                        >
-                            Nuevo Ejército
-                        </button>
-                    </Link>
-                    <Link to="/admin/guides" style={{ textDecoration: 'none' }}>
-                        <button style={{
-                            width: '100%',
-                            padding: '1rem',
-                            background: 'linear-gradient(135deg, var(--color-secondary), #ff0064)',
-                            border: 'none',
-                            borderRadius: '12px',
-                            color: 'var(--color-light)',
-                            fontFamily: 'var(--font-display)',
-                            fontSize: '1rem',
-                            cursor: 'pointer',
-                            transition: 'transform 0.2s'
-                        }}
-                            onMouseEnter={e => e.target.style.transform = 'translateY(-2px)'}
-                            onMouseLeave={e => e.target.style.transform = 'translateY(0)'}
-                        >
-                            Nueva Guía
-                        </button>
-                    </Link>
-                    <Link to="/admin/reports" style={{ textDecoration: 'none' }}>
-                        <button style={{
-                            width: '100%',
-                            padding: '1rem',
-                            background: 'linear-gradient(135deg, #ff0064, #ff6600)',
-                            border: 'none',
-                            borderRadius: '12px',
-                            color: 'var(--color-light)',
-                            fontFamily: 'var(--font-display)',
-                            fontSize: '1rem',
-                            cursor: 'pointer',
-                            transition: 'transform 0.2s'
-                        }}
-                            onMouseEnter={e => e.target.style.transform = 'translateY(-2px)'}
-                            onMouseLeave={e => e.target.style.transform = 'translateY(0)'}
-                        >
-                            Nuevo Informe
-                        </button>
-                    </Link>
-                    <Link to="/admin/news" style={{ textDecoration: 'none' }}>
-                        <button style={{
-                            width: '100%',
-                            padding: '1rem',
-                            background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-                            border: 'none',
-                            borderRadius: '12px',
-                            color: 'var(--color-light)',
-                            fontFamily: 'var(--font-display)',
-                            fontSize: '1rem',
-                            cursor: 'pointer',
-                            transition: 'transform 0.2s'
-                        }}
-                            onMouseEnter={e => e.target.style.transform = 'translateY(-2px)'}
-                            onMouseLeave={e => e.target.style.transform = 'translateY(0)'}
-                        >
-                            Nueva Noticia
-                        </button>
-                    </Link>
-                    <Link to="/admin/users" style={{ textDecoration: 'none' }}>
-                        <button style={{
-                            width: '100%',
-                            padding: '1rem',
-                            background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                            border: 'none',
-                            borderRadius: '12px',
-                            color: 'var(--color-light)',
-                            fontFamily: 'var(--font-display)',
-                            fontSize: '1rem',
-                            cursor: 'pointer',
-                            transition: 'transform 0.2s'
-                        }}
-                            onMouseEnter={e => e.target.style.transform = 'translateY(-2px)'}
-                            onMouseLeave={e => e.target.style.transform = 'translateY(0)'}
-                        >
-                            Gestionar Usuarios
-                        </button>
-                    </Link>
+                    {quickActions.map((action) => (
+                        <Link key={action.to + action.label} to={action.to} style={{ textDecoration: 'none' }}>
+                            <motion.button
+                                whileHover={{ y: -2 }}
+                                whileTap={{ scale: 0.97 }}
+                                style={{
+                                    padding: '0.65rem 1.25rem',
+                                    background: action.color,
+                                    border: 'none',
+                                    borderRadius: '10px',
+                                    color: '#fff',
+                                    fontFamily: 'var(--font-display)',
+                                    fontSize: '0.82rem',
+                                    letterSpacing: '0.5px',
+                                    fontWeight: 700,
+                                    cursor: 'pointer',
+                                    boxShadow: '0 2px 12px rgba(0,0,0,0.3)',
+                                }}
+                            >
+                                {action.label}
+                            </motion.button>
+                        </Link>
+                    ))}
                 </div>
             </motion.div>
         </div>

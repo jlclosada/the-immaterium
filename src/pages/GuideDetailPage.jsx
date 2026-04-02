@@ -71,8 +71,11 @@ const GuideDetailPage = () => {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', background: 'var(--color-darker)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div className="loading-spinner" />
+      <div style={{ minHeight: '100vh', background: 'var(--color-darker)', display: 'flex', flexDirection: 'column' }}>
+        <Navbar />
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="loading-spinner" />
+        </div>
       </div>
     );
   }

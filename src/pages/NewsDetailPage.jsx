@@ -5,6 +5,7 @@ import { api } from '../services/api';
 import Navbar from '../components/UI/Navbar';
 import Footer from '../components/UI/Footer';
 import { renderMarkdown } from '../utils/renderMarkdown';
+import { estimateReadTime } from '../utils/readTime';
 
 const NewsDetailPage = () => {
   const { id } = useParams();
@@ -33,8 +34,11 @@ const NewsDetailPage = () => {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', background: 'var(--color-darker)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div className="loading-spinner" />
+      <div style={{ minHeight: '100vh', background: 'var(--color-darker)', display: 'flex', flexDirection: 'column' }}>
+        <Navbar />
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="loading-spinner" />
+        </div>
       </div>
     );
   }
@@ -74,7 +78,7 @@ const NewsDetailPage = () => {
 
         {/* Header: title + tags first */}
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: '2rem' }}>
-          {/* Date + author */}
+          {/* Date + author + read time */}
           <div style={{
             display: 'flex', flexWrap: 'wrap', gap: '0.4rem 0.75rem',
             fontSize: '0.75rem', color: 'rgba(255,255,255,0.3)',
@@ -85,6 +89,13 @@ const NewsDetailPage = () => {
               <span>{new Date(article.publishedAt).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
             )}
             {article.author && <><span style={{ opacity: 0.3 }}>·</span><span>Por {article.author}</span></>}
+            {article.content && (() => {
+              const rt = estimateReadTime(article.content);
+              return rt ? <><span style={{ opacity: 0.3 }}>·</span><span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                {rt} lectura
+              </span></> : null;
+            })()}
           </div>
 
           <h1 style={{
