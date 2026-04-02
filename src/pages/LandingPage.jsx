@@ -142,7 +142,7 @@ const quickBtnStyle = (color) => ({
 });
 
 const LandingPage = () => {
-  const { fetchInitialData, language, token } = useStore();
+  const { fetchInitialData, language, token, user, logout } = useStore();
   const t = useTranslation(language);
   const { isLight, toggleTheme } = useTheme();
   const navigate = useNavigate();
@@ -303,77 +303,202 @@ const LandingPage = () => {
           {t('description')}
         </motion.p>
 
-        {/* ── Auth CTA (solo usuarios no autenticados) ── */}
-        {!token && (
+        {/* ── Auth CTA ── */}
+        {!token ? (
+          /* ─── Not logged in: prominent login / register CTA ─── */
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.62, duration: 0.5 }}
             style={{
-              display: 'flex',
-              gap: '0.75rem',
-              flexWrap: 'wrap',
-              justifyContent: 'center',
               zIndex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '1rem',
+              marginBottom: 'clamp(0.5rem, 2vw, 1rem)',
+              width: '100%',
+              maxWidth: '480px',
+            }}
+          >
+            {/* Invitation text */}
+            <p style={{
+              fontSize: 'clamp(0.8rem, 1.8vw, 0.9rem)',
+              color: isLight ? 'var(--text-secondary)' : 'rgba(255,255,255,0.45)',
+              letterSpacing: '1px',
+              margin: 0,
+            }}>
+              Únete a la mayor comunidad Warhammer en español
+            </p>
+            {/* Buttons */}
+            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+              <Link
+                to="/signin"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.45rem',
+                  padding: '0.75rem 1.8rem',
+                  background: 'linear-gradient(135deg, var(--color-primary) 0%, #0099cc 100%)',
+                  color: '#fff',
+                  fontFamily: 'var(--font-display)',
+                  fontWeight: 700,
+                  fontSize: 'clamp(0.78rem, 1.8vw, 0.88rem)',
+                  letterSpacing: '2px',
+                  textTransform: 'uppercase',
+                  textDecoration: 'none',
+                  borderRadius: '50px',
+                  boxShadow: '0 4px 20px rgba(0,190,255,0.3)',
+                  transition: 'transform 0.2s, box-shadow 0.2s',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.04)'; e.currentTarget.style.boxShadow = '0 6px 28px rgba(0,190,255,0.45)'; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,190,255,0.3)'; }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                  <polyline points="10 17 15 12 10 7"/>
+                  <line x1="15" y1="12" x2="3" y2="12"/>
+                </svg>
+                Iniciar sesión
+              </Link>
+              <Link
+                to="/signin?mode=register"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.45rem',
+                  padding: '0.75rem 1.8rem',
+                  background: 'transparent',
+                  color: isLight ? 'var(--color-primary)' : 'rgba(255,255,255,0.85)',
+                  fontFamily: 'var(--font-display)',
+                  fontWeight: 700,
+                  fontSize: 'clamp(0.78rem, 1.8vw, 0.88rem)',
+                  letterSpacing: '2px',
+                  textTransform: 'uppercase',
+                  textDecoration: 'none',
+                  borderRadius: '50px',
+                  border: isLight ? '1.5px solid var(--color-primary)' : '1.5px solid rgba(255,255,255,0.25)',
+                  transition: 'transform 0.2s, border-color 0.2s, background 0.2s',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.04)'; e.currentTarget.style.background = isLight ? 'rgba(0,120,200,0.08)' : 'rgba(255,255,255,0.07)'; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.background = 'transparent'; }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                Crear cuenta gratis
+              </Link>
+            </div>
+          </motion.div>
+        ) : (
+          /* ─── Logged in: personalized welcome card ─── */
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.62, duration: 0.5 }}
+            style={{
+              zIndex: 1,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1rem',
+              background: isLight ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.05)',
+              border: isLight ? '1px solid rgba(0,153,204,0.2)' : '1px solid rgba(0,212,255,0.18)',
+              borderRadius: '20px',
+              padding: '1rem 1.5rem',
+              backdropFilter: 'blur(12px)',
+              boxShadow: isLight ? '0 4px 20px rgba(0,0,0,0.08)' : '0 4px 24px rgba(0,0,0,0.3)',
+              maxWidth: '420px',
+              width: '100%',
               marginBottom: 'clamp(0.5rem, 2vw, 1rem)',
             }}
           >
+            {/* Avatar */}
+            <div style={{
+              width: '52px',
+              height: '52px',
+              flexShrink: 0,
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, var(--color-primary) 0%, #0099cc 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontFamily: 'var(--font-display)',
+              fontWeight: 800,
+              fontSize: '1.2rem',
+              color: '#fff',
+              boxShadow: '0 0 16px rgba(0,190,255,0.35)',
+              border: '2px solid rgba(0,212,255,0.3)',
+            }}>
+              {(user?.username || user?.name || 'U')[0].toUpperCase()}
+            </div>
+            {/* Info */}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <p style={{
+                  fontFamily: 'var(--font-display)',
+                  fontSize: 'clamp(0.82rem, 2vw, 0.95rem)',
+                  color: isLight ? 'var(--text-primary)' : 'rgba(255,255,255,0.9)',
+                  margin: 0,
+                  letterSpacing: '1px',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}>
+                  {user?.username || user?.name || 'Comandante'}
+                </p>
+                {user?.isPremium && (
+                  <span style={{
+                    fontSize: '0.6rem',
+                    fontFamily: 'var(--font-display)',
+                    letterSpacing: '2px',
+                    color: '#FFD700',
+                    background: 'rgba(255,215,0,0.12)',
+                    border: '1px solid rgba(255,215,0,0.3)',
+                    borderRadius: '6px',
+                    padding: '1px 6px',
+                    textTransform: 'uppercase',
+                  }}>
+                    ★ Premium
+                  </span>
+                )}
+              </div>
+              <p style={{
+                fontSize: '0.75rem',
+                color: isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.35)',
+                margin: '0.2rem 0 0',
+              }}>
+                Bienvenido de vuelta a The Immaterium
+              </p>
+            </div>
+            {/* Profile link */}
             <Link
-              to="/signin"
+              to="/profile"
               style={{
+                flexShrink: 0,
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '0.45rem',
-                padding: '0.7rem 1.6rem',
-                background: 'linear-gradient(135deg, var(--color-primary) 0%, #0099cc 100%)',
-                color: '#fff',
+                gap: '0.3rem',
+                padding: '0.5rem 1rem',
+                background: isLight ? 'rgba(0,153,204,0.1)' : 'rgba(0,212,255,0.1)',
+                border: '1px solid rgba(0,212,255,0.25)',
+                borderRadius: '12px',
+                color: 'var(--color-primary)',
                 fontFamily: 'var(--font-display)',
-                fontWeight: 700,
-                fontSize: 'clamp(0.78rem, 1.8vw, 0.88rem)',
-                letterSpacing: '2px',
+                fontSize: '0.7rem',
+                letterSpacing: '1.5px',
                 textTransform: 'uppercase',
                 textDecoration: 'none',
-                borderRadius: '50px',
-                boxShadow: '0 4px 20px rgba(0,190,255,0.3)',
-                transition: 'transform 0.2s, box-shadow 0.2s',
+                transition: 'background 0.2s',
               }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.04)'; e.currentTarget.style.boxShadow = '0 6px 28px rgba(0,190,255,0.45)'; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,190,255,0.3)'; }}
+              onMouseEnter={e => { e.currentTarget.style.background = isLight ? 'rgba(0,153,204,0.2)' : 'rgba(0,212,255,0.2)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = isLight ? 'rgba(0,153,204,0.1)' : 'rgba(0,212,255,0.1)'; }}
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
-                <polyline points="10 17 15 12 10 7"/>
-                <line x1="15" y1="12" x2="3" y2="12"/>
-              </svg>
-              Iniciar sesión
-            </Link>
-            <Link
-              to="/signin?mode=register"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.45rem',
-                padding: '0.7rem 1.6rem',
-                background: 'transparent',
-                color: isLight ? 'var(--color-primary)' : 'rgba(255,255,255,0.85)',
-                fontFamily: 'var(--font-display)',
-                fontWeight: 700,
-                fontSize: 'clamp(0.78rem, 1.8vw, 0.88rem)',
-                letterSpacing: '2px',
-                textTransform: 'uppercase',
-                textDecoration: 'none',
-                borderRadius: '50px',
-                border: isLight ? '1.5px solid var(--color-primary)' : '1.5px solid rgba(255,255,255,0.25)',
-                transition: 'transform 0.2s, border-color 0.2s, background 0.2s',
-              }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.04)'; e.currentTarget.style.background = isLight ? 'rgba(0,120,200,0.08)' : 'rgba(255,255,255,0.07)'; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.background = 'transparent'; }}
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                 <circle cx="12" cy="7" r="4"/>
               </svg>
-              Crear cuenta
+              Perfil
             </Link>
           </motion.div>
         )}
@@ -736,7 +861,152 @@ const LandingPage = () => {
                 ))}
               </div>
 
-              <div style={{ paddingTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              {/* ── Auth section ── */}
+              <div style={{ paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+                {!token ? (
+                  /* Not logged in */
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <p style={{ fontSize: '0.68rem', color: 'var(--text-faint)', fontFamily: 'var(--font-display)', letterSpacing: '1px', margin: '0 0 0.25rem', textTransform: 'uppercase' }}>
+                      Tu cuenta
+                    </p>
+                    <motion.button
+                      whileHover={{ x: 4 }}
+                      whileTap={{ scale: 0.97 }}
+                      onClick={() => { navigate('/signin'); setNavOpen(false); }}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: '0.6rem',
+                        padding: '0.7rem 1rem',
+                        background: 'linear-gradient(135deg, var(--color-primary) 0%, #0099cc 100%)',
+                        border: 'none',
+                        borderRadius: '12px',
+                        color: '#fff',
+                        fontFamily: 'var(--font-display)',
+                        fontSize: '0.78rem',
+                        letterSpacing: '1.5px',
+                        textTransform: 'uppercase',
+                        cursor: 'pointer',
+                        width: '100%',
+                        boxShadow: '0 4px 16px rgba(0,190,255,0.25)',
+                      }}
+                    >
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                        <polyline points="10 17 15 12 10 7"/>
+                        <line x1="15" y1="12" x2="3" y2="12"/>
+                      </svg>
+                      Iniciar sesión
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ x: 4 }}
+                      whileTap={{ scale: 0.97 }}
+                      onClick={() => { navigate('/signin?mode=register'); setNavOpen(false); }}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: '0.6rem',
+                        padding: '0.7rem 1rem',
+                        background: 'transparent',
+                        border: '1px solid rgba(0,212,255,0.3)',
+                        borderRadius: '12px',
+                        color: 'var(--color-primary)',
+                        fontFamily: 'var(--font-display)',
+                        fontSize: '0.78rem',
+                        letterSpacing: '1.5px',
+                        textTransform: 'uppercase',
+                        cursor: 'pointer',
+                        width: '100%',
+                      }}
+                    >
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                      </svg>
+                      Crear cuenta gratis
+                    </motion.button>
+                  </div>
+                ) : (
+                  /* Logged in: user card + actions */
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    {/* User info row */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem', background: isLight ? 'rgba(0,153,204,0.07)' : 'rgba(0,212,255,0.06)', borderRadius: '12px', border: '1px solid rgba(0,212,255,0.12)' }}>
+                      <div style={{
+                        width: '40px', height: '40px', flexShrink: 0,
+                        borderRadius: '50%',
+                        background: 'linear-gradient(135deg, var(--color-primary) 0%, #0099cc 100%)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1rem', color: '#fff',
+                        boxShadow: '0 0 10px rgba(0,190,255,0.3)',
+                      }}>
+                        {(user?.username || user?.name || 'U')[0].toUpperCase()}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.82rem', color: isLight ? 'var(--text-primary)' : 'rgba(255,255,255,0.9)', margin: 0, letterSpacing: '0.5px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {user?.username || user?.name || 'Comandante'}
+                        </p>
+                        {user?.isPremium && (
+                          <span style={{ fontSize: '0.58rem', fontFamily: 'var(--font-display)', letterSpacing: '1.5px', color: '#FFD700', textTransform: 'uppercase' }}>★ Premium</span>
+                        )}
+                      </div>
+                    </div>
+                    {/* Profile */}
+                    <motion.button
+                      whileHover={{ x: 4 }}
+                      whileTap={{ scale: 0.97 }}
+                      onClick={() => { navigate('/profile'); setNavOpen(false); }}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: '0.6rem',
+                        padding: '0.6rem 1rem',
+                        background: 'transparent',
+                        border: '1px solid rgba(0,212,255,0.2)',
+                        borderRadius: '10px',
+                        color: 'var(--text-primary)',
+                        fontFamily: 'var(--font-display)',
+                        fontSize: '0.75rem',
+                        letterSpacing: '1.5px',
+                        textTransform: 'uppercase',
+                        cursor: 'pointer',
+                        width: '100%',
+                        textAlign: 'left',
+                      }}
+                    >
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                      </svg>
+                      Mi perfil
+                    </motion.button>
+                    {/* Logout */}
+                    <motion.button
+                      whileHover={{ x: 4 }}
+                      whileTap={{ scale: 0.97 }}
+                      onClick={() => { logout(); setNavOpen(false); }}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: '0.6rem',
+                        padding: '0.6rem 1rem',
+                        background: 'rgba(255,60,60,0.07)',
+                        border: '1px solid rgba(255,60,60,0.2)',
+                        borderRadius: '10px',
+                        color: '#ff6464',
+                        fontFamily: 'var(--font-display)',
+                        fontSize: '0.75rem',
+                        letterSpacing: '1.5px',
+                        textTransform: 'uppercase',
+                        cursor: 'pointer',
+                        width: '100%',
+                        textAlign: 'left',
+                      }}
+                    >
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                        <polyline points="16 17 21 12 16 7"/>
+                        <line x1="21" y1="12" x2="9" y2="12"/>
+                      </svg>
+                      Cerrar sesión
+                    </motion.button>
+                  </div>
+                )}
+              </div>
+
+              {/* ── Theme toggle ── */}
+              <div style={{ paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-faint)', fontFamily: 'var(--font-display)', letterSpacing: '1px' }}>TEMA</span>
                 <motion.button
                   onClick={toggleTheme}
