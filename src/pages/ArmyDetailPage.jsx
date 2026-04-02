@@ -6,6 +6,7 @@ import { useStore } from '../stores/useStore';
 import { useTranslation } from '../i18n/translations';
 import Navbar from '../components/UI/Navbar';
 import Footer from '../components/UI/Footer';
+import ShareButton from '../components/UI/ShareButton';
 
 /* ─── Related content card ─────────────────────────────────── */
 const RELATED_CONFIG = {
@@ -232,8 +233,8 @@ const ArmyDetailPage = () => {
           zIndex: 1,
           textAlign: 'center',
         }}>
-          {/* Back link */}
-          <div style={{ textAlign: 'left', marginBottom: '2.5rem' }}>
+          {/* Back link + share */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '0.75rem' }}>
             <Link to="/armies" style={{
               display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
               color: 'rgba(255,255,255,0.3)', textDecoration: 'none',
@@ -246,6 +247,7 @@ const ArmyDetailPage = () => {
             >
               ← Ejércitos
             </Link>
+            <ShareButton label="Compartir" />
           </div>
 
           {/* Icon */}

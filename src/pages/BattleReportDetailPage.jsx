@@ -9,7 +9,7 @@ import ShareButton from '../components/UI/ShareButton';
 
 const BattleReportDetailPage = () => {
   const { id } = useParams();
-  const { armies } = useStore();
+  const { armies, userLikes, toggleLike } = useStore();
   const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -227,6 +227,30 @@ const BattleReportDetailPage = () => {
             <div style={{ marginTop: '1rem', color: '#ff6464', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
               Favorito del Admin
+            </div>
+          )}
+
+          {/* Like button */}
+          {report.likes != null && (
+            <div style={{ marginTop: '1.25rem', display: 'flex', justifyContent: 'center' }}>
+              <motion.button
+                onClick={() => toggleLike(report.id, 'report')}
+                whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.9 }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '0.45rem',
+                  background: userLikes.includes(report.id) ? 'rgba(255,80,80,0.12)' : 'rgba(255,255,255,0.05)',
+                  border: `1px solid ${userLikes.includes(report.id) ? 'rgba(255,80,80,0.3)' : 'rgba(255,255,255,0.12)'}`,
+                  borderRadius: '20px', padding: '0.4rem 1rem',
+                  color: userLikes.includes(report.id) ? '#ff6464' : 'rgba(255,255,255,0.45)',
+                  fontSize: '0.82rem', cursor: 'pointer',
+                  transition: 'all 0.2s', fontFamily: 'var(--font-body)',
+                }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill={userLikes.includes(report.id) ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+                {report.likes + (userLikes.includes(report.id) ? 1 : 0)} Me gusta
+              </motion.button>
             </div>
           )}
         </motion.div>

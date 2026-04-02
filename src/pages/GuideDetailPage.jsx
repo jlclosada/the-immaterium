@@ -53,7 +53,7 @@ const GuideDetailPage = () => {
   const [guide, setGuide] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(null);
-  const { purchases, user } = useStore();
+  const { purchases, user, userLikes, toggleLike } = useStore();
 
   useEffect(() => {
     const fetchGuide = async () => {
@@ -242,6 +242,30 @@ const GuideDetailPage = () => {
                   #{tag}
                 </span>
               ))}
+            </div>
+          )}
+
+          {/* Like counter */}
+          {guide.likes != null && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', paddingTop: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+              <motion.button
+                onClick={() => toggleLike(guide.id, 'guide')}
+                whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.9 }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '0.4rem',
+                  background: userLikes.includes(guide.id) ? 'rgba(255,80,80,0.12)' : 'rgba(255,255,255,0.05)',
+                  border: `1px solid ${userLikes.includes(guide.id) ? 'rgba(255,80,80,0.3)' : 'rgba(255,255,255,0.1)'}`,
+                  borderRadius: '20px', padding: '0.3rem 0.85rem',
+                  color: userLikes.includes(guide.id) ? '#ff6464' : 'rgba(255,255,255,0.4)',
+                  fontSize: '0.78rem', cursor: 'pointer',
+                  transition: 'all 0.2s', fontFamily: 'var(--font-body)',
+                }}
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill={userLikes.includes(guide.id) ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+                {guide.likes + (userLikes.includes(guide.id) ? 1 : 0)}
+              </motion.button>
             </div>
           )}
         </motion.div>
