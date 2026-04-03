@@ -148,6 +148,8 @@ function ListingCard({ listing, onClick }) {
             className="mp-card-img"
             src={img}
             alt={listing.title}
+            loading="lazy"
+            decoding="async"
             style={{
               width: '100%',
               aspectRatio: '4/3',
@@ -558,7 +560,7 @@ function DetailModal({ listing, onClose }) {
                         flexShrink: 0,
                       }}
                     >
-                      <img src={img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                      <img src={img} alt="" loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                     </button>
                   ))}
                 </div>
