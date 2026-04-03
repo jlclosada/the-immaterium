@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { api } from '../services/api';
+import { toast } from '../utils/toastBridge';
 
 // Persistent anonymous user ID — generated once per browser, stored in localStorage
 function getOrCreateUserId() {
@@ -140,6 +141,7 @@ export const useStore = create((set, get) => ({
       const updated = userLikes.filter(id => id !== contentId);
       set({ userLikes: updated });
       localStorage.setItem('wg-likes', JSON.stringify(updated));
+      toast('Me gusta eliminado', 'info', 2000);
 
       if (contentType === 'guide') {
         set({ paintingGuides: get().paintingGuides.map(g => g.id === contentId ? { ...g, likes: (g.likes || 1) - 1 } : g) });
@@ -156,6 +158,7 @@ export const useStore = create((set, get) => ({
       const updated = [...userLikes, contentId];
       set({ userLikes: updated });
       localStorage.setItem('wg-likes', JSON.stringify(updated));
+      toast('¡Te gusta!', 'success', 2000);
 
       if (contentType === 'guide') {
         set({ paintingGuides: get().paintingGuides.map(g => g.id === contentId ? { ...g, likes: (g.likes || 0) + 1 } : g) });
@@ -179,10 +182,12 @@ export const useStore = create((set, get) => ({
       const updated = userFavorites.filter(id => id !== contentId);
       set({ userFavorites: updated });
       localStorage.setItem('wg-favorites', JSON.stringify(updated));
+      toast('Eliminado de favoritos', 'info', 2000);
     } else {
       const updated = [...userFavorites, contentId];
       set({ userFavorites: updated });
       localStorage.setItem('wg-favorites', JSON.stringify(updated));
+      toast('¡Guardado en favoritos!', 'success', 2000);
     }
   },
 

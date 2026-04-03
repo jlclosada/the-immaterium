@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useCallback } from 'react'
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { setToastFn } from '../../utils/toastBridge'
 
 const ToastContext = createContext(null)
 
@@ -39,6 +40,12 @@ export const ToastProvider = ({ children }) => {
   const removeToast = useCallback((id) => {
     setToasts(prev => prev.filter(t => t.id !== id))
   }, [])
+
+  // Register with the bridge so non-React code (store, api) can show toasts
+  useEffect(() => {
+    setToastFn(showToast)
+    return () => setToastFn(null)
+  }, [showToast])
 
   return (
     <ToastContext.Provider value={showToast}>
