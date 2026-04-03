@@ -296,6 +296,8 @@ const GuideDetailPage = () => {
             <img
               src={guide.coverImage}
               alt={guide.title}
+              loading="eager"
+              decoding="async"
               style={{
                 width: '100%', maxHeight: '480px',
                 objectFit: 'contain', display: 'block',
@@ -465,6 +467,8 @@ const GuideDetailPage = () => {
                     <img
                       src={img}
                       alt={`Paso ${step.stepNumber} - ${imgIdx + 1}`}
+                      loading="lazy"
+                      decoding="async"
                       style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.3s' }}
                     />
                   </div>

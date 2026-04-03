@@ -402,6 +402,8 @@ const BattleReportDetailPage = () => {
                   <img
                     src={url}
                     alt={`Imagen ${i + 1}`}
+                    loading="lazy"
+                    decoding="async"
                     style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform 0.3s' }}
                     onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.04)'}
                     onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
