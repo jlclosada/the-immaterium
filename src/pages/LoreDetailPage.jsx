@@ -37,6 +37,8 @@ const LoreDetailPage = () => {
         const data = await api.getLoreEntry(id);
         setLore(data);
         if (data?.title) document.title = `${data.title} | The Immaterium`;
+        // Track view (fire-and-forget)
+        api.incrementLoreViews(id);
       } catch (error) {
         console.error('Failed to fetch lore entry:', error);
       } finally {

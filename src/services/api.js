@@ -128,6 +128,10 @@ export const api = {
     return response.json()
   },
 
+  incrementGuideViews: (id) => {
+    fetch(`${API_URL}/api/guides/${id}/increment_views/`, { method: 'POST' }).catch(() => {})
+  },
+
   // Paints catalogue
   getPaints: async (search = '') => {
     const params = search ? `?search=${encodeURIComponent(search)}` : ''
@@ -196,6 +200,10 @@ export const api = {
     })
     if (!response.ok) throw new Error('Failed to like battle report')
     return response.json()
+  },
+
+  incrementReportViews: (id) => {
+    fetch(`${API_URL}/api/battle-reports/${id}/increment_views/`, { method: 'POST' }).catch(() => {})
   },
 
   // News
@@ -431,6 +439,10 @@ export const api = {
     })
     if (!response.ok) throw new Error('Failed to like lore entry')
     return response.json()
+  },
+
+  incrementLoreViews: (id) => {
+    fetch(`${API_URL}/api/lore/${id}/increment_views/`, { method: 'POST' }).catch(() => {})
   },
 
   // ── Marketplace ─────────────────────────────────────

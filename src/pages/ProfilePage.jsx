@@ -101,7 +101,7 @@ function InputField({ label, value, onChange, placeholder, type = 'text', disabl
 
 export default function ProfilePage() {
   const navigate = useNavigate();
-  const { token, user, purchases, setUser, logout } = useStore();
+  const { token, user, purchases, setUser, logout, userLikes } = useStore();
 
   // Form state — Perfil
   const [name, setName] = useState('');
@@ -313,7 +313,7 @@ export default function ProfilePage() {
 
           {/* Quick stats */}
           <div style={{ display: 'flex', gap: '1rem', paddingBottom: '0.5rem' }}>
-            {[{ label: 'Compras', value: purchases.length }, { label: 'Guías', value: '—' }].map(s => (
+            {[{ label: 'Compras', value: purchases.length }, { label: 'Me gustas', value: userLikes.length }].map(s => (
               <div key={s.label} style={{ textAlign: 'center' }}>
                 <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem', color: 'var(--color-primary)', fontWeight: 900 }}>{s.value}</div>
                 <div style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.3)', letterSpacing: '1px' }}>{s.label}</div>

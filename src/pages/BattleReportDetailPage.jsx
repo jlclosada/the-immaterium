@@ -18,6 +18,9 @@ const BattleReportDetailPage = () => {
       try {
         const data = await api.getBattleReport(id);
         setReport(data);
+        if (data?.title) document.title = `${data.title} | The Immaterium`;
+        // Track view (fire-and-forget)
+        api.incrementReportViews(id);
       } catch (error) {
         console.error('Failed to fetch battle report:', error);
       } finally {
