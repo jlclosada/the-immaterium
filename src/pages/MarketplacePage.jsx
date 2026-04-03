@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../services/api';
@@ -780,11 +780,20 @@ const MarketplacePage = () => {
   const [filterStatus, setFilterStatus] = useState('');
   const [filterFaction, setFilterFaction] = useState('');
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedListing, setSelectedListing] = useState(null);
+  const debounceRef = useRef(null);
 
   useEffect(() => {
     document.title = 'Marketplace | The Immaterium';
   }, []);
+
+  // Debounce search input
+  useEffect(() => {
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => setDebouncedSearch(search), 380);
+    return () => clearTimeout(debounceRef.current);
+  }, [search]);
 
   useEffect(() => {
     const fetchListings = async () => {
@@ -793,7 +802,7 @@ const MarketplacePage = () => {
         const params = {};
         if (filterStatus) params.status = filterStatus;
         if (filterFaction) params.faction = filterFaction;
-        if (search) params.search = search;
+        if (debouncedSearch) params.search = debouncedSearch;
         const data = await api.getListings(params);
         const arr = Array.isArray(data) ? data : [];
         setListings(arr);
@@ -809,7 +818,7 @@ const MarketplacePage = () => {
       }
     };
     fetchListings();
-  }, [filterStatus, filterFaction, search, urlId]);
+  }, [filterStatus, filterFaction, debouncedSearch, urlId]);
 
   // Derive unique factions for the filter dropdown
   const factions = [...new Set(listings.map(l => l.faction).filter(Boolean))].sort();
