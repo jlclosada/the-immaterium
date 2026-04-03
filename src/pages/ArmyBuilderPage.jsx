@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../services/api'
+import Navbar from '../components/UI/Navbar'
 
 /* ─── helpers ─────────────────────────────────────────────────────────── */
 function getOrCreateUserId() {
@@ -851,6 +852,8 @@ export default function ArmyBuilderPage() {
   /* ─── Render ─── */
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-darker)', color: 'var(--color-light)', paddingTop: '80px' }}>
+
+      <Navbar />
 
       {/* Unit config modal */}
       <AnimatePresence>

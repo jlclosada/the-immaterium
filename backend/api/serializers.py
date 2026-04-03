@@ -260,7 +260,7 @@ class LoreEntrySerializer(serializers.ModelSerializer):
         model = LoreEntry
         fields = [
             'id', 'title', 'category', 'content', 'excerpt',
-            'tags', 'author', 'dateCreated', 'isFeatured', 'views',
+            'tags', 'author', 'dateCreated', 'isFeatured', 'views', 'likes',
             'relatedFaction'
         ]
 

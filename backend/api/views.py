@@ -503,6 +503,36 @@ class LoreEntryViewSet(viewsets.ModelViewSet):
         lore.refresh_from_db()
         return Response({'views': lore.views})
 
+    @action(detail=True, methods=['post'])
+    def like(self, request, id=None):
+        lore = self.get_object()
+        user_id = request.data.get('user_id', 'anonymous')
+
+        liked = UserLike.objects.filter(
+            user_id=user_id,
+            content_type='lore',
+            content_id=lore.id
+        ).exists()
+
+        if liked:
+            UserLike.objects.filter(
+                user_id=user_id,
+                content_type='lore',
+                content_id=lore.id
+            ).delete()
+            LoreEntry.objects.filter(id=lore.id).update(likes=F('likes') - 1)
+            lore.refresh_from_db()
+            return Response({'status': 'unliked', 'likes': lore.likes})
+        else:
+            UserLike.objects.create(
+                user_id=user_id,
+                content_type='lore',
+                content_id=lore.id
+            )
+            LoreEntry.objects.filter(id=lore.id).update(likes=F('likes') + 1)
+            lore.refresh_from_db()
+            return Response({'status': 'liked', 'likes': lore.likes})
+
 
 class NewsArticleViewSet(viewsets.ModelViewSet):
     queryset = NewsArticle.objects.filter(is_published=True)

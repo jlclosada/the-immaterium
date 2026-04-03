@@ -271,7 +271,7 @@ function SectionHeader({ eyebrow, title, subtitle, accent = 'var(--color-primary
 /* ────────────────────────────────────────────────────────────────────────── */
 
 export default function LandingPage() {
-  const { fetchInitialData, language, token, user, logout } = useStore();
+  const { fetchInitialData, language, token, user, logout, armies: storeArmies } = useStore();
   const t = useTranslation(language);
   const { isLight } = useTheme();
   const navigate = useNavigate();
@@ -289,6 +289,8 @@ export default function LandingPage() {
   const [featuredListings, setFeaturedListings] = useState([]);
   const [selectedListing,  setSelectedListing]  = useState(null);
   const [loadingContent,   setLoadingContent]   = useState(true);
+  const [allGuidesCount,   setAllGuidesCount]   = useState(0);
+  const [allReportsCount,  setAllReportsCount]  = useState(0);
 
   useEffect(() => {
     document.title = 'The Immaterium | Comunidad Warhammer 40,000 en Español';
@@ -306,9 +308,13 @@ export default function LandingPage() {
         api.getListings({ status: 'available' }),
       ]);
       const safe = r => r.status === 'fulfilled' && Array.isArray(r.value) ? r.value : [];
+      const guides = safe(guidesRes);
+      const reports = safe(reportsRes);
+      setAllGuidesCount(guides.length);
+      setAllReportsCount(reports.length);
       setFeaturedNews(safe(newsRes).slice(0, 4));
-      setFeaturedGuides(safe(guidesRes).slice(0, 4));
-      setFeaturedReports(safe(reportsRes).slice(0, 3));
+      setFeaturedGuides(guides.slice(0, 4));
+      setFeaturedReports(reports.slice(0, 3));
       setFeaturedListings(safe(listingsRes).slice(0, 4));
     } finally {
       setLoadingContent(false);
@@ -534,10 +540,10 @@ export default function LandingPage() {
       }}>
         <div style={{ maxWidth: '900px', margin: '0 auto', display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 0 }}>
           {[
-            { value: 40000, suffix: '+', label: 'Años de lore', color: 'var(--color-primary)' },
-            { value: 18,    suffix: '',  label: 'Facciones',    color: '#ff6464' },
-            { value: 9,     suffix: '+', label: 'Secciones',    color: '#10b981' },
-            { value: 100,   suffix: '%', label: 'En Español',   color: '#f59e0b' },
+            { value: 40000,                                  suffix: '+', label: 'Años de lore', color: 'var(--color-primary)' },
+            { value: storeArmies.length || 18,               suffix: '',  label: 'Facciones',    color: '#ff6464' },
+            { value: allGuidesCount + allReportsCount || 50, suffix: '+', label: 'Contenidos',   color: '#10b981' },
+            { value: 100,                                    suffix: '%', label: 'En Español',   color: '#f59e0b' },
           ].map((s, i) => (
             <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1, duration: 0.6 }}
               style={{ flex: '1 1 150px', borderRight: i < 3 ? (isLight ? '1px solid rgba(0,0,0,0.07)' : '1px solid rgba(255,255,255,0.06)') : 'none' }}>

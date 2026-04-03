@@ -58,9 +58,9 @@ export const useStore = create((set, get) => ({
   isLoading: false,
   error: null,
 
-  // Social Features State
-  userLikes: [],
-  userFavorites: [],
+  // Social Features State (persisted in localStorage)
+  userLikes: JSON.parse(localStorage.getItem('wg-likes') || '[]'),
+  userFavorites: JSON.parse(localStorage.getItem('wg-favorites') || '[]'),
 
   // Actions
   fetchInitialData: async () => {
@@ -135,42 +135,34 @@ export const useStore = create((set, get) => ({
     const isLiked = userLikes.includes(contentId);
     const userId = getOrCreateUserId();
 
-    // Optimistic update
+    // Optimistic update + persist
     if (isLiked) {
-      set({ userLikes: userLikes.filter(id => id !== contentId) });
+      const updated = userLikes.filter(id => id !== contentId);
+      set({ userLikes: updated });
+      localStorage.setItem('wg-likes', JSON.stringify(updated));
 
       if (contentType === 'guide') {
-        set({
-          paintingGuides: get().paintingGuides.map(g =>
-            g.id === contentId ? { ...g, likes: g.likes - 1 } : g
-          )
-        });
+        set({ paintingGuides: get().paintingGuides.map(g => g.id === contentId ? { ...g, likes: (g.likes || 1) - 1 } : g) });
         try { await api.likeGuide(contentId, userId); } catch (e) { console.error(e); }
       } else if (contentType === 'report') {
-        set({
-          battleReports: get().battleReports.map(r =>
-            r.id === contentId ? { ...r, likes: r.likes - 1 } : r
-          )
-        });
+        set({ battleReports: get().battleReports.map(r => r.id === contentId ? { ...r, likes: (r.likes || 1) - 1 } : r) });
         try { await api.likeBattleReport(contentId, userId); } catch (e) { console.error(e); }
+      } else if (contentType === 'lore') {
+        try { await api.likeLoreEntry(contentId, userId); } catch (e) { console.error(e); }
       }
     } else {
-      set({ userLikes: [...userLikes, contentId] });
+      const updated = [...userLikes, contentId];
+      set({ userLikes: updated });
+      localStorage.setItem('wg-likes', JSON.stringify(updated));
 
       if (contentType === 'guide') {
-        set({
-          paintingGuides: get().paintingGuides.map(g =>
-            g.id === contentId ? { ...g, likes: g.likes + 1 } : g
-          )
-        });
+        set({ paintingGuides: get().paintingGuides.map(g => g.id === contentId ? { ...g, likes: (g.likes || 0) + 1 } : g) });
         try { await api.likeGuide(contentId, userId); } catch (e) { console.error(e); }
       } else if (contentType === 'report') {
-        set({
-          battleReports: get().battleReports.map(r =>
-            r.id === contentId ? { ...r, likes: r.likes + 1 } : r
-          )
-        });
+        set({ battleReports: get().battleReports.map(r => r.id === contentId ? { ...r, likes: (r.likes || 0) + 1 } : r) });
         try { await api.likeBattleReport(contentId, userId); } catch (e) { console.error(e); }
+      } else if (contentType === 'lore') {
+        try { await api.likeLoreEntry(contentId, userId); } catch (e) { console.error(e); }
       }
     }
   },
@@ -180,9 +172,13 @@ export const useStore = create((set, get) => ({
     const isFavorited = userFavorites.includes(contentId);
 
     if (isFavorited) {
-      set({ userFavorites: userFavorites.filter(id => id !== contentId) });
+      const updated = userFavorites.filter(id => id !== contentId);
+      set({ userFavorites: updated });
+      localStorage.setItem('wg-favorites', JSON.stringify(updated));
     } else {
-      set({ userFavorites: [...userFavorites, contentId] });
+      const updated = [...userFavorites, contentId];
+      set({ userFavorites: updated });
+      localStorage.setItem('wg-favorites', JSON.stringify(updated));
     }
   },
 

@@ -423,6 +423,16 @@ export const api = {
     return true
   },
 
+  likeLoreEntry: async (id, userId) => {
+    const response = await fetch(`${API_URL}/api/lore/${id}/like/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: userId }),
+    })
+    if (!response.ok) throw new Error('Failed to like lore entry')
+    return response.json()
+  },
+
   // ── Marketplace ─────────────────────────────────────
   getListings: async (params = {}) => {
     const qs = new URLSearchParams(params).toString()
