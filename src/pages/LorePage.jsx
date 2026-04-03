@@ -49,9 +49,12 @@ const LorePage = () => {
 
   const filteredEntries = loreEntries.filter(entry => {
     const matchesCategory = selectedCategory === 'all' || entry.category === selectedCategory;
-    const matchesSearch =
-      entry.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (entry.excerpt || '').toLowerCase().includes(searchTerm.toLowerCase());
+    const term = searchTerm.toLowerCase();
+    const matchesSearch = !term ||
+      entry.title.toLowerCase().includes(term) ||
+      (entry.excerpt || '').toLowerCase().includes(term) ||
+      (entry.author || '').toLowerCase().includes(term) ||
+      (entry.tags || []).some(t => t.toLowerCase().includes(term));
     return matchesCategory && matchesSearch;
   });
 

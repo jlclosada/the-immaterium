@@ -37,11 +37,12 @@ const BattleReportsPage = () => {
 
   const filteredReports = reports.filter(r => {
     const term = searchTerm.toLowerCase();
-    const matchesSearch = (
+    const matchesSearch = !term || (
       (r.title || '').toLowerCase().includes(term) ||
       (r.mission || '').toLowerCase().includes(term) ||
       (r.armies?.player1?.name || '').toLowerCase().includes(term) ||
-      (r.armies?.player2?.name || '').toLowerCase().includes(term)
+      (r.armies?.player2?.name || '').toLowerCase().includes(term) ||
+      (r.tags || []).some(t => t.toLowerCase().includes(term))
     );
     const matchesFilter =
       activeFilter === 'all' ? true :
