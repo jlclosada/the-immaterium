@@ -8,6 +8,7 @@ import Footer from '../components/UI/Footer';
 import ImageModal from '../components/Gallery/ImageModal';
 import PremiumGate from '../components/Auth/PremiumGate';
 import ShareButton from '../components/UI/ShareButton';
+import ReadingProgressBar from '../components/UI/ReadingProgressBar';
 
 // ── YouTube helpers ────────────────────────────────────────────────────────────
 function getYouTubeId(url) {
@@ -102,6 +103,7 @@ const GuideDetailPage = () => {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-darker)', display: 'flex', flexDirection: 'column' }}>
+      <ReadingProgressBar />
       <Navbar />
 
       {selectedImage && (

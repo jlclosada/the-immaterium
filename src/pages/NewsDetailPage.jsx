@@ -8,10 +8,12 @@ import Footer from '../components/UI/Footer';
 import { renderMarkdown } from '../utils/renderMarkdown';
 import { estimateReadTime } from '../utils/readTime';
 import ShareButton from '../components/UI/ShareButton';
+import ReadingProgressBar from '../components/UI/ReadingProgressBar';
 
 const NewsDetailPage = () => {
   const { id } = useParams();
   const [article, setArticle] = useState(null);
+  const [related, setRelated] = useState([]);
   const [loading, setLoading] = useState(true);
   const userLikes = useStore(state => state.userLikes);
   const toggleLike = useStore(state => state.toggleLike);
@@ -19,11 +21,27 @@ const NewsDetailPage = () => {
   useEffect(() => {
     const fetchArticle = async () => {
       try {
-        const data = await api.getNewsArticle(id);
-        setArticle(data);
-        if (data?.title) document.title = `${data.title} | The Immaterium`;
-        // Track view (fire-and-forget)
-        api.incrementNewsViews(id);
+        const [data, all] = await Promise.allSettled([
+          api.getNewsArticle(id),
+          api.getNewsArticles(),
+        ]);
+        const article = data.status === 'fulfilled' ? data.value : null;
+        if (article) {
+          setArticle(article);
+          if (article.title) document.title = `${article.title} | The Immaterium`;
+          api.incrementNewsViews(id);
+          // Related: same tags first, then recency, exclude self, max 3
+          if (all.status === 'fulfilled' && Array.isArray(all.value)) {
+            const others = all.value.filter(a => String(a.id) !== String(id));
+            const tags = new Set(article.tags || []);
+            const scored = others.map(a => ({
+              ...a,
+              _score: (a.tags || []).filter(t => tags.has(t)).length,
+            }));
+            scored.sort((a, b) => b._score - a._score || new Date(b.publishedAt) - new Date(a.publishedAt));
+            setRelated(scored.slice(0, 3));
+          }
+        }
       } catch (e) {
         console.error(e);
       } finally {
@@ -58,6 +76,7 @@ const NewsDetailPage = () => {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-darker)', display: 'flex', flexDirection: 'column' }}>
+      <ReadingProgressBar />
       <Navbar />
 
       <div style={{
@@ -229,6 +248,93 @@ const NewsDetailPage = () => {
                     onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
                   />
                 </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+        {/* Related articles */}
+        {related.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            style={{ marginTop: '3.5rem', paddingTop: '2.5rem', borderTop: '1px solid rgba(255,255,255,0.07)' }}
+          >
+            <p style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: '0.65rem',
+              letterSpacing: '4px',
+              color: 'var(--color-primary)',
+              textTransform: 'uppercase',
+              marginBottom: '1.5rem',
+              opacity: 0.8,
+            }}>
+              También te puede interesar
+            </p>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 220px), 1fr))',
+              gap: '1rem',
+            }}>
+              {related.map((a, i) => (
+                <Link key={a.id} to={`/news/${a.id}`} style={{ textDecoration: 'none' }}>
+                  <motion.div
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.35 + i * 0.07 }}
+                    whileHover={{ y: -3 }}
+                    style={{
+                      background: 'rgba(255,255,255,0.03)',
+                      border: '1px solid rgba(255,255,255,0.07)',
+                      borderRadius: '14px',
+                      overflow: 'hidden',
+                      transition: 'border-color 0.25s, box-shadow 0.25s',
+                    }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.borderColor = 'rgba(0,212,255,0.2)';
+                      e.currentTarget.style.boxShadow = '0 8px 28px rgba(0,0,0,0.35)';
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
+                  >
+                    {a.coverImage && (
+                      <div style={{ width: '100%', aspectRatio: '16/7', overflow: 'hidden', background: 'rgba(0,0,0,0.3)' }}>
+                        <img
+                          src={a.coverImage}
+                          alt={a.title}
+                          loading="lazy"
+                          decoding="async"
+                          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform 0.4s' }}
+                          onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
+                          onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                        />
+                      </div>
+                    )}
+                    <div style={{ padding: '0.9rem 1rem' }}>
+                      {a.publishedAt && (
+                        <p style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.25)', fontFamily: 'var(--font-display)', letterSpacing: '0.5px', textTransform: 'uppercase', marginBottom: '0.4rem' }}>
+                          {new Date(a.publishedAt).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        </p>
+                      )}
+                      <p style={{
+                        fontFamily: 'var(--font-display)',
+                        fontSize: '0.88rem',
+                        color: '#fff',
+                        lineHeight: 1.3,
+                        fontWeight: 700,
+                        margin: 0,
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                      }}>
+                        {a.title}
+                      </p>
+                    </div>
+                  </motion.div>
+                </Link>
               ))}
             </div>
           </motion.div>

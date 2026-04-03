@@ -9,6 +9,7 @@ import Footer from '../components/UI/Footer';
 import { renderMarkdown } from '../utils/renderMarkdown';
 import { estimateReadTime } from '../utils/readTime';
 import ShareButton from '../components/UI/ShareButton';
+import ReadingProgressBar from '../components/UI/ReadingProgressBar';
 
 const CATEGORY_COLORS = {
   historia: '#a78bfa',
@@ -73,6 +74,7 @@ const LoreDetailPage = () => {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-darker)', display: 'flex', flexDirection: 'column' }}>
+      <ReadingProgressBar />
       <Navbar />
 
       <div style={{

@@ -6,6 +6,7 @@ import { useStore } from '../stores/useStore';
 import Navbar from '../components/UI/Navbar';
 import Footer from '../components/UI/Footer';
 import ShareButton from '../components/UI/ShareButton';
+import ReadingProgressBar from '../components/UI/ReadingProgressBar';
 
 const BattleReportDetailPage = () => {
   const { id } = useParams();
@@ -62,6 +63,7 @@ const BattleReportDetailPage = () => {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-darker)', display: 'flex', flexDirection: 'column' }}>
+      <ReadingProgressBar />
       <Navbar />
 
       <div style={{
