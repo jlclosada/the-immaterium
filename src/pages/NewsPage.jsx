@@ -30,10 +30,14 @@ const NewsPage = () => {
     fetch();
   }, []);
 
-  const filtered = articles.filter(a =>
-    a.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (a.excerpt || '').toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filtered = articles.filter(a => {
+    const term = searchTerm.toLowerCase();
+    return !term ||
+      a.title.toLowerCase().includes(term) ||
+      (a.excerpt || '').toLowerCase().includes(term) ||
+      (a.author || '').toLowerCase().includes(term) ||
+      (a.tags || []).some(t => t.toLowerCase().includes(term));
+  });
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-darker)', display: 'flex', flexDirection: 'column' }}>

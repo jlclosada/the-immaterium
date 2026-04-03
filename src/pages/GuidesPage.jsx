@@ -45,10 +45,12 @@ const GuidesPage = () => {
 
   const filteredGuides = guides.filter(g => {
     const term = searchTerm.toLowerCase();
-    const matchesSearch = (
+    const matchesSearch = !term || (
       g.title.toLowerCase().includes(term) ||
       (g.faction?.name || '').toLowerCase().includes(term) ||
-      (g.difficulty || '').toLowerCase().includes(term)
+      (g.difficulty || '').toLowerCase().includes(term) ||
+      (g.author || '').toLowerCase().includes(term) ||
+      (g.tags || []).some(t => t.toLowerCase().includes(term))
     );
     const isPremium = g.isPremium || g.is_premium;
     const matchesFilter =
