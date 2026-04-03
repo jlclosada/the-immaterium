@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { useStore } from './stores/useStore';
 import { api } from './services/api';
@@ -7,19 +7,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 import ScrollToTop from './components/UI/ScrollToTop';
 import BackToTop from './components/UI/BackToTop';
 
+// ── Eagerly loaded (critical path) ──────────────────────────────────────────
 import LandingPage from './pages/LandingPage';
-import LoginPage from './pages/LoginPage';
-import AdminLayout from './layouts/AdminLayout';
-import AdminDashboard from './pages/admin/AdminDashboard';
-import ArmyManager from './components/Admin/ArmyManager';
-import GuideManager from './components/Admin/GuideManager';
-import ReportManager from './components/Admin/ReportManager';
-import LoreManager from './components/Admin/LoreManager';
-import UserManager from './components/Admin/UserManager';
-import NewRecruitManager from './components/Admin/NewRecruitManager'
-import PaintManager from './components/Admin/PaintManager';
-import MarketplaceManager from './components/Admin/MarketplaceManager';
-
 import ArmiesPage from './pages/ArmiesPage';
 import ArmyDetailPage from './pages/ArmyDetailPage';
 import GuidesPage from './pages/GuidesPage';
@@ -30,16 +19,31 @@ import LorePage from './pages/LorePage';
 import LoreDetailPage from './pages/LoreDetailPage';
 import NewsPage from './pages/NewsPage';
 import NewsDetailPage from './pages/NewsDetailPage';
-import NewsManager from './components/Admin/NewsManager';
-import SearchPage from './pages/SearchPage';
-import ArmyBuilderPage from './pages/ArmyBuilderPage';
-import VideosPage from './pages/VideosPage';
-import MarketplacePage from './pages/MarketplacePage';
-import PaymentSuccessPage from './pages/PaymentSuccessPage';
-import PaymentCancelPage from './pages/PaymentCancelPage';
 import UserAuthPage from './pages/UserAuthPage';
-import ProfilePage from './pages/ProfilePage';
 import NotFoundPage from './pages/NotFoundPage';
+
+// ── Lazily loaded (not on critical path) ────────────────────────────────────
+const LoginPage         = lazy(() => import('./pages/LoginPage'));
+const SearchPage        = lazy(() => import('./pages/SearchPage'));
+const ArmyBuilderPage   = lazy(() => import('./pages/ArmyBuilderPage'));
+const VideosPage        = lazy(() => import('./pages/VideosPage'));
+const MarketplacePage   = lazy(() => import('./pages/MarketplacePage'));
+const ProfilePage       = lazy(() => import('./pages/ProfilePage'));
+const PaymentSuccessPage = lazy(() => import('./pages/PaymentSuccessPage'));
+const PaymentCancelPage  = lazy(() => import('./pages/PaymentCancelPage'));
+
+// ── Admin (lazily loaded, rarely visited) ────────────────────────────────────
+const AdminLayout       = lazy(() => import('./layouts/AdminLayout'));
+const AdminDashboard    = lazy(() => import('./pages/admin/AdminDashboard'));
+const ArmyManager       = lazy(() => import('./components/Admin/ArmyManager'));
+const GuideManager      = lazy(() => import('./components/Admin/GuideManager'));
+const ReportManager     = lazy(() => import('./components/Admin/ReportManager'));
+const LoreManager       = lazy(() => import('./components/Admin/LoreManager'));
+const UserManager       = lazy(() => import('./components/Admin/UserManager'));
+const NewRecruitManager = lazy(() => import('./components/Admin/NewRecruitManager'));
+const PaintManager      = lazy(() => import('./components/Admin/PaintManager'));
+const MarketplaceManager = lazy(() => import('./components/Admin/MarketplaceManager'));
+const NewsManager       = lazy(() => import('./components/Admin/NewsManager'));
 
 import './styles/index.css';
 import './index.css';
@@ -76,6 +80,7 @@ function App() {
     <>
       <ScrollToTop />
       <BackToTop />
+      <Suspense fallback={<div style={{ minHeight: '100vh', background: 'var(--color-darker)' }} />}>
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<AnimatedPage><LandingPage /></AnimatedPage>} />
@@ -122,6 +127,7 @@ function App() {
           <Route path="*" element={<AnimatedPage><NotFoundPage /></AnimatedPage>} />
         </Routes>
       </AnimatePresence>
+      </Suspense>
     </>
   );
 }
