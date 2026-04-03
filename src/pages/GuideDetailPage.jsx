@@ -52,6 +52,7 @@ const getDifficultyStyle = (difficulty) => {
 const GuideDetailPage = () => {
   const { id } = useParams();
   const [guide, setGuide] = useState(null);
+  const [related, setRelated] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(null);
   const { purchases, user, userLikes, toggleLike } = useStore();
@@ -59,11 +60,27 @@ const GuideDetailPage = () => {
   useEffect(() => {
     const fetchGuide = async () => {
       try {
-        const data = await api.getGuide(id);
-        setGuide(data);
-        if (data?.title) document.title = `${data.title} | The Immaterium`;
-        // Track view (fire-and-forget)
-        api.incrementGuideViews(id);
+        const [guideRes, allRes] = await Promise.allSettled([
+          api.getGuide(id),
+          api.getPaintingGuides(),
+        ]);
+        const data = guideRes.status === 'fulfilled' ? guideRes.value : null;
+        if (data) {
+          setGuide(data);
+          if (data.title) document.title = `${data.title} | The Immaterium`;
+          api.incrementGuideViews(id);
+          if (allRes.status === 'fulfilled' && Array.isArray(allRes.value)) {
+            const others = allRes.value.filter(g => String(g.id) !== String(id));
+            const scored = others.map(g => ({
+              ...g,
+              _score:
+                (g.difficulty === data.difficulty ? 1 : 0) +
+                (data.faction && g.faction?.id === data.faction?.id ? 2 : 0),
+            }));
+            scored.sort((a, b) => b._score - a._score || (b.views || 0) - (a.views || 0));
+            setRelated(scored.slice(0, 3));
+          }
+        }
       } catch (error) {
         console.error('Failed to fetch guide:', error);
       } finally {
@@ -499,6 +516,104 @@ const GuideDetailPage = () => {
             )}
           </motion.div>
         ))}
+
+        {/* Related guides */}
+        {related.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            style={{ marginTop: '3.5rem', paddingTop: '2.5rem', borderTop: '1px solid rgba(255,255,255,0.07)' }}
+          >
+            <p style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: '0.65rem',
+              letterSpacing: '4px',
+              color: 'var(--color-secondary)',
+              textTransform: 'uppercase',
+              marginBottom: '1.5rem',
+              opacity: 0.85,
+            }}>
+              Guías relacionadas
+            </p>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 220px), 1fr))',
+              gap: '1rem',
+            }}>
+              {related.map((g, i) => {
+                const isPrem = g.isPremium || g.is_premium;
+                return (
+                  <Link key={g.id} to={`/guides/${g.id}`} style={{ textDecoration: 'none' }}>
+                    <motion.div
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.35 + i * 0.07 }}
+                      whileHover={{ y: -3 }}
+                      style={{
+                        background: 'rgba(255,255,255,0.03)',
+                        border: '1px solid rgba(255,255,255,0.07)',
+                        borderRadius: '14px',
+                        overflow: 'hidden',
+                        transition: 'border-color 0.25s, box-shadow 0.25s',
+                      }}
+                      onMouseEnter={e => {
+                        e.currentTarget.style.borderColor = 'rgba(153,0,255,0.25)';
+                        e.currentTarget.style.boxShadow = '0 8px 28px rgba(0,0,0,0.35)';
+                      }}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)';
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
+                    >
+                      {(g.coverImage || g.cover_image) && (
+                        <div style={{ width: '100%', aspectRatio: '16/7', overflow: 'hidden', background: 'rgba(0,0,0,0.3)' }}>
+                          <img
+                            src={g.coverImage || g.cover_image}
+                            alt={g.title}
+                            loading="lazy"
+                            decoding="async"
+                            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform 0.4s' }}
+                            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
+                            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                          />
+                        </div>
+                      )}
+                      <div style={{ padding: '0.9rem 1rem' }}>
+                        <div style={{ display: 'flex', gap: '0.4rem', marginBottom: '0.4rem', flexWrap: 'wrap' }}>
+                          {isPrem && (
+                            <span style={{ padding: '1px 7px', borderRadius: '999px', background: 'rgba(255,215,0,0.12)', border: '1px solid rgba(255,215,0,0.3)', color: '#FFD700', fontSize: '0.6rem', fontFamily: 'var(--font-display)', fontWeight: 700 }}>
+                              ★ Premium
+                            </span>
+                          )}
+                          {g.difficulty && (
+                            <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.3)', fontFamily: 'var(--font-display)', letterSpacing: '0.5px' }}>
+                              {g.difficulty}
+                            </span>
+                          )}
+                        </div>
+                        <p style={{
+                          fontFamily: 'var(--font-display)',
+                          fontSize: '0.88rem',
+                          color: '#fff',
+                          lineHeight: 1.3,
+                          fontWeight: 700,
+                          margin: 0,
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                        }}>
+                          {g.title}
+                        </p>
+                      </div>
+                    </motion.div>
+                  </Link>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
       </div>
 
       <Footer />
