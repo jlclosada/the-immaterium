@@ -631,6 +631,10 @@ export default function ArmyBuilderPage() {
   const saveTimer = useRef(null)
 
   useEffect(() => {
+    document.title = 'Army Builder | The Immaterium';
+  }, [])
+
+  useEffect(() => {
     api.getBuilderFactions()
       .then(data => setFactions(data.results || data))
       .catch(console.error)

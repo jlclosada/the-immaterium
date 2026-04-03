@@ -1,9 +1,14 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Navbar from '../components/UI/Navbar';
 import Footer from '../components/UI/Footer';
 
 export default function NotFoundPage() {
+  useEffect(() => {
+    document.title = 'Página no encontrada | The Immaterium';
+  }, []);
+
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-darker)', display: 'flex', flexDirection: 'column' }}>
       <Navbar />

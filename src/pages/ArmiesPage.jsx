@@ -315,6 +315,8 @@ const ArmyCard = ({ army, index, language, theme, accentColor, onClick }) => {
           <img
             src={army.iconUrl}
             alt={name}
+            loading="lazy"
+            decoding="async"
             style={{
               maxWidth: '90px',
               maxHeight: '90px',
