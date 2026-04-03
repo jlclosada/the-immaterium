@@ -265,6 +265,8 @@ const ArmyDetailPage = () => {
               <img
                 src={army.iconUrl}
                 alt={name}
+                loading="eager"
+                decoding="async"
                 style={{
                   width: 'clamp(90px, 16vw, 150px)',
                   height: 'clamp(90px, 16vw, 150px)',
@@ -535,6 +537,8 @@ const ArmyDetailPage = () => {
                       <img
                         src={image.url}
                         alt={image.name}
+                        loading="lazy"
+                        decoding="async"
                         style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', display: 'block' }}
                       />
                       <div style={{
@@ -695,6 +699,8 @@ const ArmyDetailPage = () => {
               <img
                 src={selectedImage.url}
                 alt={selectedImage.name}
+                loading="eager"
+                decoding="async"
                 style={{
                   maxWidth: '100%', maxHeight: '85vh',
                   objectFit: 'contain',
