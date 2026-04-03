@@ -149,6 +149,8 @@ export const useStore = create((set, get) => ({
         try { await api.likeBattleReport(contentId, userId); } catch (e) { console.error(e); }
       } else if (contentType === 'lore') {
         try { await api.likeLoreEntry(contentId, userId); } catch (e) { console.error(e); }
+      } else if (contentType === 'news') {
+        try { await api.likeNewsArticle(contentId, userId); } catch (e) { console.error(e); }
       }
     } else {
       const updated = [...userLikes, contentId];
@@ -163,6 +165,8 @@ export const useStore = create((set, get) => ({
         try { await api.likeBattleReport(contentId, userId); } catch (e) { console.error(e); }
       } else if (contentType === 'lore') {
         try { await api.likeLoreEntry(contentId, userId); } catch (e) { console.error(e); }
+      } else if (contentType === 'news') {
+        try { await api.likeNewsArticle(contentId, userId); } catch (e) { console.error(e); }
       }
     }
   },

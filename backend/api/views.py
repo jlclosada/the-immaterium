@@ -573,6 +573,27 @@ class NewsArticleViewSet(viewsets.ModelViewSet):
         serializer.save()
         return Response(serializer.data)
 
+    @action(detail=True, methods=['post'])
+    def increment_views(self, request, id=None):
+        NewsArticle.objects.filter(id=id).update(views=F('views') + 1)
+        return Response({'status': 'ok'})
+
+    @action(detail=True, methods=['post'])
+    def like(self, request, id=None):
+        article = self.get_object()
+        user_id = request.data.get('user_id', 'anonymous')
+        liked = UserLike.objects.filter(user_id=user_id, content_type='news', content_id=article.id).exists()
+        if liked:
+            UserLike.objects.filter(user_id=user_id, content_type='news', content_id=article.id).delete()
+            NewsArticle.objects.filter(id=article.id).update(likes=F('likes') - 1)
+            article.refresh_from_db()
+            return Response({'status': 'unliked', 'likes': article.likes})
+        else:
+            UserLike.objects.create(user_id=user_id, content_type='news', content_id=article.id)
+            NewsArticle.objects.filter(id=article.id).update(likes=F('likes') + 1)
+            article.refresh_from_db()
+            return Response({'status': 'liked', 'likes': article.likes})
+
 
 @api_view(['GET'])
 def global_search(request):

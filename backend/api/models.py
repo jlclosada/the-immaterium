@@ -284,6 +284,8 @@ class NewsArticle(models.Model):
     published_at = models.DateTimeField(auto_now_add=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    views = models.IntegerField(default=0)
+    likes = models.IntegerField(default=0)
 
     class Meta:
         ordering = ['-published_at']

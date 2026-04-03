@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { api } from '../services/api';
+import { useStore } from '../stores/useStore';
 import Navbar from '../components/UI/Navbar';
 import Footer from '../components/UI/Footer';
 import { renderMarkdown } from '../utils/renderMarkdown';
@@ -12,26 +13,25 @@ const NewsDetailPage = () => {
   const { id } = useParams();
   const [article, setArticle] = useState(null);
   const [loading, setLoading] = useState(true);
+  const userLikes = useStore(state => state.userLikes);
+  const toggleLike = useStore(state => state.toggleLike);
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchArticle = async () => {
       try {
         const data = await api.getNewsArticle(id);
         setArticle(data);
+        if (data?.title) document.title = `${data.title} | The Immaterium`;
+        // Track view (fire-and-forget)
+        api.incrementNewsViews(id);
       } catch (e) {
         console.error(e);
       } finally {
         setLoading(false);
       }
     };
-    if (id) fetch();
+    if (id) fetchArticle();
   }, [id]);
-
-  useEffect(() => {
-    if (article?.title) {
-      document.title = `${article.title} | The Immaterium`;
-    }
-  }, [article]);
 
   if (loading) {
     return (
@@ -53,6 +53,8 @@ const NewsDetailPage = () => {
       </div>
     );
   }
+
+  const isLiked = userLikes.includes(article.id);
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-darker)', display: 'flex', flexDirection: 'column' }}>
@@ -113,27 +115,51 @@ const NewsDetailPage = () => {
             {article.title}
           </h1>
 
-          {/* Tags */}
-          {article.tags?.length > 0 && (
-            <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
-              {article.tags.map(tag => (
-                <span key={tag} style={{
-                  padding: '3px 10px',
-                  borderRadius: '999px',
-                  background: 'rgba(0,212,255,0.08)',
-                  border: '1px solid rgba(0,212,255,0.2)',
-                  color: 'var(--color-primary)',
-                  fontSize: '0.68rem',
-                  fontWeight: 700,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.8px',
-                  fontFamily: 'var(--font-display)',
-                }}>
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
+          {/* Tags + like button row */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.25rem' }}>
+            {article.tags?.length > 0 && (
+              <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+                {article.tags.map(tag => (
+                  <span key={tag} style={{
+                    padding: '3px 10px',
+                    borderRadius: '999px',
+                    background: 'rgba(0,212,255,0.08)',
+                    border: '1px solid rgba(0,212,255,0.2)',
+                    color: 'var(--color-primary)',
+                    fontSize: '0.68rem',
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.8px',
+                    fontFamily: 'var(--font-display)',
+                  }}>
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Like button */}
+            <motion.button
+              whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.96 }}
+              onClick={() => toggleLike(article.id, 'news')}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: '0.45rem',
+                padding: '0.35rem 0.9rem',
+                background: isLiked ? 'rgba(255,80,80,0.12)' : 'rgba(255,255,255,0.05)',
+                border: `1px solid ${isLiked ? 'rgba(255,80,80,0.3)' : 'rgba(255,255,255,0.1)'}`,
+                borderRadius: '20px',
+                color: isLiked ? '#ff6464' : 'rgba(255,255,255,0.4)',
+                fontSize: '0.78rem', cursor: 'pointer',
+                transition: 'all 0.2s',
+                flexShrink: 0,
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill={isLiked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+              {(article.likes || 0) + (isLiked ? 1 : 0)}
+            </motion.button>
+          </div>
 
           <div style={{ width: '48px', height: '2px', background: 'linear-gradient(90deg, var(--color-primary), var(--color-secondary))' }} />
         </motion.div>

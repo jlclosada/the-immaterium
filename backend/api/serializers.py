@@ -284,7 +284,7 @@ class NewsArticleSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'title', 'slug', 'content', 'excerpt',
             'coverImage', 'images', 'author', 'tags',
-            'isPublished', 'publishedAt'
+            'isPublished', 'publishedAt', 'views', 'likes'
         ]
 
 

@@ -245,6 +245,20 @@ export const api = {
     return true
   },
 
+  likeNewsArticle: async (id, userId) => {
+    const response = await fetch(`${API_URL}/api/news/${id}/like/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: userId }),
+    })
+    if (!response.ok) throw new Error('Failed to like article')
+    return response.json()
+  },
+
+  incrementNewsViews: (id) => {
+    fetch(`${API_URL}/api/news/${id}/increment_views/`, { method: 'POST' }).catch(() => {})
+  },
+
   // Users (admin only)
   getUsers: async (token) => {
     const response = await fetch(`${API_URL}/api/users/`, {
