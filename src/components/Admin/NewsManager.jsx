@@ -315,8 +315,20 @@ const NewsManager = () => {
                                             <span style={{ padding: '1px 7px', background: 'rgba(255,100,100,0.15)', border: '1px solid rgba(255,100,100,0.3)', borderRadius: '10px', color: '#ff8080', fontSize: '0.7rem', flexShrink: 0 }}>Borrador</span>
                                         )}
                                     </div>
-                                    <p style={{ color: 'rgba(255,255,255,0.35)', margin: 0, fontSize: '0.8rem' }}>
-                                        {article.author} · {article.publishedAt ? new Date(article.publishedAt).toLocaleDateString('es-ES') : ''}
+                                    <p style={{ color: 'rgba(255,255,255,0.35)', margin: 0, fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                                        <span>{article.author} · {article.publishedAt ? new Date(article.publishedAt).toLocaleDateString('es-ES') : ''}</span>
+                                        {article.views > 0 && (
+                                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: 'rgba(255,255,255,0.25)', fontSize: '0.72rem' }}>
+                                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                                {article.views}
+                                            </span>
+                                        )}
+                                        {article.likes > 0 && (
+                                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: 'rgba(255,100,100,0.5)', fontSize: '0.72rem' }}>
+                                                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                                                {article.likes}
+                                            </span>
+                                        )}
                                     </p>
                                 </div>
                                 <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
