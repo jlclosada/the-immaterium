@@ -80,7 +80,11 @@ function App() {
     <>
       <ScrollToTop />
       <BackToTop />
-      <Suspense fallback={<div style={{ minHeight: '100vh', background: 'var(--color-darker)' }} />}>
+      <Suspense fallback={
+        <div style={{ minHeight: '100vh', background: 'var(--color-darker)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="loading-spinner" />
+        </div>
+      }>
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<AnimatedPage><LandingPage /></AnimatedPage>} />
