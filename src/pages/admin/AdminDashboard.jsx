@@ -16,6 +16,8 @@ const AdminDashboard = () => {
         listings: 0,
         purchaseRequests: 0,
     });
+    const [engagement, setEngagement] = useState({ totalViews: 0, totalLikes: 0 });
+    const [topContent, setTopContent] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -39,6 +41,11 @@ const AdminDashboard = () => {
             const d = res.value;
             return Array.isArray(d) ? d.length : (d?.results?.length ?? 0);
         };
+        const safeArr = (res) => {
+            if (res.status !== 'fulfilled') return [];
+            const d = res.value;
+            return Array.isArray(d) ? d : (d?.results ?? []);
+        };
 
         setStats({
             armies: safeLen(results[0]),
@@ -50,6 +57,29 @@ const AdminDashboard = () => {
             listings: safeLen(results[6]),
             purchaseRequests: safeLen(results[7]),
         });
+
+        // Compute engagement totals and top content from content that has views/likes
+        const CONTENT_TYPES = [
+            { arr: safeArr(results[1]), type: 'guide',  label: 'Guía',    route: '/guides',        color: 'var(--color-secondary)' },
+            { arr: safeArr(results[2]), type: 'report', label: 'Batalla', route: '/battle-reports', color: '#ff6464' },
+            { arr: safeArr(results[3]), type: 'lore',   label: 'Lore',    route: '/lore',           color: '#a855f7' },
+            { arr: safeArr(results[4]), type: 'news',   label: 'Noticia', route: '/news',            color: '#f59e0b' },
+        ];
+
+        let totalViews = 0, totalLikes = 0;
+        const allItems = [];
+        for (const { arr, type, label, route, color } of CONTENT_TYPES) {
+            for (const item of arr) {
+                totalViews += item.views || 0;
+                totalLikes += item.likes || 0;
+                if (item.views || item.likes) {
+                    allItems.push({ id: item.id, title: item.title, views: item.views || 0, likes: item.likes || 0, type, label, route, color });
+                }
+            }
+        }
+        allItems.sort((a, b) => (b.views + b.likes * 2) - (a.views + a.likes * 2));
+        setEngagement({ totalViews, totalLikes });
+        setTopContent(allItems.slice(0, 6));
         setLoading(false);
     };
 
@@ -225,6 +255,138 @@ const AdminDashboard = () => {
                     </Link>
                 ))}
             </div>
+
+            {/* Engagement summary */}
+            <motion.div
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.45 }}
+                style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    gap: '1rem',
+                    marginBottom: '2rem',
+                }}
+            >
+                {[
+                    { label: 'Vistas Totales', value: engagement.totalViews.toLocaleString('es-ES'), icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>, color: 'var(--color-primary)' },
+                    { label: 'Me Gustas Totales', value: engagement.totalLikes.toLocaleString('es-ES'), icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>, color: '#ff6464' },
+                ].map((card, i) => (
+                    <div key={i} style={{
+                        padding: '1.25rem 1.5rem',
+                        background: 'rgba(255,255,255,0.025)',
+                        border: `1px solid ${card.color}28`,
+                        borderRadius: '16px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '1rem',
+                    }}>
+                        <div style={{ color: card.color, opacity: 0.7 }}>{card.icon}</div>
+                        <div>
+                            <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 700, color: card.color, lineHeight: 1 }}>{card.value}</div>
+                            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.82rem', marginTop: '0.25rem' }}>{card.label}</div>
+                        </div>
+                    </div>
+                ))}
+            </motion.div>
+
+            {/* Top content */}
+            {topContent.length > 0 && (
+                <motion.div
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.5 }}
+                    style={{
+                        background: 'rgba(255,255,255,0.02)',
+                        border: '1px solid rgba(255,255,255,0.07)',
+                        borderRadius: '20px',
+                        padding: '1.75rem',
+                        marginBottom: '2rem',
+                    }}
+                >
+                    <h2 style={{
+                        fontFamily: 'var(--font-display)',
+                        fontSize: '1rem',
+                        letterSpacing: '2px',
+                        textTransform: 'uppercase',
+                        color: 'rgba(255,255,255,0.45)',
+                        marginBottom: '1.25rem',
+                    }}>
+                        Contenido más popular
+                    </h2>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                        {topContent.map((item, i) => (
+                            <Link key={`${item.type}-${item.id}`} to={`${item.route}/${item.id}`} style={{ textDecoration: 'none' }}>
+                                <motion.div
+                                    whileHover={{ x: 4 }}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.75rem',
+                                        padding: '0.75rem 1rem',
+                                        borderRadius: '12px',
+                                        background: 'rgba(255,255,255,0.02)',
+                                        border: '1px solid rgba(255,255,255,0.05)',
+                                        transition: 'background 0.2s',
+                                    }}
+                                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.04)'}
+                                    onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
+                                >
+                                    <span style={{
+                                        fontFamily: 'var(--font-display)',
+                                        fontSize: '0.7rem',
+                                        fontWeight: 700,
+                                        color: 'rgba(255,255,255,0.2)',
+                                        width: '1.5rem',
+                                        flexShrink: 0,
+                                    }}>
+                                        #{i + 1}
+                                    </span>
+                                    <span style={{
+                                        padding: '2px 8px',
+                                        borderRadius: '999px',
+                                        background: `${item.color}18`,
+                                        border: `1px solid ${item.color}35`,
+                                        color: item.color,
+                                        fontSize: '0.62rem',
+                                        fontFamily: 'var(--font-display)',
+                                        fontWeight: 700,
+                                        letterSpacing: '0.5px',
+                                        flexShrink: 0,
+                                    }}>
+                                        {item.label}
+                                    </span>
+                                    <span style={{
+                                        flex: 1,
+                                        fontSize: '0.85rem',
+                                        color: 'rgba(255,255,255,0.7)',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap',
+                                        fontFamily: 'var(--font-display)',
+                                    }}>
+                                        {item.title}
+                                    </span>
+                                    <div style={{ display: 'flex', gap: '0.75rem', flexShrink: 0 }}>
+                                        {item.views > 0 && (
+                                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', fontSize: '0.72rem', color: 'rgba(255,255,255,0.3)' }}>
+                                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                                {item.views}
+                                            </span>
+                                        )}
+                                        {item.likes > 0 && (
+                                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', fontSize: '0.72rem', color: 'rgba(255,100,100,0.55)' }}>
+                                                <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                                                {item.likes}
+                                            </span>
+                                        )}
+                                    </div>
+                                </motion.div>
+                            </Link>
+                        ))}
+                    </div>
+                </motion.div>
+            )}
 
             {/* Quick actions */}
             <motion.div

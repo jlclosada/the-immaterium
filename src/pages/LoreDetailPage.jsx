@@ -26,6 +26,7 @@ const getCategoryColor = (value) => CATEGORY_COLORS[value] || 'var(--color-prima
 const LoreDetailPage = () => {
   const { id } = useParams();
   const [lore, setLore] = useState(null);
+  const [related, setRelated] = useState([]);
   const [loading, setLoading] = useState(true);
   const language = useStore(state => state.language);
   const userLikes = useStore(state => state.userLikes);
@@ -35,11 +36,28 @@ const LoreDetailPage = () => {
   useEffect(() => {
     const fetchLore = async () => {
       try {
-        const data = await api.getLoreEntry(id);
-        setLore(data);
-        if (data?.title) document.title = `${data.title} | The Immaterium`;
-        // Track view (fire-and-forget)
-        api.incrementLoreViews(id);
+        const [entryRes, allRes] = await Promise.allSettled([
+          api.getLoreEntry(id),
+          api.getLoreEntries(),
+        ]);
+        const data = entryRes.status === 'fulfilled' ? entryRes.value : null;
+        if (data) {
+          setLore(data);
+          if (data.title) document.title = `${data.title} | The Immaterium`;
+          api.incrementLoreViews(id);
+          if (allRes.status === 'fulfilled' && Array.isArray(allRes.value)) {
+            const others = allRes.value.filter(e => String(e.id) !== String(id));
+            // Score by same category, then same faction
+            const scored = others.map(e => ({
+              ...e,
+              _score:
+                (e.category === data.category ? 2 : 0) +
+                (data.relatedFaction && e.relatedFaction?.id === data.relatedFaction?.id ? 1 : 0),
+            }));
+            scored.sort((a, b) => b._score - a._score || new Date(b.createdAt) - new Date(a.createdAt));
+            setRelated(scored.slice(0, 3));
+          }
+        }
       } catch (error) {
         console.error('Failed to fetch lore entry:', error);
       } finally {
@@ -291,6 +309,97 @@ const LoreDetailPage = () => {
                 <div style={{ marginLeft: 'auto', color: 'var(--color-primary)', opacity: 0.6, fontSize: '1.2rem' }}>→</div>
               </div>
             </Link>
+          </motion.div>
+        )}
+
+        {/* Related lore entries */}
+        {related.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35 }}
+            style={{ marginTop: '3rem', paddingTop: '2.5rem', borderTop: '1px solid rgba(255,255,255,0.07)' }}
+          >
+            <p style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: '0.65rem',
+              letterSpacing: '4px',
+              color: 'var(--color-primary)',
+              textTransform: 'uppercase',
+              marginBottom: '1.25rem',
+              opacity: 0.8,
+            }}>
+              Entradas relacionadas
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+              {related.map((entry, i) => {
+                const catColor = getCategoryColor(entry.category);
+                return (
+                  <Link key={entry.id} to={`/lore/${entry.id}`} style={{ textDecoration: 'none' }}>
+                    <motion.div
+                      initial={{ opacity: 0, x: -12 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.4 + i * 0.06 }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '1rem',
+                        padding: '0.9rem 1.1rem',
+                        borderRadius: '14px',
+                        background: 'rgba(255,255,255,0.02)',
+                        border: '1px solid rgba(255,255,255,0.06)',
+                        transition: 'border-color 0.2s, background 0.2s',
+                      }}
+                      onMouseEnter={e => {
+                        e.currentTarget.style.borderColor = `${catColor}40`;
+                        e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
+                      }}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)';
+                        e.currentTarget.style.background = 'rgba(255,255,255,0.02)';
+                      }}
+                    >
+                      <div style={{
+                        width: '8px', height: '8px', borderRadius: '50%',
+                        background: catColor, flexShrink: 0,
+                        boxShadow: `0 0 6px ${catColor}80`,
+                      }} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{
+                          fontFamily: 'var(--font-display)',
+                          fontSize: '0.9rem',
+                          color: 'rgba(255,255,255,0.85)',
+                          margin: 0,
+                          letterSpacing: '0.4px',
+                          display: '-webkit-box',
+                          WebkitLineClamp: 1,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                        }}>
+                          {entry.title}
+                        </p>
+                        {entry.excerpt && (
+                          <p style={{
+                            fontSize: '0.75rem',
+                            color: 'rgba(255,255,255,0.3)',
+                            margin: '2px 0 0',
+                            display: '-webkit-box',
+                            WebkitLineClamp: 1,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                          }}>
+                            {entry.excerpt}
+                          </p>
+                        )}
+                      </div>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={catColor} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, opacity: 0.6 }}>
+                        <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+                      </svg>
+                    </motion.div>
+                  </Link>
+                );
+              })}
+            </div>
           </motion.div>
         )}
       </div>
