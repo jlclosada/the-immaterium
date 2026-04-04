@@ -310,7 +310,7 @@ export default function ProfilePage() {
           {/* Name + badges */}
           <div style={{ flex: 1, paddingBottom: '0.5rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap', marginBottom: '0.3rem' }}>
-              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.2rem, 4vw, 1.7rem)', color: '#fff', margin: 0 }}>
+              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.2rem, 4vw, 1.7rem)', color: '#fff', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 'min(100%, 320px)' }}>
                 {name || username || user?.email?.split('@')[0] || 'Usuario'}
               </h1>
               {isAdmin && (

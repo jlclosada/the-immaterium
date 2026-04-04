@@ -1544,3 +1544,14 @@ input.search-bar:focus {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+/* ── Skeleton loading animation ─────────────────────────────────────────────── */
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.skeleton {
+  animation: skeleton-pulse 1.6s ease-in-out infinite;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}

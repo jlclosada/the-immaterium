@@ -350,6 +350,7 @@ class LoreEntry(models.Model):
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='historia')
     content = models.TextField()
     excerpt = models.CharField(max_length=500, blank=True)
+    cover_image = models.URLField(max_length=500, blank=True, default='')
     related_faction = models.ForeignKey(Army, on_delete=models.SET_NULL, null=True, blank=True, related_name='lore_entries')
     tags = ArrayField(models.CharField(max_length=100), default=list)
     author = models.CharField(max_length=200, default='Administratum')

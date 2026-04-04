@@ -170,24 +170,19 @@ export default function Navbar() {
         transition: 'background 0.35s, border-color 0.35s, backdrop-filter 0.35s, box-shadow 0.35s',
       }}>
         {/* Logo */}
-        <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.55rem', flexShrink: 0 }}>
-          <div style={{
-            width: '30px', height: '30px', borderRadius: '8px',
-            background: 'linear-gradient(135deg, var(--color-primary) 0%, #0044bb 100%)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 0 12px rgba(0,212,255,0.35)',
-          }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-            </svg>
-          </div>
-          <span style={{
-            fontFamily: 'var(--font-display)', fontSize: '0.82rem',
-            letterSpacing: '3.5px', fontWeight: 900,
-            color: isLight ? 'var(--text-primary)' : '#fff',
-          }}>
-            IMMATERIUM
-          </span>
+        <style>{`
+          .logo-desktop { display: block; }
+          .logo-mobile  { display: none;  }
+          @media (max-width: 820px) {
+            .logo-desktop { display: none  !important; }
+            .logo-mobile  { display: block !important; }
+          }
+        `}</style>
+        <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+          <img src="/logo-full.png" alt="The Immaterium" className="logo-desktop"
+            style={{ height: '38px', width: 'auto', objectFit: 'contain' }} />
+          <img src="/logo-icon.png" alt="The Immaterium" className="logo-mobile"
+            style={{ height: '32px', width: 'auto', objectFit: 'contain' }} />
         </Link>
 
         {/* ── Desktop center nav ── */}

@@ -167,7 +167,18 @@ const GuidesPage = () => {
         </motion.div>
 
         {loading ? (
-          <div className="loading-spinner" style={{ margin: '5rem auto' }} />
+          <div className="cards-grid">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} style={{ borderRadius: '16px', overflow: 'hidden', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <div style={{ height: '200px', background: 'rgba(255,255,255,0.05)', animation: 'skeleton-pulse 1.6s ease-in-out infinite' }} />
+                <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  <div style={{ height: '20px', borderRadius: '4px', background: 'rgba(255,255,255,0.05)', width: '70%', animation: 'skeleton-pulse 1.6s ease-in-out infinite' }} />
+                  <div style={{ height: '14px', borderRadius: '4px', background: 'rgba(255,255,255,0.04)', width: '100%', animation: 'skeleton-pulse 1.6s ease-in-out infinite' }} />
+                  <div style={{ height: '14px', borderRadius: '4px', background: 'rgba(255,255,255,0.04)', width: '85%', animation: 'skeleton-pulse 1.6s ease-in-out infinite' }} />
+                </div>
+              </div>
+            ))}
+          </div>
         ) : filteredGuides.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '5rem 2rem', color: 'rgba(255,255,255,0.3)' }}>
             <div style={{ marginBottom: '1rem', opacity: 0.25 }}>

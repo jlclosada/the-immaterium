@@ -50,7 +50,7 @@ const ArmiesPage = () => {
         const gamesList = gamesData.status === 'fulfilled' ? (Array.isArray(gamesData.value) ? gamesData.value : []) : [];
         setArmies(armiesList);
         setGames(gamesList);
-        if (gamesList.length > 0) setSelectedGameId(gamesList[0].id);
+        // No auto-select — null = "Todos"
       } catch (error) {
         console.error('Failed to fetch data:', error);
       } finally {
@@ -66,16 +66,17 @@ const ArmiesPage = () => {
   const { isLight } = useTheme();
   const secondaryColor = selectedGame?.secondaryColor || '#7b2fff';
 
-  const { user } = useStore(s => ({ user: s.user }));
+  const user = useStore(s => s.user);
   const favoriteArmyNames = user?.favorite_armies
     ? user.favorite_armies.split(',').filter(Boolean).map(s => s.trim().toLowerCase())
     : [];
 
   const filteredArmies = armies.filter(army => {
-    // Filter by game
-    if (selectedGameId && army.gameId && army.gameId !== selectedGameId) return false;
-    // If army has no game assigned, show it in the first game tab only
-    if (selectedGameId && !army.gameId && games.length > 0 && games[0].id !== selectedGameId) return false;
+    // null = "Todos" → show everything
+    if (selectedGameId !== null) {
+      if (army.gameId && army.gameId !== selectedGameId) return false;
+      if (!army.gameId && games.length > 0 && games[0].id !== selectedGameId) return false;
+    }
     // Search filter
     const term = searchTerm.toLowerCase();
     if (!term) return true;
@@ -151,50 +152,51 @@ const ArmiesPage = () => {
           </p>
         </motion.div>
 
-        {/* Game selector — plain text tabs, no boxes */}
-        {games.length > 1 && (
+        {/* Game selector — pill tabs with count badges */}
+        {games.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              gap: '2rem',
-              marginBottom: 'clamp(1.5rem, 4vw, 2.5rem)',
-              flexWrap: 'wrap',
-            }}
+            style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', marginBottom: 'clamp(1.5rem, 4vw, 2.5rem)', flexWrap: 'wrap' }}
           >
-            {games.map((game, i) => {
-              const isSelected = game.id === selectedGameId;
-              const gAccent = game.accentColor || '#00d4ff';
+            {/* "Todos" tab */}
+            {(() => {
+              const isActive = selectedGameId === null;
               return (
-                <React.Fragment key={game.id}>
-                  {i > 0 && (
-                    <span style={{ color: isLight ? 'var(--text-faint)' : 'rgba(255,255,255,0.12)', fontSize: '0.8rem' }}>·</span>
-                  )}
-                  <motion.button
-                    onClick={() => setSelectedGameId(game.id)}
-                    whileHover={{ opacity: 1 }}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      borderBottom: isSelected ? `1px solid ${gAccent}` : '1px solid transparent',
-                      color: isSelected ? gAccent : isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.35)',
-                      fontFamily: 'var(--font-display)',
-                      fontSize: '0.72rem',
-                      letterSpacing: '3px',
-                      textTransform: 'uppercase',
-                      cursor: 'pointer',
-                      padding: '0.1rem 0',
-                      transition: 'color 0.3s, border-color 0.3s',
-                      opacity: isSelected ? 1 : 0.7,
-                    }}
-                  >
-                    {game.name}
-                  </motion.button>
-                </React.Fragment>
+                <button onClick={() => setSelectedGameId(null)} style={{
+                  padding: '0.4rem 1.1rem', borderRadius: '20px', cursor: 'pointer',
+                  fontFamily: 'var(--font-display)', fontSize: '0.68rem', letterSpacing: '1.5px', textTransform: 'uppercase',
+                  border: `1px solid ${isActive ? 'rgba(0,212,255,0.55)' : 'rgba(255,255,255,0.12)'}`,
+                  background: isActive ? 'rgba(0,212,255,0.1)' : 'rgba(255,255,255,0.04)',
+                  color: isActive ? 'var(--color-primary)' : isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.45)',
+                  transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '0.45rem',
+                }}>
+                  Todos
+                  <span style={{ background: isActive ? 'rgba(0,212,255,0.2)' : 'rgba(255,255,255,0.08)', borderRadius: '10px', padding: '1px 7px', fontSize: '0.65rem', letterSpacing: 0 }}>
+                    {armies.length}
+                  </span>
+                </button>
+              );
+            })()}
+            {games.map(game => {
+              const isActive = game.id === selectedGameId;
+              const gAccent = game.accentColor || '#00d4ff';
+              const count = armies.filter(a => a.gameId === game.id || a.game?.id === game.id).length;
+              return (
+                <button key={game.id} onClick={() => setSelectedGameId(game.id)} style={{
+                  padding: '0.4rem 1.1rem', borderRadius: '20px', cursor: 'pointer',
+                  fontFamily: 'var(--font-display)', fontSize: '0.68rem', letterSpacing: '1.5px', textTransform: 'uppercase',
+                  border: `1px solid ${isActive ? `${gAccent}88` : 'rgba(255,255,255,0.12)'}`,
+                  background: isActive ? `${gAccent}18` : 'rgba(255,255,255,0.04)',
+                  color: isActive ? gAccent : isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.45)',
+                  transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '0.45rem',
+                }}>
+                  {game.name}
+                  <span style={{ background: isActive ? `${gAccent}30` : 'rgba(255,255,255,0.08)', borderRadius: '10px', padding: '1px 7px', fontSize: '0.65rem', letterSpacing: 0 }}>
+                    {count || 0}
+                  </span>
+                </button>
               );
             })}
           </motion.div>

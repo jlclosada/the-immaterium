@@ -90,21 +90,42 @@ const NewsPage = () => {
         </motion.div>
 
         {loading ? (
-          <div className="loading-spinner" style={{ margin: '5rem auto' }} />
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 320px), 1fr))', gap: '1.5rem' }}>
+            {[...Array(6)].map((_, i) => (
+              <div key={i} style={{ borderRadius: '16px', overflow: 'hidden', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <div style={{ height: '200px', background: 'rgba(255,255,255,0.05)', animation: 'skeleton-pulse 1.6s ease-in-out infinite' }} />
+                <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  <div style={{ height: '20px', borderRadius: '4px', background: 'rgba(255,255,255,0.05)', width: '70%', animation: 'skeleton-pulse 1.6s ease-in-out infinite' }} />
+                  <div style={{ height: '14px', borderRadius: '4px', background: 'rgba(255,255,255,0.04)', width: '100%', animation: 'skeleton-pulse 1.6s ease-in-out infinite' }} />
+                  <div style={{ height: '14px', borderRadius: '4px', background: 'rgba(255,255,255,0.04)', width: '85%', animation: 'skeleton-pulse 1.6s ease-in-out infinite' }} />
+                </div>
+              </div>
+            ))}
+          </div>
         ) : filtered.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '5rem 2rem', color: 'rgba(255,255,255,0.3)' }}>
             <p>{searchTerm ? `Sin resultados para "${searchTerm}"` : 'No hay artículos publicados aún.'}</p>
           </div>
         ) : (
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 420px), 1fr))',
-            gap: 'clamp(1rem, 3vw, 1.75rem)',
-          }}>
-            {filtered.map((article, index) => (
-              <NewsCard key={article.id} article={article} index={index} />
-            ))}
-          </div>
+          <>
+            {/* Artículo destacado */}
+            {!searchTerm && filtered.length > 0 && (
+              <FeaturedNewsCard article={filtered[0]} />
+            )}
+            {/* Resto del grid */}
+            {(searchTerm ? filtered : filtered.slice(1)).length > 0 && (
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 420px), 1fr))',
+                gap: 'clamp(1rem, 3vw, 1.75rem)',
+                marginTop: !searchTerm && filtered.length > 1 ? 'clamp(1.5rem, 3vw, 2rem)' : 0,
+              }}>
+                {(searchTerm ? filtered : filtered.slice(1)).map((article, index) => (
+                  <NewsCard key={article.id} article={article} index={index} />
+                ))}
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -112,6 +133,76 @@ const NewsPage = () => {
     </div>
   );
 };
+
+/* ── Tarjeta destacada (primer artículo, ancho completo) ─────────────────── */
+const FeaturedNewsCard = ({ article }) => (
+  <Link to={`/news/${article.id}`} style={{ textDecoration: 'none', display: 'block' }}>
+    <motion.article
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      whileHover={{ y: -3 }}
+      style={{
+        background: 'rgba(255,255,255,0.02)',
+        border: '1px solid rgba(255,255,255,0.07)',
+        borderRadius: '24px',
+        overflow: 'hidden',
+        display: 'flex',
+        flexWrap: 'wrap',
+        cursor: 'pointer',
+        transition: 'box-shadow 0.3s, border-color 0.3s',
+      }}
+      onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,212,255,0.2)'; e.currentTarget.style.borderColor = 'rgba(0,212,255,0.2)'; }}
+      onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'; }}
+    >
+      {/* Imagen */}
+      {article.coverImage && (
+        <div style={{ flex: '1 1 300px', minWidth: '280px', height: '280px', overflow: 'hidden', background: 'rgba(0,0,0,0.3)', position: 'relative' }}>
+          <img src={article.coverImage} alt={article.title} loading="eager"
+            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            onError={e => { e.target.style.display = 'none'; }}
+          />
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, transparent 60%, rgba(5,5,16,0.6))', pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', top: '1rem', left: '1rem', padding: '4px 12px', borderRadius: '20px', background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))', color: '#fff', fontSize: '0.6rem', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', fontFamily: 'var(--font-display)' }}>
+            Destacado
+          </div>
+        </div>
+      )}
+      {/* Contenido */}
+      <div style={{ flex: '1 1 300px', padding: 'clamp(1.5rem, 3vw, 2rem)', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '0.75rem' }}>
+        {!article.coverImage && (
+          <div style={{ display: 'inline-block', padding: '4px 12px', borderRadius: '20px', background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))', color: '#fff', fontSize: '0.6rem', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', fontFamily: 'var(--font-display)', width: 'fit-content' }}>
+            Destacado
+          </div>
+        )}
+        <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.3)', letterSpacing: '0.5px', textTransform: 'uppercase', fontFamily: 'var(--font-display)', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          {article.publishedAt && <span>{new Date(article.publishedAt).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}</span>}
+          {article.publishedAt && article.author && <span style={{ opacity: 0.4 }}>·</span>}
+          {article.author && <span>Por {article.author}</span>}
+        </div>
+        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.4rem, 3vw, 2rem)', color: '#fff', lineHeight: 1.15, letterSpacing: '0.5px', margin: 0, fontWeight: 700 }}>
+          {article.title}
+        </h2>
+        {article.excerpt && (
+          <p style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1.8, fontSize: 'clamp(0.87rem, 1.8vw, 0.98rem)', margin: 0, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+            {article.excerpt}
+          </p>
+        )}
+        {article.tags?.length > 0 && (
+          <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+            {article.tags.slice(0, 4).map(tag => (
+              <span key={tag} style={{ padding: '3px 10px', borderRadius: '999px', background: 'rgba(0,212,255,0.07)', border: '1px solid rgba(0,212,255,0.15)', color: 'var(--color-primary)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.8px', fontFamily: 'var(--font-display)' }}>{tag}</span>
+            ))}
+          </div>
+        )}
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: 'var(--color-primary)', fontWeight: 700, fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: '1.5px', textTransform: 'uppercase' }}>
+          Leer artículo
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </span>
+      </div>
+    </motion.article>
+  </Link>
+);
 
 const NewsCard = ({ article, index }) => (
   <Link to={`/news/${article.id}`} style={{ textDecoration: 'none' }}>

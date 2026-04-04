@@ -2,11 +2,11 @@
  * LANDING PAGE — Full redesign
  * Apple-quality, content-first, immersive
  */
-import { useEffect, useState, useRef } from 'react';
+import { AnimatePresence, motion, useScroll, useTransform } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
-import Navbar from '../components/UI/Navbar';
 import Footer from '../components/UI/Footer';
+import Navbar from '../components/UI/Navbar';
 import { useTheme } from '../hooks/useTheme';
 import { useTranslation } from '../i18n/translations';
 import { api } from '../services/api';
@@ -286,6 +286,7 @@ export default function LandingPage() {
   const [featuredNews,     setFeaturedNews]     = useState([]);
   const [featuredGuides,   setFeaturedGuides]   = useState([]);
   const [featuredReports,  setFeaturedReports]  = useState([]);
+  const [featuredLore,     setFeaturedLore]     = useState([]);
   const [featuredListings, setFeaturedListings] = useState([]);
   const [selectedListing,  setSelectedListing]  = useState(null);
   const [loadingContent,   setLoadingContent]   = useState(true);
@@ -301,10 +302,11 @@ export default function LandingPage() {
   const loadContent = async () => {
     setLoadingContent(true);
     try {
-      const [newsRes, guidesRes, reportsRes, listingsRes] = await Promise.allSettled([
+      const [newsRes, guidesRes, reportsRes, loreRes, listingsRes] = await Promise.allSettled([
         api.getNewsArticles(),
         api.getPaintingGuides(),
         api.getBattleReports(),
+        api.getLoreEntries(),
         api.getListings({ status: 'available' }),
       ]);
       const safe = r => r.status === 'fulfilled' && Array.isArray(r.value) ? r.value : [];
@@ -315,6 +317,7 @@ export default function LandingPage() {
       setFeaturedNews(safe(newsRes).slice(0, 4));
       setFeaturedGuides(guides.slice(0, 4));
       setFeaturedReports(reports.slice(0, 3));
+      setFeaturedLore(safe(loreRes).slice(0, 4));
       setFeaturedListings(safe(listingsRes).slice(0, 4));
     } finally {
       setLoadingContent(false);
@@ -394,6 +397,11 @@ export default function LandingPage() {
         <div aria-hidden style={{ position: 'absolute', top: '45%', left: '50%', transform: 'translate(-50%,-50%)', width: 'min(800px,100vw)', height: 'min(800px,100vw)', borderRadius: '50%', background: isLight ? 'radial-gradient(circle, rgba(0,100,220,0.06) 0%, transparent 65%)' : 'radial-gradient(circle, rgba(0,212,255,0.05) 0%, transparent 65%)', pointerEvents: 'none' }} />
 
         <motion.div style={{ y: heroY, opacity: heroOpacity, zIndex: 1, width: '100%', maxWidth: '900px' }}>
+          {/* Logo icon */}
+          <motion.div variants={fadeUp} initial="hidden" animate="visible" style={{ marginBottom: '2rem' }}>
+            <img src="/logo-icon.png" alt="The Immaterium" style={{ height: '90px', width: 'auto', objectFit: 'contain', filter: 'drop-shadow(0 0 24px rgba(0,212,255,0.35))' }} />
+          </motion.div>
+
           {/* Eyebrow */}
           <motion.div variants={fadeUp} initial="hidden" animate="visible">
             <span style={{
@@ -508,24 +516,6 @@ export default function LandingPage() {
             )}
           </motion.div>
         </motion.div>
-
-        {/* Scroll indicator */}
-        <motion.div
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }}
-          style={{ position: 'absolute', bottom: '2.5rem', left: '50%', transform: 'translateX(-50%)', zIndex: 1 }}
-        >
-          <motion.div
-            animate={{ y: [0, 10, 0] }} transition={{ repeat: Infinity, duration: 2.2, ease: 'easeInOut' }}
-            style={{ width: '28px', height: '44px', borderRadius: '14px', border: `2px solid ${isLight ? 'rgba(0,153,204,0.3)' : 'rgba(255,255,255,0.15)'}`, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '6px 0', cursor: 'pointer' }}
-            onClick={() => window.scrollBy({ top: window.innerHeight, behavior: 'smooth' })}
-          >
-            <motion.div
-              animate={{ y: [0, 12, 0], opacity: [1, 0, 1] }}
-              transition={{ repeat: Infinity, duration: 2.2, ease: 'easeInOut' }}
-              style={{ width: '5px', height: '5px', borderRadius: '50%', background: isLight ? 'rgba(0,153,204,0.6)' : 'rgba(255,255,255,0.5)' }}
-            />
-          </motion.div>
-        </motion.div>
       </section>
 
       {/* ════════════════════════════════════
@@ -540,13 +530,12 @@ export default function LandingPage() {
       }}>
         <div style={{ maxWidth: '900px', margin: '0 auto', display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 0 }}>
           {[
-            { value: 40000,                                  suffix: '+', label: 'Años de lore', color: 'var(--color-primary)' },
             { value: storeArmies.length || 18,               suffix: '',  label: 'Facciones',    color: '#ff6464' },
             { value: allGuidesCount + allReportsCount || 50, suffix: '+', label: 'Contenidos',   color: '#10b981' },
             { value: 100,                                    suffix: '%', label: 'En Español',   color: '#f59e0b' },
           ].map((s, i) => (
             <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1, duration: 0.6 }}
-              style={{ flex: '1 1 150px', borderRight: i < 3 ? (isLight ? '1px solid rgba(0,0,0,0.07)' : '1px solid rgba(255,255,255,0.06)') : 'none' }}>
+              style={{ flex: '1 1 150px', borderRight: i < 2 ? (isLight ? '1px solid rgba(0,0,0,0.07)' : '1px solid rgba(255,255,255,0.06)') : 'none' }}>
               <StatCard value={s.value} suffix={s.suffix} label={s.label} color={s.color} isLight={isLight} />
             </motion.div>
           ))}
@@ -705,6 +694,48 @@ export default function LandingPage() {
                   </motion.div>
                 ))
               }
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ════════════════════════════════════
+          LORE & HISTORIA
+          ════════════════════════════════════ */}
+      {featuredLore.length > 0 && (
+        <section style={{ position: 'relative', zIndex: 1, padding: sectionPad, background: isLight ? 'rgba(180,120,255,0.03)' : 'rgba(180,120,255,0.025)' }}>
+          <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', marginBottom: 'clamp(1.5rem, 3vw, 2.5rem)' }}>
+              <SectionHeader eyebrow="Fragmentos del 41º milenio" title="Biblioteca de Lore" isLight={isLight} accent="var(--color-accent)" />
+              <Link to="/lore" style={{ flexShrink: 0, padding: '0.5rem 1.2rem', borderRadius: '20px', border: '1px solid rgba(255,215,0,0.3)', color: 'var(--color-accent)', textDecoration: 'none', fontSize: '0.78rem', fontFamily: 'var(--font-display)', letterSpacing: '1.5px', transition: 'background 0.2s', marginBottom: 'clamp(1.5rem, 3vw, 2.5rem)' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,215,0,0.07)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+              >Ver todo →</Link>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {featuredLore.map((entry, i) => {
+                const CATEGORY_COLORS = { 'Historia': '#ffd700', 'Facciones': '#00d4ff', 'Personajes': '#ff6b35', 'Planetas': '#7bff7b', 'Tecnología': '#c084fc', 'Eventos': '#f97316' };
+                const catColor = CATEGORY_COLORS[entry.category] || 'var(--color-accent)';
+                return (
+                  <motion.div key={entry.id} initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.07 }}>
+                    <Link to={`/lore/${entry.id}`} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem 1.25rem', borderRadius: '14px', background: isLight ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.025)', border: `1px solid ${isLight ? 'rgba(180,120,255,0.1)' : 'rgba(255,255,255,0.06)'}`, transition: 'border-color 0.2s, background 0.2s' }}
+                      onMouseEnter={e => { e.currentTarget.style.borderColor = `${catColor}50`; e.currentTarget.style.background = isLight ? 'rgba(255,255,255,0.9)' : `${catColor}08`; }}
+                      onMouseLeave={e => { e.currentTarget.style.borderColor = isLight ? 'rgba(180,120,255,0.1)' : 'rgba(255,255,255,0.06)'; e.currentTarget.style.background = isLight ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.025)'; }}
+                    >
+                      <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: catColor, flexShrink: 0, boxShadow: `0 0 8px ${catColor}80` }} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '2px' }}>
+                          <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.88rem', color: isLight ? '#111' : 'rgba(255,255,255,0.9)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{entry.title}</span>
+                          {entry.category && <span style={{ fontSize: '0.6rem', padding: '2px 8px', borderRadius: '20px', background: `${catColor}20`, color: catColor, border: `1px solid ${catColor}40`, flexShrink: 0, fontFamily: 'var(--font-display)', fontWeight: 700, letterSpacing: '0.8px', textTransform: 'uppercase' }}>{entry.category}</span>}
+                        </div>
+                        {entry.excerpt && <p style={{ margin: 0, fontSize: '0.78rem', color: isLight ? 'var(--text-dim)' : 'rgba(255,255,255,0.35)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{entry.excerpt}</p>}
+                      </div>
+                      {entry.relatedFaction?.name && <span style={{ fontSize: '0.7rem', color: isLight ? 'var(--text-dim)' : 'var(--text-faint)', flexShrink: 0 }}>{entry.relatedFaction.name}</span>}
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={catColor} strokeWidth="2" strokeLinecap="round" style={{ flexShrink: 0, opacity: 0.6 }}><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </Link>
+                  </motion.div>
+                );
+              })}
             </div>
           </div>
         </section>

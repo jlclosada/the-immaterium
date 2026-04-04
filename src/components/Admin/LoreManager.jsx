@@ -16,6 +16,7 @@ const LoreManager = () => {
         title: '',
         category: 'historia',
         content: '',
+        coverImage: '',
         tags: [],
         relatedFaction: '',
         author: 'Administratum',
@@ -54,7 +55,8 @@ const LoreManager = () => {
                 ...formData,
                 id: formData.id || `lore-${Date.now()}`,
                 relatedFaction: formData.relatedFaction || null,
-                isFeatured: formData.isFeatured || false
+                isFeatured: formData.isFeatured || false,
+                coverImage: formData.coverImage || '',
             };
 
             if (editingLore) {
@@ -80,6 +82,7 @@ const LoreManager = () => {
             title: lore.title,
             category: lore.category,
             content: lore.content,
+            coverImage: lore.coverImage || '',
             tags: lore.tags || [],
             relatedFaction: lore.relatedFaction?.id || '',
             author: lore.author,
@@ -95,6 +98,7 @@ const LoreManager = () => {
             title: '',
             category: 'historia',
             content: '',
+            coverImage: '',
             tags: [],
             relatedFaction: '',
             author: 'Administratum',
@@ -122,6 +126,7 @@ const LoreManager = () => {
             title: '',
             category: 'historia',
             content: '',
+            coverImage: '',
             tags: [],
             relatedFaction: '',
             author: 'Administratum',
@@ -288,6 +293,25 @@ const LoreManager = () => {
                                         onChange={(e) => setFormData({ ...formData, author: e.target.value })}
                                         style={inputStyle}
                                     />
+                                </div>
+
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem' }}>
+                                        URL Imagen de Portada
+                                    </label>
+                                    <input
+                                        type="url"
+                                        placeholder="https://res.cloudinary.com/..."
+                                        value={formData.coverImage}
+                                        onChange={(e) => setFormData({ ...formData, coverImage: e.target.value })}
+                                        style={inputStyle}
+                                    />
+                                    {formData.coverImage && (
+                                        <div style={{ marginTop: '0.5rem', borderRadius: '8px', overflow: 'hidden', maxHeight: '100px' }}>
+                                            <img src={formData.coverImage} alt="preview" style={{ width: '100%', height: '100px', objectFit: 'cover' }}
+                                                onError={e => { e.target.style.display = 'none'; }} />
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div>

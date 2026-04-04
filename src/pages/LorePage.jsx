@@ -62,8 +62,18 @@ const LorePage = () => {
     return (
       <div style={{ minHeight: '100vh', background: 'var(--color-darker)', display: 'flex', flexDirection: 'column' }}>
         <Navbar />
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div className="loading-spinner" />
+        <div style={{ flex: 1, maxWidth: '900px', margin: '0 auto', padding: 'clamp(5rem, 10vw, 6.5rem) clamp(1rem, 4vw, 2rem) 3rem', width: '100%' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '2rem' }}>
+            {[...Array(8)].map((_, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem 1.25rem', borderRadius: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'rgba(255,255,255,0.08)', flexShrink: 0, animation: 'skeleton-pulse 1.6s ease-in-out infinite' }} />
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <div style={{ height: '16px', borderRadius: '4px', background: 'rgba(255,255,255,0.06)', width: '60%', animation: 'skeleton-pulse 1.6s ease-in-out infinite' }} />
+                  <div style={{ height: '12px', borderRadius: '4px', background: 'rgba(255,255,255,0.04)', width: '90%', animation: 'skeleton-pulse 1.6s ease-in-out infinite' }} />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -245,19 +255,37 @@ const LoreCard = ({ entry, index }) => {
           e.currentTarget.style.borderColor = isLight ? 'rgba(0,120,200,0.12)' : 'rgba(255,255,255,0.06)';
         }}
       >
-        {/* Category color dot */}
-        <div style={{
-          width: '36px', height: '36px', flexShrink: 0,
-          borderRadius: '10px',
-          background: `${categoryColor}18`,
-          border: `1px solid ${categoryColor}35`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          marginTop: '2px',
-        }}>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={categoryColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-          </svg>
-        </div>
+        {/* Category icon / cover thumbnail */}
+        {entry.coverImage ? (
+          <div style={{
+            width: '80px', height: '80px', flexShrink: 0,
+            borderRadius: '10px',
+            overflow: 'hidden',
+            border: `1px solid ${categoryColor}35`,
+            marginTop: '2px',
+          }}>
+            <img
+              src={entry.coverImage}
+              alt={entry.title}
+              loading="lazy"
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              onError={e => { e.target.style.display = 'none'; }}
+            />
+          </div>
+        ) : (
+          <div style={{
+            width: '36px', height: '36px', flexShrink: 0,
+            borderRadius: '10px',
+            background: `${categoryColor}18`,
+            border: `1px solid ${categoryColor}35`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            marginTop: '2px',
+          }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={categoryColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+            </svg>
+          </div>
+        )}
 
         <div style={{ flex: 1, minWidth: 0 }}>
           {/* Badges row */}

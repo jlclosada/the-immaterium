@@ -21,6 +21,7 @@ const VideosPage = () => {
   const t = useTranslation(language);
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeSeries, setActiveSeries] = useState('all');
@@ -120,6 +121,7 @@ const VideosPage = () => {
       }
     } catch (err) {
       console.warn('RSS feed fetch failed:', err);
+      setError('No se pudieron cargar los vídeos. Visita el canal directamente.');
     }
     setLoading(false);
   };
@@ -310,57 +312,37 @@ const VideosPage = () => {
         }}
       >
         {loading ? (
-          <div
-            style={{
-              textAlign: 'center',
-              padding: '4rem 0',
-              color: 'rgba(255,255,255,0.5)',
-            }}
-          >
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
-              style={{
-                width: '40px',
-                height: '40px',
-                border: '3px solid rgba(255,255,255,0.1)',
-                borderTop: '3px solid #ff4444',
-                borderRadius: '50%',
-                margin: '0 auto 1rem',
-              }}
-            />
-            <p style={{ fontFamily: 'var(--font-display)', letterSpacing: '2px' }}>
-              {t('loading')}
-            </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: '1.25rem', marginTop: '1rem' }}>
+            {[...Array(6)].map((_, i) => (
+              <div key={i} style={{ borderRadius: '14px', overflow: 'hidden', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <div style={{ aspectRatio: '16/9', background: 'rgba(255,255,255,0.06)', animation: 'skeleton-pulse 1.6s ease-in-out infinite' }} />
+                <div style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                  <div style={{ height: '16px', borderRadius: '4px', background: 'rgba(255,255,255,0.05)', width: '80%', animation: 'skeleton-pulse 1.6s ease-in-out infinite' }} />
+                  <div style={{ height: '12px', borderRadius: '4px', background: 'rgba(255,255,255,0.04)', width: '55%', animation: 'skeleton-pulse 1.6s ease-in-out infinite' }} />
+                </div>
+              </div>
+            ))}
           </div>
-        ) : videos.length === 0 ? (
-          <div
-            style={{
-              textAlign: 'center',
-              padding: '4rem 1rem',
-              color: 'rgba(255,255,255,0.5)',
-            }}
-          >
-            <p style={{ fontSize: '1.1rem', marginBottom: '1.5rem' }}>{t('noVideosFound')}</p>
-            <motion.a
-              href={YOUTUBE_CHANNEL_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              whileHover={{ scale: 1.05 }}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                color: '#ff4444',
-                textDecoration: 'none',
-                fontFamily: 'var(--font-display)',
-                fontSize: '0.9rem',
-                letterSpacing: '1px',
-              }}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        ) : error && videos.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '5rem 2rem', color: 'var(--text-dim)' }}>
+            <div style={{ marginBottom: '1.5rem' }}>
+              <svg width="56" height="56" viewBox="0 0 24 24" fill="#ff4444" style={{ opacity: 0.7 }}>
                 <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
               </svg>
+            </div>
+            <p style={{ fontSize: '1.05rem', marginBottom: '1.75rem', color: 'rgba(255,255,255,0.5)' }}>{error}</p>
+            <a href={YOUTUBE_CHANNEL_URL} target="_blank" rel="noopener noreferrer"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.6rem', padding: '0.75rem 1.75rem', background: 'rgba(255,0,0,0.12)', color: '#ff4444', border: '1px solid rgba(255,0,0,0.3)', borderRadius: '10px', textDecoration: 'none', fontFamily: 'var(--font-display)', fontSize: '0.78rem', letterSpacing: '2px', textTransform: 'uppercase' }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" /></svg>
+              Ir al canal de YouTube
+            </a>
+          </div>
+        ) : videos.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '4rem 1rem', color: 'rgba(255,255,255,0.5)' }}>
+            <p style={{ fontSize: '1.1rem', marginBottom: '1.5rem' }}>{t('noVideosFound')}</p>
+            <motion.a href={YOUTUBE_CHANNEL_URL} target="_blank" rel="noopener noreferrer" whileHover={{ scale: 1.05 }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', color: '#ff4444', textDecoration: 'none', fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '1px' }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" /></svg>
               {t('visitChannelDirectly')}
             </motion.a>
           </div>

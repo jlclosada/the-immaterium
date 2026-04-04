@@ -69,18 +69,11 @@ const Footer = () => {
             transition={{ delay: 0.05 }}
           >
             <Link to="/" style={{ textDecoration: 'none', display: 'inline-block', marginBottom: '1.25rem' }}>
-              <h3 style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: 'clamp(1.1rem, 2.5vw, 1.35rem)',
-                background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                margin: 0,
-                letterSpacing: '3px',
-              }}>
-                THE IMMATERIUM
-              </h3>
+              <img
+                src="/logo-full.png"
+                alt="The Immaterium"
+                style={{ height: '48px', width: 'auto', objectFit: 'contain' }}
+              />
             </Link>
             <p style={{
               color: 'var(--text-dim)',

@@ -149,7 +149,18 @@ const BattleReportsPage = () => {
         </motion.div>
 
         {loading ? (
-          <div className="loading-spinner" style={{ margin: '5rem auto' }} />
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 320px), 1fr))', gap: '1.5rem' }}>
+            {[...Array(6)].map((_, i) => (
+              <div key={i} style={{ borderRadius: '16px', overflow: 'hidden', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <div style={{ height: '200px', background: 'rgba(255,255,255,0.05)', animation: 'skeleton-pulse 1.6s ease-in-out infinite' }} />
+                <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  <div style={{ height: '20px', borderRadius: '4px', background: 'rgba(255,255,255,0.05)', width: '70%', animation: 'skeleton-pulse 1.6s ease-in-out infinite' }} />
+                  <div style={{ height: '14px', borderRadius: '4px', background: 'rgba(255,255,255,0.04)', width: '100%', animation: 'skeleton-pulse 1.6s ease-in-out infinite' }} />
+                  <div style={{ height: '14px', borderRadius: '4px', background: 'rgba(255,255,255,0.04)', width: '85%', animation: 'skeleton-pulse 1.6s ease-in-out infinite' }} />
+                </div>
+              </div>
+            ))}
+          </div>
         ) : error ? (
           <div style={{ textAlign: 'center', padding: '5rem 2rem', color: 'rgba(255,255,255,0.4)' }}>
             <div style={{ marginBottom: '1rem', opacity: 0.3 }}>
@@ -186,6 +197,7 @@ const ReportCard = ({ report, index, onClick }) => {
   const s1 = report.finalScore?.player1;
   const s2 = report.finalScore?.player2;
   const [hovered, setHovered] = React.useState(false);
+  const coverImage = report.images?.[0] || null;
 
   return (
     <motion.div
@@ -200,11 +212,9 @@ const ReportCard = ({ report, index, onClick }) => {
         background: isLight ? 'rgba(255,255,255,0.97)' : 'rgba(255,255,255,0.025)',
         border: `1px solid ${hovered ? 'rgba(255,100,100,0.35)' : (isLight ? 'rgba(0,120,200,0.15)' : 'rgba(255,255,255,0.07)')}`,
         borderRadius: 'var(--radius-xl)',
-        padding: 'clamp(1.25rem, 3vw, 1.75rem)',
         cursor: 'pointer',
         display: 'flex',
         flexDirection: 'column',
-        gap: '1rem',
         position: 'relative',
         overflow: 'hidden',
         transition: 'box-shadow 0.3s, border-color 0.3s',
@@ -212,12 +222,39 @@ const ReportCard = ({ report, index, onClick }) => {
         boxShadow: hovered ? '0 12px 40px rgba(255,100,100,0.12), 0 2px 8px rgba(0,0,0,0.2)' : 'none',
       }}
     >
-      {/* Top accent */}
-      <div style={{
-        position: 'absolute', top: 0, left: 0, right: 0, height: '2px',
-        background: 'linear-gradient(90deg, #ff6464, #f9cb28)',
-        opacity: 0.5,
-      }} />
+      {/* Cover image */}
+      {coverImage ? (
+        <div style={{ height: '160px', overflow: 'hidden', position: 'relative', flexShrink: 0 }}>
+          <img
+            src={coverImage}
+            alt={report.title}
+            loading="lazy"
+            style={{
+              width: '100%', height: '100%', objectFit: 'cover',
+              transition: 'transform 0.5s ease',
+              transform: hovered ? 'scale(1.06)' : 'scale(1)',
+            }}
+          />
+          <div style={{
+            position: 'absolute', bottom: 0, left: 0, right: 0, height: '60%',
+            background: 'linear-gradient(to top, rgba(5,5,16,0.9), transparent)',
+          }} />
+          {/* Top accent on image */}
+          <div style={{
+            position: 'absolute', top: 0, left: 0, right: 0, height: '2px',
+            background: 'linear-gradient(90deg, #ff6464, #f9cb28)',
+          }} />
+        </div>
+      ) : (
+        /* Top accent when no image */
+        <div style={{
+          position: 'absolute', top: 0, left: 0, right: 0, height: '2px',
+          background: 'linear-gradient(90deg, #ff6464, #f9cb28)',
+          opacity: 0.5,
+        }} />
+      )}
+
+      <div style={{ padding: 'clamp(1.25rem, 3vw, 1.75rem)', display: 'flex', flexDirection: 'column', gap: '1rem', flex: 1 }}>
 
       {/* Title + date */}
       <div>
@@ -339,6 +376,7 @@ const ReportCard = ({ report, index, onClick }) => {
             <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
           </svg>
         </div>
+      </div>
       </div>
     </motion.div>
   );

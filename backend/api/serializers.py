@@ -254,13 +254,14 @@ class UserFavoriteSerializer(serializers.ModelSerializer):
 class LoreEntrySerializer(serializers.ModelSerializer):
     dateCreated = serializers.DateTimeField(source='date_created', read_only=True)
     isFeatured = serializers.BooleanField(source='is_featured', required=False, default=False)
+    coverImage = serializers.URLField(source='cover_image', required=False, allow_blank=True, default='')
     relatedFaction = serializers.SerializerMethodField()
 
     class Meta:
         model = LoreEntry
         fields = [
             'id', 'title', 'category', 'content', 'excerpt',
-            'tags', 'author', 'dateCreated', 'isFeatured', 'views', 'likes',
+            'coverImage', 'tags', 'author', 'dateCreated', 'isFeatured', 'views', 'likes',
             'relatedFaction'
         ]
 

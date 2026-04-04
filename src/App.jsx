@@ -1,7 +1,15 @@
 import { useEffect, lazy, Suspense } from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useStore } from './stores/useStore';
 import { api } from './services/api';
+
+function AdminGuard({ children }) {
+  const user = useStore(s => s.user);
+  const token = useStore(s => s.token);
+  if (!token) return <Navigate to="/signin" replace />;
+  if (user && !user.isAdmin && !user.is_staff) return <Navigate to="/" replace />;
+  return children;
+}
 import { AnimatePresence, motion } from 'framer-motion';
 
 import ScrollToTop from './components/UI/ScrollToTop';
@@ -88,7 +96,7 @@ function App() {
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<AnimatedPage><LandingPage /></AnimatedPage>} />
-          <Route path="/login" element={<AnimatedPage><LoginPage /></AnimatedPage>} />
+          <Route path="/login" element={<Navigate to="/signin" replace />} />
 
           {/* Public Content Routes */}
           <Route path="/armies" element={<AnimatedPage><ArmiesPage /></AnimatedPage>} />
@@ -114,7 +122,7 @@ function App() {
           <Route path="/profile" element={<AnimatedPage><ProfilePage /></AnimatedPage>} />
 
           {/* Admin Routes */}
-          <Route path="/admin" element={<AdminLayout />}>
+          <Route path="/admin" element={<AdminGuard><AdminLayout /></AdminGuard>}>
             <Route index element={<AdminDashboard />} />
             <Route path="armies" element={<ArmyManager />} />
             <Route path="guides" element={<GuideManager />} />
