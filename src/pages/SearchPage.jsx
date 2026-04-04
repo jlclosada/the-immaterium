@@ -56,13 +56,26 @@ const TYPE_ICONS = {
   ),
 };
 
+const MAX_RECENT = 6;
+function getRecentSearches() {
+  try { return JSON.parse(localStorage.getItem('wg-recent-searches') || '[]'); } catch { return []; }
+}
+function saveRecentSearch(q) {
+  if (!q || q.length < 2) return;
+  const list = [q, ...getRecentSearches().filter(s => s !== q)].slice(0, MAX_RECENT);
+  localStorage.setItem('wg-recent-searches', JSON.stringify(list));
+}
+function clearRecentSearches() {
+  localStorage.removeItem('wg-recent-searches');
+}
+
 function ResultCard({ result, index }) {
   const navigate = useNavigate();
   const color = TYPE_COLORS[result.type] || '#fff';
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.04 }}
       onClick={() => navigate(result.url)}
@@ -71,12 +84,12 @@ function ResultCard({ result, index }) {
         border: `1px solid rgba(255, 255, 255, 0.08)`,
         borderLeft: `3px solid ${color}`,
         borderRadius: '12px',
-        padding: '1.25rem 1.5rem',
+        padding: '0.9rem 1.25rem',
         cursor: 'pointer',
         transition: 'all 0.2s ease',
         display: 'flex',
         gap: '1rem',
-        alignItems: 'flex-start',
+        alignItems: 'center',
       }}
       whileHover={{
         background: 'rgba(255, 255, 255, 0.06)',
@@ -84,45 +97,55 @@ function ResultCard({ result, index }) {
         x: 4,
       }}
     >
-      {/* Type badge */}
-      <div style={{
-        flexShrink: 0,
-        width: '36px',
-        height: '36px',
-        borderRadius: '8px',
-        background: `${color}20`,
-        border: `1px solid ${color}40`,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color,
-      }}>
-        {TYPE_ICONS[result.type]}
-      </div>
+      {/* Thumbnail or type badge */}
+      {result.image ? (
+        <img
+          src={result.image}
+          alt={result.title}
+          loading="lazy"
+          decoding="async"
+          style={{ width: '56px', height: '42px', objectFit: 'cover', borderRadius: '7px', flexShrink: 0 }}
+        />
+      ) : (
+        <div style={{
+          flexShrink: 0,
+          width: '42px',
+          height: '42px',
+          borderRadius: '8px',
+          background: `${color}20`,
+          border: `1px solid ${color}40`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color,
+        }}>
+          {TYPE_ICONS[result.type]}
+        </div>
+      )}
 
       {/* Content */}
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
           <span style={{
-            fontSize: '0.65rem',
+            fontSize: '0.6rem',
             fontFamily: 'var(--font-display)',
             letterSpacing: '1px',
             color,
             textTransform: 'uppercase',
-            opacity: 0.8,
+            opacity: 0.85,
           }}>
             {TYPE_LABELS[result.type + 's'] || result.type}
           </span>
           {result.subtitle && (
             <>
               <span style={{ color: 'var(--text-faint)', fontSize: '0.7rem' }}>·</span>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>{result.subtitle}</span>
+              <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '180px' }}>{result.subtitle}</span>
             </>
           )}
         </div>
         <h3 style={{
           margin: 0,
-          fontSize: '1rem',
+          fontSize: '0.95rem',
           fontFamily: 'var(--font-display)',
           color: '#fff',
           letterSpacing: '0.5px',
@@ -134,12 +157,12 @@ function ResultCard({ result, index }) {
         </h3>
         {result.description && (
           <p style={{
-            margin: '0.35rem 0 0',
-            fontSize: '0.82rem',
+            margin: '0.2rem 0 0',
+            fontSize: '0.78rem',
             color: 'var(--text-dim)',
-            lineHeight: 1.55,
+            lineHeight: 1.5,
             display: '-webkit-box',
-            WebkitLineClamp: 2,
+            WebkitLineClamp: 1,
             WebkitBoxOrient: 'vertical',
             overflow: 'hidden',
           }}>
@@ -149,8 +172,8 @@ function ResultCard({ result, index }) {
       </div>
 
       {/* Arrow */}
-      <div style={{ flexShrink: 0, color: 'var(--text-dim)', alignSelf: 'center' }}>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <div style={{ flexShrink: 0, color: `${color}80`, alignSelf: 'center' }}>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
           <polyline points="9 18 15 12 9 6" />
         </svg>
       </div>
@@ -166,6 +189,8 @@ export default function SearchPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [error, setError] = useState(null);
+  const [showRecent, setShowRecent] = useState(false);
+  const [recentSearches, setRecentSearches] = useState(getRecentSearches);
   const inputRef = useRef(null);
   const debounceRef = useRef(null);
 
@@ -194,6 +219,8 @@ export default function SearchPage() {
       const data = await api.search(q, type);
       setResults(data.results || []);
       setHasSearched(true);
+      saveRecentSearch(q);
+      setRecentSearches(getRecentSearches());
     } catch (e) {
       setError('Error al buscar. Intenta de nuevo.');
       setResults([]);
@@ -205,6 +232,7 @@ export default function SearchPage() {
   const handleInputChange = (e) => {
     const val = e.target.value;
     setQuery(val);
+    setShowRecent(false);
     clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       setSearchParams(val ? { q: val } : {});
@@ -216,6 +244,19 @@ export default function SearchPage() {
     setActiveType(type);
     if (query.length >= 2) runSearch(query, type);
   };
+
+  const applyRecent = (term) => {
+    setQuery(term);
+    setShowRecent(false);
+    setSearchParams({ q: term });
+    runSearch(term, activeType);
+  };
+
+  // Count results per type for filter badges
+  const countByType = results.reduce((acc, r) => {
+    acc[r.type + 's'] = (acc[r.type + 's'] || 0) + 1;
+    return acc;
+  }, {});
 
   const filteredResults = activeType === 'all'
     ? results
@@ -303,8 +344,8 @@ export default function SearchPage() {
               boxSizing: 'border-box',
               boxShadow: '0 0 0 0 transparent',
             }}
-            onFocus={e => { e.target.style.borderColor = 'var(--color-primary)'; e.target.style.boxShadow = '0 0 20px rgba(0, 212, 255, 0.15)'; }}
-            onBlur={e => { e.target.style.borderColor = 'rgba(0, 212, 255, 0.3)'; e.target.style.boxShadow = 'none'; }}
+            onFocus={e => { e.target.style.borderColor = 'var(--color-primary)'; e.target.style.boxShadow = '0 0 20px rgba(0, 212, 255, 0.15)'; setShowRecent(true); }}
+            onBlur={e => { e.target.style.borderColor = 'rgba(0, 212, 255, 0.3)'; e.target.style.boxShadow = 'none'; setTimeout(() => setShowRecent(false), 200); }}
           />
           {query && (
             <button
@@ -330,6 +371,56 @@ export default function SearchPage() {
               </svg>
             </button>
           )}
+
+          {/* Recent searches dropdown */}
+          <AnimatePresence>
+            {showRecent && !query && recentSearches.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.15 }}
+                style={{
+                  position: 'absolute',
+                  top: 'calc(100% + 8px)',
+                  left: 0,
+                  right: 0,
+                  zIndex: 50,
+                  background: 'rgba(8,8,22,0.97)',
+                  border: '1px solid rgba(0,212,255,0.2)',
+                  borderRadius: '14px',
+                  overflow: 'hidden',
+                  boxShadow: '0 16px 40px rgba(0,0,0,0.5)',
+                  backdropFilter: 'blur(12px)',
+                }}
+              >
+                <div style={{ padding: '0.75rem 1rem 0.4rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: '0.65rem', fontFamily: 'var(--font-display)', letterSpacing: '2px', color: 'rgba(255,255,255,0.25)', textTransform: 'uppercase' }}>Búsquedas recientes</span>
+                  <button onClick={() => { clearRecentSearches(); setRecentSearches([]); setShowRecent(false); }}
+                    style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.2)', fontSize: '0.72rem', cursor: 'pointer', padding: '0 2px' }}>
+                    Borrar
+                  </button>
+                </div>
+                {recentSearches.map((term, i) => (
+                  <button key={i} onClick={() => applyRecent(term)}
+                    style={{
+                      width: '100%', textAlign: 'left', padding: '0.7rem 1rem',
+                      background: 'none', border: 'none',
+                      color: 'rgba(255,255,255,0.65)', fontSize: '0.9rem',
+                      cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.65rem',
+                      transition: 'background 0.15s',
+                      borderTop: i === 0 ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(255,255,255,0.03)',
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,212,255,0.05)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                  >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2" strokeLinecap="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.78"/></svg>
+                    {term}
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
 
         {/* Type filter tabs */}
@@ -344,26 +435,44 @@ export default function SearchPage() {
             marginBottom: '2rem',
           }}
         >
-          {Object.entries(TYPE_LABELS).map(([type, label]) => (
-            <button
-              key={type}
-              onClick={() => handleTypeChange(type)}
-              style={{
-                padding: '0.4rem 1rem',
-                borderRadius: '20px',
-                border: `1px solid ${activeType === type ? 'var(--color-primary)' : 'rgba(255,255,255,0.1)'}`,
-                background: activeType === type ? 'rgba(0, 212, 255, 0.15)' : 'rgba(255,255,255,0.04)',
-                color: activeType === type ? 'var(--color-primary)' : '#aaa',
-                fontSize: '0.8rem',
-                fontFamily: 'var(--font-display)',
-                letterSpacing: '0.5px',
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-              }}
-            >
-              {label.toUpperCase()}
-            </button>
-          ))}
+          {Object.entries(TYPE_LABELS).map(([type, label]) => {
+            const isActive = activeType === type;
+            const count = type === 'all' ? results.length : (countByType[type] || 0);
+            const typeColor = type === 'all' ? 'var(--color-primary)' : (TYPE_COLORS[type.replace(/s$/, '')] || 'var(--color-primary)');
+            return (
+              <button
+                key={type}
+                onClick={() => handleTypeChange(type)}
+                style={{
+                  padding: '0.4rem 0.9rem',
+                  borderRadius: '20px',
+                  border: `1px solid ${isActive ? typeColor : 'rgba(255,255,255,0.1)'}`,
+                  background: isActive ? `${typeColor}20` : 'rgba(255,255,255,0.04)',
+                  color: isActive ? typeColor : '#aaa',
+                  fontSize: '0.77rem',
+                  fontFamily: 'var(--font-display)',
+                  letterSpacing: '0.5px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                }}
+              >
+                {label.toUpperCase()}
+                {hasSearched && count > 0 && (
+                  <span style={{
+                    minWidth: '18px', height: '18px', borderRadius: '9px', padding: '0 4px',
+                    background: isActive ? typeColor : 'rgba(255,255,255,0.1)',
+                    color: isActive ? (typeColor === 'var(--color-primary)' ? '#000' : '#fff') : 'rgba(255,255,255,0.5)',
+                    fontSize: '0.62rem', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    {count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </motion.div>
 
         {/* Results area */}
