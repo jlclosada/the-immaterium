@@ -121,6 +121,10 @@ export default function ProfilePage() {
   const [savingPrefs, setSavingPrefs] = useState(false);
   const [savePrefsMsg, setSavePrefsMsg] = useState('');
 
+  // Content cache for purchases / likes / favorites display
+  const [allGuides, setAllGuides] = useState([]);
+  const [allContent, setAllContent] = useState({ guides: [], reports: [], lore: [], news: [] });
+
   // Password change
   const [currentPw, setCurrentPw] = useState('');
   const [newPw, setNewPw] = useState('');
@@ -139,6 +143,18 @@ export default function ProfilePage() {
       setFavoriteArmies(user.favorite_armies ? user.favorite_armies.split(',').filter(Boolean) : []);
       setPlayerTypes(user.player_types ? user.player_types.split(',').filter(Boolean) : []);
     }
+    // Fetch content for purchases / saved / likes display (fire-and-forget)
+    Promise.allSettled([
+      api.getPaintingGuides(),
+      api.getBattleReports(),
+      api.getLoreEntries(),
+      api.getNewsArticles(),
+    ]).then(([g, r, l, n]) => {
+      const safe = (res) => (res.status === 'fulfilled' && Array.isArray(res.value) ? res.value : []);
+      const guides = safe(g);
+      setAllGuides(guides);
+      setAllContent({ guides, reports: safe(r), lore: safe(l), news: safe(n) });
+    });
   }, [token, user]);
 
   const handleSave = async () => {
@@ -198,6 +214,7 @@ export default function ProfilePage() {
   const tabs = [
     { id: 'profile',   label: 'Perfil',    icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> },
     { id: 'gustos',    label: 'Gustos',    icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> },
+    { id: 'saved',     label: 'Guardados', icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg> },
     { id: 'purchases', label: 'Compras',   icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> },
     { id: 'security',  label: 'Seguridad', icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> },
   ];
@@ -595,33 +612,131 @@ export default function ProfilePage() {
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                  {purchases.map(guideId => (
-                    <Link key={guideId} to={`/guides/${guideId}`} style={{
-                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                      padding: '0.85rem 1rem', background: 'rgba(255,255,255,0.03)',
-                      border: '1px solid rgba(255,255,255,0.07)', borderRadius: '10px',
-                      textDecoration: 'none', transition: 'border-color 0.2s',
-                    }}
-                      onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(0,212,255,0.25)'}
-                      onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                        <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: 'rgba(255,215,0,0.1)', border: '1px solid rgba(255,215,0,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFD700" strokeWidth="2" strokeLinecap="round"><path d="M18.37 2.63 14 7l-1.59-1.59a2 2 0 0 0-2.82 0L8 7l9 9 1.59-1.59a2 2 0 0 0 0-2.82L17 10l4.37-4.37a2.12 2.12 0 1 0-3-3z"/></svg>
+                  {purchases.map(guideId => {
+                    const guide = allGuides.find(g => String(g.id) === String(guideId));
+                    return (
+                      <Link key={guideId} to={`/guides/${guideId}`} style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        padding: '0.75rem 1rem', background: 'rgba(255,255,255,0.03)',
+                        border: '1px solid rgba(255,255,255,0.07)', borderRadius: '10px',
+                        textDecoration: 'none', transition: 'border-color 0.2s', gap: '0.75rem',
+                      }}
+                        onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(255,215,0,0.3)'}
+                        onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
+                          {(guide?.coverImage || guide?.cover_image) ? (
+                            <img
+                              src={guide.coverImage || guide.cover_image}
+                              alt={guide.title}
+                              loading="lazy"
+                              decoding="async"
+                              style={{ width: '48px', height: '36px', objectFit: 'cover', borderRadius: '6px', flexShrink: 0 }}
+                            />
+                          ) : (
+                            <div style={{ width: '48px', height: '36px', borderRadius: '6px', background: 'rgba(255,215,0,0.1)', border: '1px solid rgba(255,215,0,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFD700" strokeWidth="2" strokeLinecap="round"><path d="M18.37 2.63 14 7l-1.59-1.59a2 2 0 0 0-2.82 0L8 7l9 9 1.59-1.59a2 2 0 0 0 0-2.82L17 10l4.37-4.37a2.12 2.12 0 1 0-3-3z"/></svg>
+                            </div>
+                          )}
+                          <div style={{ minWidth: 0 }}>
+                            <div style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.88rem', fontFamily: 'var(--font-display)', letterSpacing: '0.3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {guide?.title || `Guía #${guideId}`}
+                            </div>
+                            {guide?.difficulty && (
+                              <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.3)', marginTop: '1px' }}>{guide.difficulty}</div>
+                            )}
+                          </div>
                         </div>
-                        <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.88rem' }}>Guía #{guideId}</span>
-                      </div>
-                      <span style={{ color: '#50c878', fontSize: '0.72rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-                        Desbloqueada
-                      </span>
-                    </Link>
-                  ))}
+                        <span style={{ color: '#50c878', fontSize: '0.72rem', display: 'flex', alignItems: 'center', gap: '0.3rem', flexShrink: 0 }}>
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                          Desbloqueada
+                        </span>
+                      </Link>
+                    );
+                  })}
                 </div>
               )}
             </Section>
           </div>
         )}
+
+        {/* ── TAB: SAVED ── */}
+        {activeTab === 'saved' && (() => {
+          // Build resolved content lists from IDs stored locally
+          const ALL = [
+            ...allContent.guides.map(g => ({ ...g, _type: 'guide',  _label: 'Guía',    _route: '/guides',         _color: 'var(--color-secondary)', _cover: g.coverImage || g.cover_image })),
+            ...allContent.reports.map(r => ({ ...r, _type: 'report', _label: 'Batalla', _route: '/battle-reports',  _color: '#ff6464',                _cover: r.images?.[0] })),
+            ...allContent.lore.map(l =>   ({ ...l, _type: 'lore',   _label: 'Lore',    _route: '/lore',            _color: '#a855f7',                _cover: l.coverImage })),
+            ...allContent.news.map(n =>   ({ ...n, _type: 'news',   _label: 'Noticia', _route: '/news',            _color: '#f59e0b',                _cover: n.coverImage })),
+          ];
+          const likedItems = ALL.filter(item => userLikes.includes(item.id));
+          const favItems   = ALL.filter(item => userFavorites.includes(item.id));
+          const ContentRow = ({ item }) => (
+            <Link to={`${item._route}/${item.id}`} style={{ textDecoration: 'none' }}>
+              <motion.div
+                whileHover={{ x: 3 }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '0.75rem',
+                  padding: '0.75rem 1rem', background: 'rgba(255,255,255,0.02)',
+                  border: '1px solid rgba(255,255,255,0.06)', borderRadius: '10px',
+                  transition: 'border-color 0.2s, background 0.2s',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = `${item._color}35`; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'; e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; }}
+              >
+                {item._cover ? (
+                  <img src={item._cover} alt={item.title} loading="lazy" decoding="async"
+                    style={{ width: '44px', height: '33px', objectFit: 'cover', borderRadius: '5px', flexShrink: 0 }} />
+                ) : (
+                  <div style={{ width: '44px', height: '33px', borderRadius: '5px', background: `${item._color}12`, border: `1px solid ${item._color}25`, flexShrink: 0 }} />
+                )}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: '0.87rem', color: 'rgba(255,255,255,0.82)', fontFamily: 'var(--font-display)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {item.title}
+                  </div>
+                </div>
+                <span style={{ padding: '1px 7px', borderRadius: '999px', background: `${item._color}15`, border: `1px solid ${item._color}30`, color: item._color, fontSize: '0.6rem', fontFamily: 'var(--font-display)', fontWeight: 700, flexShrink: 0 }}>
+                  {item._label}
+                </span>
+              </motion.div>
+            </Link>
+          );
+          return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              <Section
+                title={`Me gusta (${likedItems.length})`}
+                accent="#ff6464"
+                icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>}
+              >
+                {likedItems.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '2rem', color: 'rgba(255,255,255,0.25)' }}>
+                    <p style={{ fontSize: '0.87rem' }}>Aún no has dado me gusta a ningún contenido</p>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    {likedItems.map(item => <ContentRow key={`like-${item._type}-${item.id}`} item={item} />)}
+                  </div>
+                )}
+              </Section>
+
+              <Section
+                title={`Favoritos (${favItems.length})`}
+                accent="#ffb432"
+                icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>}
+              >
+                {favItems.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '2rem', color: 'rgba(255,255,255,0.25)' }}>
+                    <p style={{ fontSize: '0.87rem' }}>No tienes contenido guardado como favorito</p>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    {favItems.map(item => <ContentRow key={`fav-${item._type}-${item.id}`} item={item} />)}
+                  </div>
+                )}
+              </Section>
+            </div>
+          );
+        })()}
 
         {/* ── TAB: SECURITY ── */}
         {activeTab === 'security' && (

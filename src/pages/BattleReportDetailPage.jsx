@@ -12,16 +12,35 @@ const BattleReportDetailPage = () => {
   const { id } = useParams();
   const { armies, userLikes, toggleLike } = useStore();
   const [report, setReport] = useState(null);
+  const [related, setRelated] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchReport = async () => {
       try {
-        const data = await api.getBattleReport(id);
-        setReport(data);
-        if (data?.title) document.title = `${data.title} | The Immaterium`;
-        // Track view (fire-and-forget)
-        api.incrementReportViews(id);
+        const [reportRes, allRes] = await Promise.allSettled([
+          api.getBattleReport(id),
+          api.getBattleReports(),
+        ]);
+        const data = reportRes.status === 'fulfilled' ? reportRes.value : null;
+        if (data) {
+          setReport(data);
+          if (data.title) document.title = `${data.title} | The Immaterium`;
+          api.incrementReportViews(id);
+          if (allRes.status === 'fulfilled' && Array.isArray(allRes.value)) {
+            const others = allRes.value.filter(r => String(r.id) !== String(id));
+            const f1 = data.armies?.player1?.faction;
+            const f2 = data.armies?.player2?.faction;
+            const scored = others.map(r => ({
+              ...r,
+              _score:
+                (f1 && (r.armies?.player1?.faction === f1 || r.armies?.player2?.faction === f1) ? 1 : 0) +
+                (f2 && (r.armies?.player1?.faction === f2 || r.armies?.player2?.faction === f2) ? 1 : 0),
+            }));
+            scored.sort((a, b) => b._score - a._score || new Date(b.date) - new Date(a.date));
+            setRelated(scored.slice(0, 3));
+          }
+        }
       } catch (error) {
         console.error('Failed to fetch battle report:', error);
       } finally {
@@ -517,6 +536,100 @@ const BattleReportDetailPage = () => {
                 </span>
               </h2>
               <YouTubeEmbed url={report.youtube_url} />
+            </div>
+          </motion.div>
+        )}
+
+        {/* Related reports */}
+        {related.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            style={{ marginTop: '3.5rem', paddingTop: '2.5rem', borderTop: '1px solid rgba(255,255,255,0.07)' }}
+          >
+            <p style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: '0.65rem',
+              letterSpacing: '4px',
+              color: '#ff6464',
+              textTransform: 'uppercase',
+              marginBottom: '1.5rem',
+              opacity: 0.85,
+            }}>
+              Más informes de batalla
+            </p>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))',
+              gap: '1rem',
+            }}>
+              {related.map((r, i) => {
+                const cover = r.images?.[0];
+                const p1 = r.armies?.player1;
+                const p2 = r.armies?.player2;
+                return (
+                  <Link key={r.id} to={`/battle-reports/${r.id}`} style={{ textDecoration: 'none' }}>
+                    <motion.div
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.35 + i * 0.07 }}
+                      whileHover={{ y: -3 }}
+                      style={{
+                        background: 'rgba(255,255,255,0.03)',
+                        border: '1px solid rgba(255,255,255,0.07)',
+                        borderRadius: '14px',
+                        overflow: 'hidden',
+                        transition: 'border-color 0.25s, box-shadow 0.25s',
+                      }}
+                      onMouseEnter={e => {
+                        e.currentTarget.style.borderColor = 'rgba(255,100,100,0.25)';
+                        e.currentTarget.style.boxShadow = '0 8px 28px rgba(0,0,0,0.35)';
+                      }}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)';
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
+                    >
+                      {cover ? (
+                        <div style={{ width: '100%', aspectRatio: '16/7', overflow: 'hidden', background: 'rgba(0,0,0,0.3)' }}>
+                          <img src={cover} alt={r.title} loading="lazy" decoding="async"
+                            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform 0.4s' }}
+                            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
+                            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                          />
+                        </div>
+                      ) : (
+                        <div style={{ width: '100%', aspectRatio: '16/7', background: 'rgba(255,100,100,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(255,100,100,0.3)" strokeWidth="1.5" strokeLinecap="round"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" y1="19" x2="19" y2="13"/></svg>
+                        </div>
+                      )}
+                      <div style={{ padding: '0.9rem 1rem' }}>
+                        {(p1 || p2) && (
+                          <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
+                            {p1?.faction && <span style={{ padding: '1px 7px', borderRadius: '999px', background: 'rgba(255,100,100,0.12)', border: '1px solid rgba(255,100,100,0.25)', color: '#ff8888', fontSize: '0.62rem', fontFamily: 'var(--font-display)', fontWeight: 700 }}>{p1.faction}</span>}
+                            {p2?.faction && <span style={{ padding: '1px 7px', borderRadius: '999px', background: 'rgba(100,100,255,0.12)', border: '1px solid rgba(100,100,255,0.25)', color: '#9999ff', fontSize: '0.62rem', fontFamily: 'var(--font-display)', fontWeight: 700 }}>{p2.faction}</span>}
+                          </div>
+                        )}
+                        <p style={{
+                          fontFamily: 'var(--font-display)',
+                          fontSize: '0.88rem',
+                          color: '#fff',
+                          lineHeight: 1.3,
+                          fontWeight: 700,
+                          margin: 0,
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                        }}>
+                          {r.title}
+                        </p>
+                      </div>
+                    </motion.div>
+                  </Link>
+                );
+              })}
             </div>
           </motion.div>
         )}
