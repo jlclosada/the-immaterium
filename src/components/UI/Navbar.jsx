@@ -179,10 +179,10 @@ export default function Navbar() {
           }
         `}</style>
         <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-          <img src="/logo-full.png" alt="The Immaterium" className="logo-desktop"
+          <img src="/logo-full.svg" alt="The Immaterium" className="logo-desktop"
             style={{ height: '38px', width: 'auto', objectFit: 'contain' }} />
-          <img src="/logo-icon.png" alt="The Immaterium" className="logo-mobile"
-            style={{ height: '32px', width: 'auto', objectFit: 'contain' }} />
+          <img src="/logo-icon.svg" alt="The Immaterium" className="logo-mobile"
+            style={{ height: '34px', width: '34px', objectFit: 'contain' }} />
         </Link>
 
         {/* ── Desktop center nav ── */}

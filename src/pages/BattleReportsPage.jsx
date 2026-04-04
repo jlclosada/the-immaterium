@@ -222,9 +222,9 @@ const ReportCard = ({ report, index, onClick }) => {
         boxShadow: hovered ? '0 12px 40px rgba(255,100,100,0.12), 0 2px 8px rgba(0,0,0,0.2)' : 'none',
       }}
     >
-      {/* Cover image */}
-      {coverImage ? (
-        <div style={{ height: '160px', overflow: 'hidden', position: 'relative', flexShrink: 0 }}>
+      {/* Cover image / fallback banner */}
+      <div style={{ height: '140px', overflow: 'hidden', position: 'relative', flexShrink: 0 }}>
+        {coverImage ? (
           <img
             src={coverImage}
             alt={report.title}
@@ -234,25 +234,34 @@ const ReportCard = ({ report, index, onClick }) => {
               transition: 'transform 0.5s ease',
               transform: hovered ? 'scale(1.06)' : 'scale(1)',
             }}
+            onError={e => { e.target.style.display = 'none'; }}
           />
+        ) : (
+          /* Fallback: decorative battle grid pattern */
           <div style={{
-            position: 'absolute', bottom: 0, left: 0, right: 0, height: '60%',
-            background: 'linear-gradient(to top, rgba(5,5,16,0.9), transparent)',
-          }} />
-          {/* Top accent on image */}
-          <div style={{
-            position: 'absolute', top: 0, left: 0, right: 0, height: '2px',
-            background: 'linear-gradient(90deg, #ff6464, #f9cb28)',
-          }} />
-        </div>
-      ) : (
-        /* Top accent when no image */
+            width: '100%', height: '100%',
+            background: `linear-gradient(135deg, rgba(20,0,0,0.9) 0%, rgba(10,5,30,0.95) 50%, rgba(20,0,0,0.9) 100%)`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <svg width="80" height="80" viewBox="0 0 80 80" fill="none" opacity="0.12">
+              <path d="M40 8 L55 20 L68 38 L55 56 L40 68 L25 56 L12 38 L25 20 Z" stroke="#ff6464" strokeWidth="1.5"/>
+              <path d="M40 18 L51 27 L59 38 L51 50 L40 58 L29 50 L21 38 L29 27 Z" stroke="#f9cb28" strokeWidth="1"/>
+              <line x1="40" y1="8" x2="40" y2="68" stroke="#ff6464" strokeWidth="0.5" opacity="0.5"/>
+              <line x1="12" y1="38" x2="68" y2="38" stroke="#ff6464" strokeWidth="0.5" opacity="0.5"/>
+              <circle cx="40" cy="38" r="4" fill="#ff6464"/>
+            </svg>
+          </div>
+        )}
+        <div style={{
+          position: 'absolute', bottom: 0, left: 0, right: 0, height: '60%',
+          background: 'linear-gradient(to top, rgba(5,5,16,0.95), transparent)',
+        }} />
+        {/* Top accent */}
         <div style={{
           position: 'absolute', top: 0, left: 0, right: 0, height: '2px',
           background: 'linear-gradient(90deg, #ff6464, #f9cb28)',
-          opacity: 0.5,
         }} />
-      )}
+      </div>
 
       <div style={{ padding: 'clamp(1.25rem, 3vw, 1.75rem)', display: 'flex', flexDirection: 'column', gap: '1rem', flex: 1 }}>
 

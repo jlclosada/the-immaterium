@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="coreGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00d4ff"/>
+      <stop offset="100%" stop-color="#7b2fff"/>
+    </linearGradient>
+    <linearGradient id="outerRing" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00d4ff" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#7b2fff" stop-opacity="0.6"/>
+    </linearGradient>
+    <filter id="glowIcon">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Outer octagonal frame -->
+  <polygon
+    points="32,4 50,12 60,30 52,50 32,60 12,50 4,30 14,12"
+    stroke="url(#outerRing)"
+    stroke-width="1.2"
+    fill="rgba(0,0,0,0.3)"
+    opacity="0.8"
+  />
+
+  <!-- Middle ring -->
+  <polygon
+    points="32,10 46,17 54,30 47,46 32,53 17,46 10,30 18,17"
+    stroke="url(#coreGrad)"
+    stroke-width="0.8"
+    fill="none"
+    opacity="0.4"
+  />
+
+  <!-- Cross / targeting reticle -->
+  <line x1="32" y1="16" x2="32" y2="22" stroke="#00d4ff" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+  <line x1="32" y1="42" x2="32" y2="48" stroke="#00d4ff" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+  <line x1="16" y1="32" x2="22" y2="32" stroke="#7b2fff" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+  <line x1="42" y1="32" x2="48" y2="32" stroke="#7b2fff" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+
+  <!-- Diagonal accents -->
+  <line x1="20" y1="20" x2="24" y2="24" stroke="#00d4ff" stroke-width="1" stroke-linecap="round" opacity="0.4"/>
+  <line x1="40" y1="40" x2="44" y2="44" stroke="#7b2fff" stroke-width="1" stroke-linecap="round" opacity="0.4"/>
+  <line x1="44" y1="20" x2="40" y2="24" stroke="#00d4ff" stroke-width="1" stroke-linecap="round" opacity="0.4"/>
+  <line x1="24" y1="40" x2="20" y2="44" stroke="#7b2fff" stroke-width="1" stroke-linecap="round" opacity="0.4"/>
+
+  <!-- Center core: stylized "I" (Immaterium) -->
+  <!-- Top bar -->
+  <rect x="25" y="24" width="14" height="2.5" rx="0.5" fill="url(#coreGrad)" filter="url(#glowIcon)"/>
+  <!-- Bottom bar -->
+  <rect x="25" y="37.5" width="14" height="2.5" rx="0.5" fill="url(#coreGrad)"/>
+  <!-- Vertical stem -->
+  <rect x="30.5" y="26.5" width="3" height="11" rx="0.5" fill="url(#coreGrad)"/>
+
+  <!-- Corner diamond accents -->
+  <rect x="29" y="6" width="6" height="6" rx="0.5" transform="rotate(45 32 9)" fill="#00d4ff" opacity="0.35"/>
+  <rect x="29" y="50" width="6" height="6" rx="0.5" transform="rotate(45 32 53)" fill="#7b2fff" opacity="0.35"/>
+</svg>

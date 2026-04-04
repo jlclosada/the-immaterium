@@ -328,10 +328,13 @@ const ArmyCard = ({ army, index, language, theme, accentColor, onClick }) => {
             }}
           />
         ) : (
-          <div style={{ opacity: 0.15, color: accentColor }}>
-            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '0.3rem' }}>
+            <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke={accentColor} strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round" opacity="0.3">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
             </svg>
+            <span style={{ fontSize: '0.58rem', letterSpacing: '2px', color: accentColor, opacity: 0.3, fontFamily: 'var(--font-display)', textTransform: 'uppercase' }}>
+              {name?.slice(0,12)}
+            </span>
           </div>
         )}
 

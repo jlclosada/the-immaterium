@@ -397,11 +397,6 @@ export default function LandingPage() {
         <div aria-hidden style={{ position: 'absolute', top: '45%', left: '50%', transform: 'translate(-50%,-50%)', width: 'min(800px,100vw)', height: 'min(800px,100vw)', borderRadius: '50%', background: isLight ? 'radial-gradient(circle, rgba(0,100,220,0.06) 0%, transparent 65%)' : 'radial-gradient(circle, rgba(0,212,255,0.05) 0%, transparent 65%)', pointerEvents: 'none' }} />
 
         <motion.div style={{ y: heroY, opacity: heroOpacity, zIndex: 1, width: '100%', maxWidth: '900px' }}>
-          {/* Logo icon */}
-          <motion.div variants={fadeUp} initial="hidden" animate="visible" style={{ marginBottom: '2rem' }}>
-            <img src="/logo-icon.png" alt="The Immaterium" style={{ height: '90px', width: 'auto', objectFit: 'contain', filter: 'drop-shadow(0 0 24px rgba(0,212,255,0.35))' }} />
-          </motion.div>
-
           {/* Eyebrow */}
           <motion.div variants={fadeUp} initial="hidden" animate="visible">
             <span style={{

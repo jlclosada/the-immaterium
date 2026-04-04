@@ -70,9 +70,9 @@ const Footer = () => {
           >
             <Link to="/" style={{ textDecoration: 'none', display: 'inline-block', marginBottom: '1.25rem' }}>
               <img
-                src="/logo-full.png"
+                src="/logo-full.svg"
                 alt="The Immaterium"
-                style={{ height: '48px', width: 'auto', objectFit: 'contain' }}
+                style={{ height: '44px', width: 'auto', objectFit: 'contain' }}
               />
             </Link>
             <p style={{
