@@ -419,14 +419,15 @@ export default function LandingPage() {
             transition={{ delay: 0.1 }}
             style={{
               fontFamily: 'var(--font-display)',
-              fontSize: 'clamp(3rem, 10vw, 7.5rem)',
-              letterSpacing: 'clamp(0.15rem, 2vw, 0.8rem)',
+              fontSize: 'clamp(2.8rem, 9vw, 7rem)',
+              letterSpacing: 'clamp(0.05rem, 0.8vw, 0.45rem)',
               lineHeight: 1.05, margin: '0 0 1.5rem',
               background: isLight
                 ? 'linear-gradient(180deg, #0a1232 0%, #1a3580 55%, #0077bb 100%)'
                 : 'linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.5) 100%)',
               WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
+              width: '100%',
             }}
           >
             THE<br />IMMATERIUM
