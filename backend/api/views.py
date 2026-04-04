@@ -625,17 +625,21 @@ def global_search(request):
                 'image': a.icon_url or '',
             })
 
+    limit = 5 if content_type == 'all' else 10
+
     if content_type in ('all', 'guides'):
         guides = PaintingGuide.objects.filter(
-            Q(title__icontains=q) | Q(author__icontains=q) | Q(difficulty__icontains=q)
-        )[:5]
+            Q(title__icontains=q) | Q(author__icontains=q) |
+            Q(difficulty__icontains=q) | Q(description__icontains=q)
+        ).select_related('faction')[:limit]
         for g in guides:
+            parts = [p for p in [g.difficulty, g.estimated_time] if p]
             results.append({
                 'type': 'guide',
                 'id': g.id,
                 'title': g.title,
                 'subtitle': g.author or '',
-                'description': f'{g.difficulty} · {g.estimated_time}',
+                'description': ' · '.join(parts),
                 'url': f'/guides/{g.id}',
                 'image': g.cover_image or '',
             })
@@ -644,14 +648,16 @@ def global_search(request):
         reports = BattleReport.objects.filter(
             Q(title__icontains=q) | Q(player1_name__icontains=q) |
             Q(player2_name__icontains=q) | Q(player1_faction__icontains=q) |
-            Q(player2_faction__icontains=q)
-        )[:5]
+            Q(player2_faction__icontains=q) | Q(summary__icontains=q)
+        )[:limit]
         for r in reports:
+            p1 = r.player1_name or ''
+            p2 = r.player2_name or ''
             results.append({
                 'type': 'report',
                 'id': r.id,
                 'title': r.title,
-                'subtitle': f'{r.player1_name} vs {r.player2_name}',
+                'subtitle': f'{p1} vs {p2}' if p1 and p2 else (p1 or p2),
                 'description': f'{r.player1_faction} vs {r.player2_faction}',
                 'url': f'/battle-reports/{r.id}',
                 'image': r.images[0] if r.images else '',
@@ -659,25 +665,28 @@ def global_search(request):
 
     if content_type in ('all', 'lore'):
         lore = LoreEntry.objects.filter(
-            Q(title__icontains=q) | Q(content__icontains=q) | Q(category__icontains=q)
-        )[:5]
+            Q(title__icontains=q) | Q(excerpt__icontains=q) |
+            Q(content__icontains=q) | Q(category__icontains=q) |
+            Q(author__icontains=q)
+        ).select_related('related_faction')[:limit]
         for l in lore:
             results.append({
                 'type': 'lore',
                 'id': l.id,
                 'title': l.title,
                 'subtitle': l.category or '',
-                'description': (getattr(l, 'excerpt', '') or l.content or '')[:120],
+                'description': (l.excerpt or l.content or '')[:120],
                 'url': f'/lore/{l.id}',
-                'image': '',
+                'image': l.related_faction.icon_url if l.related_faction and l.related_faction.icon_url else '',
             })
 
     if content_type in ('all', 'news'):
         news = NewsArticle.objects.filter(
             is_published=True
         ).filter(
-            Q(title__icontains=q) | Q(content__icontains=q) | Q(excerpt__icontains=q) | Q(author__icontains=q)
-        )[:5]
+            Q(title__icontains=q) | Q(content__icontains=q) |
+            Q(excerpt__icontains=q) | Q(author__icontains=q)
+        )[:limit]
         for n in news:
             results.append({
                 'type': 'news',
