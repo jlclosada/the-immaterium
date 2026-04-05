@@ -3,7 +3,7 @@ from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import BasePermission, IsAuthenticated, IsAdminUser
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
@@ -21,6 +21,19 @@ from .serializers import (
     LoreEntrySerializer, NewsArticleSerializer, GameSerializer, PaintSerializer,
     ListingSerializer, ListingDetailSerializer, PurchaseRequestSerializer,
 )
+
+class IsAdminOrLeader(BasePermission):
+    """Grants write access to staff (Admin) or users with is_leader profile flag."""
+    def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
+        if request.user.is_staff:
+            return True
+        try:
+            return request.user.profile.is_leader
+        except Exception:
+            return False
+
 
 @api_view(['POST'])
 def login_view(request):
@@ -52,10 +65,16 @@ class ArmyViewSet(viewsets.ModelViewSet):
     queryset = Army.objects.all()
     serializer_class = ArmySerializer
     lookup_field = 'id'
+    authentication_classes = [TokenAuthentication]
     filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ['name', 'description', 'planet_name']
     ordering_fields = ['name', 'planet_name']
     ordering = ['name']
+
+    def get_permissions(self):
+        if self.action in ('list', 'retrieve'):
+            return []
+        return [IsAuthenticated(), IsAdminOrLeader()]
 
     def list(self, request, *args, **kwargs):
         try:
@@ -120,17 +139,23 @@ class PaintViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action in ('list', 'retrieve'):
             return []
-        return [IsAuthenticated(), IsAdminUser()]
+        return [IsAuthenticated(), IsAdminOrLeader()]
 
 
 class PaintingGuideViewSet(viewsets.ModelViewSet):
     queryset = PaintingGuide.objects.all()
     serializer_class = PaintingGuideSerializer
     lookup_field = 'id'
+    authentication_classes = [TokenAuthentication]
     filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ['title', 'difficulty', 'author', 'faction__name']
     ordering_fields = ['title', 'date_created', 'views', 'likes']
     ordering = ['-date_created']
+
+    def get_permissions(self):
+        if self.action in ('list', 'retrieve'):
+            return []
+        return [IsAuthenticated(), IsAdminOrLeader()]
 
     def create(self, request, *args, **kwargs):
         # Make a mutable copy
@@ -275,10 +300,16 @@ class BattleReportViewSet(viewsets.ModelViewSet):
     queryset = BattleReport.objects.all()
     serializer_class = BattleReportSerializer
     lookup_field = 'id'
+    authentication_classes = [TokenAuthentication]
     filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ['title', 'player1_name', 'player2_name', 'player1_faction', 'player2_faction', 'mission']
     ordering_fields = ['date', 'views', 'likes']
     ordering = ['-date']
+
+    def get_permissions(self):
+        if self.action in ('list', 'retrieve'):
+            return []
+        return [IsAuthenticated(), IsAdminOrLeader()]
 
     def list(self, request, *args, **kwargs):
         try:
@@ -463,10 +494,16 @@ class LoreEntryViewSet(viewsets.ModelViewSet):
     queryset = LoreEntry.objects.all()
     serializer_class = LoreEntrySerializer
     lookup_field = 'id'
+    authentication_classes = [TokenAuthentication]
     filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ['title', 'content', 'category', 'era']
     ordering_fields = ['title', 'date_created', 'views']
     ordering = ['-date_created']
+
+    def get_permissions(self):
+        if self.action in ('list', 'retrieve'):
+            return []
+        return [IsAuthenticated(), IsAdminOrLeader()]
 
     def create(self, request, *args, **kwargs):
         data = request.data.copy()
@@ -569,10 +606,16 @@ class NewsArticleViewSet(viewsets.ModelViewSet):
     queryset = NewsArticle.objects.filter(is_published=True)
     serializer_class = NewsArticleSerializer
     lookup_field = 'id'
+    authentication_classes = [TokenAuthentication]
     filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ['title', 'content', 'excerpt', 'author']
     ordering_fields = ['title', 'published_at']
     ordering = ['-published_at']
+
+    def get_permissions(self):
+        if self.action in ('list', 'retrieve'):
+            return []
+        return [IsAuthenticated(), IsAdminOrLeader()]
 
     def get_queryset(self):
         # Admin can see all; public only sees published
@@ -846,15 +889,19 @@ def _get_authenticated_user(request):
 
 
 def _serialize_user(u):
+    profile = getattr(u, 'profile', None)
     return {
         'id': u.id,
         'username': u.username,
         'email': u.email,
         'isStaff': u.is_staff,
         'isSuperuser': u.is_superuser,
+        'isAdmin': u.is_staff or u.is_superuser,
         'isActive': u.is_active,
         'dateJoined': u.date_joined.isoformat(),
         'lastLogin': u.last_login.isoformat() if u.last_login else None,
+        'isLeader': profile.is_leader if profile else False,
+        'isPremium': profile.is_premium if profile else False,
     }
 
 
@@ -873,12 +920,12 @@ def users_list(request):
 
 @api_view(['POST'])
 def user_create(request):
-    """Create a new admin user. Requires superuser (leader) token."""
+    """Create a new admin user. Requires admin (is_staff) token."""
     requesting_user, err = _get_authenticated_user(request)
     if err:
         return err
-    if not requesting_user.is_superuser:
-        return Response({'error': 'Solo el leader puede crear administradores'}, status=status.HTTP_403_FORBIDDEN)
+    if not requesting_user.is_staff:
+        return Response({'error': 'Solo los administradores pueden crear nuevos usuarios'}, status=status.HTTP_403_FORBIDDEN)
 
     username = request.data.get('username', '').strip()
     password = request.data.get('password', '').strip()
@@ -901,12 +948,12 @@ def user_create(request):
 
 @api_view(['DELETE'])
 def user_delete(request, user_id):
-    """Delete an admin user. Requires superuser (leader) token."""
+    """Delete a user. Requires admin (is_staff) token."""
     requesting_user, err = _get_authenticated_user(request)
     if err:
         return err
-    if not requesting_user.is_superuser:
-        return Response({'error': 'Solo el leader puede eliminar administradores'}, status=status.HTTP_403_FORBIDDEN)
+    if not requesting_user.is_staff:
+        return Response({'error': 'Solo los administradores pueden eliminar usuarios'}, status=status.HTTP_403_FORBIDDEN)
     if requesting_user.id == user_id:
         return Response({'error': 'No puedes eliminarte a ti mismo'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -920,12 +967,12 @@ def user_delete(request, user_id):
 
 @api_view(['PATCH'])
 def user_toggle_active(request, user_id):
-    """Toggle a user's active status. Requires superuser (leader) token."""
+    """Toggle a user's active status. Requires admin (is_staff) token."""
     requesting_user, err = _get_authenticated_user(request)
     if err:
         return err
-    if not requesting_user.is_superuser:
-        return Response({'error': 'Solo el leader puede activar/desactivar usuarios'}, status=status.HTTP_403_FORBIDDEN)
+    if not requesting_user.is_staff:
+        return Response({'error': 'Solo los administradores pueden activar/desactivar usuarios'}, status=status.HTTP_403_FORBIDDEN)
     if requesting_user.id == user_id:
         return Response({'error': 'No puedes modificar tu propia cuenta'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -937,13 +984,13 @@ def user_toggle_active(request, user_id):
 
 @api_view(['POST'])
 def user_toggle_leader(request, user_id):
-    """Toggle a user's leader (is_leader) status. Requires superuser token."""
+    """Toggle a user's leader (is_leader) status. Requires admin (is_staff) token."""
     from .models import UserProfile
     requesting_user, err = _get_authenticated_user(request)
     if err:
         return err
-    if not requesting_user.is_superuser:
-        return Response({'error': 'Solo el superusuario puede asignar líderes'}, status=status.HTTP_403_FORBIDDEN)
+    if not requesting_user.is_staff:
+        return Response({'error': 'Solo los administradores pueden asignar líderes'}, status=status.HTTP_403_FORBIDDEN)
     if requesting_user.id == user_id:
         return Response({'error': 'No puedes modificar tu propia cuenta'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -952,6 +999,25 @@ def user_toggle_leader(request, user_id):
     profile.is_leader = not profile.is_leader
     profile.save(update_fields=['is_leader'])
     return Response({'id': user.id, 'isLeader': profile.is_leader})
+
+
+@api_view(['POST'])
+def user_toggle_premium(request, user_id):
+    """Toggle a user's premium status. Requires admin (is_staff) token."""
+    from .models import UserProfile
+    requesting_user, err = _get_authenticated_user(request)
+    if err:
+        return err
+    if not requesting_user.is_staff:
+        return Response({'error': 'Solo los administradores pueden gestionar el premium'}, status=status.HTTP_403_FORBIDDEN)
+    if requesting_user.id == user_id:
+        return Response({'error': 'No puedes modificar tu propia cuenta'}, status=status.HTTP_400_BAD_REQUEST)
+
+    user = get_object_or_404(User, id=user_id)
+    profile, _ = UserProfile.objects.get_or_create(user=user)
+    profile.is_premium = not profile.is_premium
+    profile.save(update_fields=['is_premium'])
+    return Response({'id': user.id, 'isPremium': profile.is_premium})
 
 
 # ────────────────────────────────────────

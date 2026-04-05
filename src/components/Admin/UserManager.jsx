@@ -25,11 +25,11 @@ const UserManager = () => {
     const [saving, setSaving] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const token = useStore(state => state.token);
+    const user = useStore(s => s.user);
     const toast = useToast();
 
-    // Detect if the current user is a leader (superuser)
-    const [currentUser, setCurrentUser] = useState(null);
-    const isLeader = currentUser?.isSuperuser ?? false;
+    // isAdmin: can manage users, assign roles, delete
+    const isAdmin = user?.isAdmin || user?.is_staff;
 
     useEffect(() => { loadUsers(); }, []);
 
@@ -39,11 +39,6 @@ const UserManager = () => {
             const data = await api.getUsers(token);
             const list = Array.isArray(data) ? data : [];
             setUsers(list);
-            // Identify the current user by finding who owns this token
-            // (The user who is logged in will have a matching token — we detect by checking
-            // the API response: all users are returned; the current one is whoever created the token.
-            // We use a separate endpoint or infer from the list by checking isActive + isSuperuser.
-            // For now, we detect by calling login info stored in the store.)
         } catch (e) {
             toast('Error al cargar usuarios: ' + e.message, 'error');
         } finally {
@@ -51,14 +46,7 @@ const UserManager = () => {
         }
     };
 
-    // Detect current user from users list using the stored username
     const username = useStore(state => state.username);
-    useEffect(() => {
-        if (users.length && username) {
-            const me = users.find(u => u.username === username);
-            if (me) setCurrentUser(me);
-        }
-    }, [users, username]);
 
     const handleCreate = async (e) => {
         e.preventDefault();
@@ -80,12 +68,12 @@ const UserManager = () => {
         }
     };
 
-    const handleToggleActive = async (user) => {
+    const handleToggleActive = async (u) => {
         try {
-            const result = await api.toggleUserActive(user.id, token);
-            setUsers(prev => prev.map(u => u.id === user.id ? { ...u, isActive: result.isActive } : u));
+            const result = await api.toggleUserActive(u.id, token);
+            setUsers(prev => prev.map(x => x.id === u.id ? { ...x, isActive: result.isActive } : x));
             toast(
-                result.isActive ? `${user.username} activado` : `${user.username} desactivado`,
+                result.isActive ? `${u.username} activado` : `${u.username} desactivado`,
                 result.isActive ? 'success' : 'info'
             );
         } catch (e) {
@@ -93,25 +81,38 @@ const UserManager = () => {
         }
     };
 
-    const handleToggleLeader = async (user) => {
+    const handleToggleLeader = async (u) => {
         try {
-            const result = await api.toggleUserLeader(user.id, token);
-            setUsers(prev => prev.map(u => u.id === user.id ? { ...u, is_leader: result.is_leader } : u));
+            const result = await api.toggleUserLeader(u.id, token);
+            setUsers(prev => prev.map(x => x.id === u.id ? { ...x, isLeader: result.isLeader } : x));
             toast(
-                result.is_leader ? `${user.username} es ahora Líder` : `${user.username} ya no es Líder`,
-                result.is_leader ? 'success' : 'info'
+                result.isLeader ? `${u.username} es ahora Líder` : `${u.username} ya no es Líder`,
+                result.isLeader ? 'success' : 'info'
             );
         } catch (e) {
             toast('Error: ' + e.message, 'error');
         }
     };
 
-    const handleDelete = async (user) => {
-        if (!window.confirm(`¿Eliminar al administrador "${user.username}"? Esta acción no se puede deshacer.`)) return;
+    const handleTogglePremium = async (u) => {
         try {
-            await api.deleteUser(user.id, token);
-            setUsers(prev => prev.filter(u => u.id !== user.id));
-            toast(`Admin "${user.username}" eliminado`, 'success');
+            const result = await api.toggleUserPremium(u.id, token);
+            setUsers(prev => prev.map(x => x.id === u.id ? { ...x, isPremium: result.isPremium } : x));
+            toast(
+                result.isPremium ? `${u.username} tiene ahora Premium` : `${u.username} ya no tiene Premium`,
+                result.isPremium ? 'success' : 'info'
+            );
+        } catch (e) {
+            toast('Error: ' + e.message, 'error');
+        }
+    };
+
+    const handleDelete = async (u) => {
+        if (!window.confirm(`¿Eliminar al usuario "${u.username}"? Esta acción no se puede deshacer.`)) return;
+        try {
+            await api.deleteUser(u.id, token);
+            setUsers(prev => prev.filter(x => x.id !== u.id));
+            toast(`Usuario "${u.username}" eliminado`, 'success');
         } catch (e) {
             toast('Error: ' + e.message, 'error');
         }
@@ -125,12 +126,13 @@ const UserManager = () => {
         );
     });
 
-    const adminCount = users.filter(u => u.isStaff && !u.isSuperuser).length;
-    const leaderCount = users.filter(u => u.isSuperuser).length;
+    const adminCount = users.filter(u => u.isAdmin || u.isStaff).length;
+    const leaderCount = users.filter(u => u.isLeader).length;
 
-    const getRoleBadge = (user) => {
-        if (user.isSuperuser) return { label: 'Leader', color: '#f59e0b', bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.3)' };
-        if (user.isStaff) return { label: 'Admin', color: 'var(--color-primary)', bg: 'rgba(0,212,255,0.1)', border: 'rgba(0,212,255,0.25)' };
+    const getRoleBadge = (u) => {
+        if (u.isAdmin || u.isStaff) return { label: 'Admin', color: 'var(--color-primary)', bg: 'rgba(0,212,255,0.1)', border: 'rgba(0,212,255,0.25)' };
+        if (u.isLeader) return { label: 'Líder', color: '#50c878', bg: 'rgba(80,200,120,0.1)', border: 'rgba(80,200,120,0.3)' };
+        if (u.isPremium) return { label: 'Premium', color: '#f59e0b', bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.3)' };
         return { label: 'Usuario', color: 'rgba(255,255,255,0.3)', bg: 'rgba(255,255,255,0.05)', border: 'rgba(255,255,255,0.1)' };
     };
 
@@ -145,11 +147,11 @@ const UserManager = () => {
                         Gestión de Usuarios
                     </h2>
                     <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.88rem' }}>
-                        {leaderCount} leader{leaderCount !== 1 ? 's' : ''} · {adminCount} admin{adminCount !== 1 ? 's' : ''}
-                        {isLeader ? <span style={{ marginLeft: '0.75rem', color: '#f59e0b', fontSize: '0.8rem' }}>· Sesión como Leader</span> : ''}
+                        {adminCount} admin{adminCount !== 1 ? 's' : ''} · {leaderCount} líder{leaderCount !== 1 ? 'es' : ''}
+                        {isAdmin ? <span style={{ marginLeft: '0.75rem', color: 'var(--color-primary)', fontSize: '0.8rem' }}>· Sesión como Admin</span> : ''}
                     </p>
                 </div>
-                {isLeader && (
+                {isAdmin && (
                     <button
                         onClick={() => { setShowForm(v => !v); setFormData(EMPTY_FORM); }}
                         style={{
@@ -175,8 +177,10 @@ const UserManager = () => {
                 style={{ padding: '1rem 1.5rem', marginBottom: '1.5rem', display: 'flex', gap: '2rem', flexWrap: 'wrap' }}
             >
                 {[
-                    { role: 'Leader', color: '#f59e0b', desc: 'Superusuario. Puede crear/eliminar admins y desactivar cuentas.' },
-                    { role: 'Admin', color: 'var(--color-primary)', desc: 'Acceso completo al panel. Gestiona contenido.' },
+                    { role: 'Admin', color: 'var(--color-primary)', desc: 'Acceso total. Gestiona usuarios, roles y todo el contenido.' },
+                    { role: 'Líder', color: '#50c878', desc: 'Acceso al panel. Crea/edita/elimina contenido. Sin gestión de usuarios.' },
+                    { role: 'Premium', color: '#f59e0b', desc: 'Acceso a contenido premium.' },
+                    { role: 'Usuario', color: 'rgba(255,255,255,0.3)', desc: 'Usuario registrado estándar.' },
                 ].map(({ role, color, desc }) => (
                     <div key={role} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem' }}>
                         <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: color, marginTop: '5px', flexShrink: 0 }} />
@@ -190,7 +194,7 @@ const UserManager = () => {
 
             {/* Create admin form */}
             <AnimatePresence>
-                {showForm && isLeader && (
+                {showForm && isAdmin && (
                     <motion.div
                         initial={{ opacity: 0, height: 0, marginBottom: 0 }}
                         animate={{ opacity: 1, height: 'auto', marginBottom: '1.5rem' }}
@@ -307,7 +311,7 @@ const UserManager = () => {
                         {/* Column headers */}
                         <div style={{
                             display: 'grid',
-                            gridTemplateColumns: '1fr 1.4fr 100px 110px auto',
+                            gridTemplateColumns: '1fr 1.4fr 100px 80px 110px auto',
                             gap: '1rem',
                             padding: '0.4rem 1rem',
                             color: 'rgba(255,255,255,0.3)',
@@ -319,31 +323,32 @@ const UserManager = () => {
                             <span>Usuario</span>
                             <span>Email</span>
                             <span>Rol</span>
+                            <span>Premium</span>
                             <span>Registro</span>
                             <span>Acciones</span>
                         </div>
 
-                        {filtered.map((user, index) => {
-                            const role = getRoleBadge(user);
-                            const isMe = user.username === username;
+                        {filtered.map((u, index) => {
+                            const role = getRoleBadge(u);
+                            const isMe = u.username === username;
                             return (
                                 <motion.div
-                                    key={user.id}
+                                    key={u.id}
                                     initial={{ opacity: 0, x: -8 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{ delay: index * 0.04 }}
                                     style={{
                                         display: 'grid',
-                                        gridTemplateColumns: '1fr 1.4fr 100px 110px auto',
+                                        gridTemplateColumns: '1fr 1.4fr 100px 80px 110px auto',
                                         gap: '1rem',
                                         alignItems: 'center',
                                         padding: '0.85rem 1rem',
-                                        background: user.isActive ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.08)',
+                                        background: u.isActive ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.08)',
                                         borderRadius: '10px',
                                         border: isMe
-                                            ? '1px solid rgba(245,158,11,0.2)'
+                                            ? '1px solid rgba(0,212,255,0.2)'
                                             : '1px solid rgba(255,255,255,0.05)',
-                                        opacity: user.isActive ? 1 : 0.55,
+                                        opacity: u.isActive ? 1 : 0.55,
                                         transition: 'opacity 0.3s',
                                     }}
                                 >
@@ -351,22 +356,22 @@ const UserManager = () => {
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', minWidth: 0 }}>
                                         <div style={{
                                             width: '32px', height: '32px', borderRadius: '50%', flexShrink: 0,
-                                            background: user.isSuperuser
-                                                ? 'linear-gradient(135deg, #f59e0b, #d97706)'
-                                                : user.isStaff
+                                            background: (u.isAdmin || u.isStaff)
                                                 ? 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))'
+                                                : u.isLeader
+                                                ? 'linear-gradient(135deg, #50c878, #2d9b57)'
                                                 : 'rgba(255,255,255,0.1)',
                                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                                             fontSize: '0.8rem', fontFamily: 'var(--font-display)',
-                                            color: user.isStaff ? '#000' : 'rgba(255,255,255,0.4)',
+                                            color: (u.isAdmin || u.isStaff || u.isLeader) ? '#000' : 'rgba(255,255,255,0.4)',
                                         }}>
-                                            {user.username.charAt(0).toUpperCase()}
+                                            {u.username.charAt(0).toUpperCase()}
                                         </div>
                                         <div style={{ minWidth: 0 }}>
                                             <div style={{ color: 'var(--color-light)', fontSize: '0.92rem', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                                {user.username}
-                                                {isMe && <span style={{ color: '#f59e0b', fontSize: '0.7rem' }}>(tú)</span>}
-                                                {user.is_leader && (
+                                                {u.username}
+                                                {isMe && <span style={{ color: 'var(--color-primary)', fontSize: '0.7rem' }}>(tú)</span>}
+                                                {u.isLeader && (
                                                     <span style={{
                                                         padding: '1px 6px',
                                                         borderRadius: '20px',
@@ -381,13 +386,28 @@ const UserManager = () => {
                                                         LÍDER
                                                     </span>
                                                 )}
+                                                {u.isPremium && (
+                                                    <span style={{
+                                                        padding: '1px 6px',
+                                                        borderRadius: '20px',
+                                                        fontSize: '0.62rem',
+                                                        fontFamily: 'var(--font-display)',
+                                                        letterSpacing: '0.5px',
+                                                        color: '#f59e0b',
+                                                        background: 'rgba(245,158,11,0.12)',
+                                                        border: '1px solid rgba(245,158,11,0.3)',
+                                                        flexShrink: 0,
+                                                    }}>
+                                                        PREMIUM
+                                                    </span>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Email */}
                                     <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.82rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                        {user.email || '—'}
+                                        {u.email || '—'}
                                     </span>
 
                                     {/* Role badge */}
@@ -400,18 +420,23 @@ const UserManager = () => {
                                         {role.label}
                                     </span>
 
-                                    {/* Date joined */}
-                                    <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
-                                        {new Date(user.dateJoined).toLocaleDateString('es-ES')}
+                                    {/* Premium indicator */}
+                                    <span style={{ color: u.isPremium ? '#f59e0b' : 'rgba(255,255,255,0.15)', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
+                                        {u.isPremium ? 'Premium' : '—'}
                                     </span>
 
-                                    {/* Actions — only leader can use these */}
-                                    <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'flex-end' }}>
-                                        {isLeader && !isMe && !user.isSuperuser && (
+                                    {/* Date joined */}
+                                    <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
+                                        {new Date(u.dateJoined).toLocaleDateString('es-ES')}
+                                    </span>
+
+                                    {/* Actions — only admin can use these */}
+                                    <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                                        {isAdmin && !isMe && !u.isSuperuser && (
                                             <>
                                                 <button
-                                                    onClick={() => handleToggleLeader(user)}
-                                                    title={user.is_leader ? 'Quitar rol de Líder' : 'Asignar rol de Líder'}
+                                                    onClick={() => handleToggleLeader(u)}
+                                                    title={u.isLeader ? 'Quitar rol de Líder' : 'Asignar rol de Líder'}
                                                     style={{
                                                         padding: '0.35rem 0.8rem',
                                                         borderRadius: '7px',
@@ -420,17 +445,17 @@ const UserManager = () => {
                                                         cursor: 'pointer',
                                                         whiteSpace: 'nowrap',
                                                         transition: 'all 0.2s',
-                                                        ...(user.is_leader
+                                                        ...(u.isLeader
                                                             ? { background: 'rgba(80,200,120,0.08)', borderColor: 'rgba(80,200,120,0.3)', color: '#50c878' }
                                                             : { background: 'rgba(80,200,120,0.04)', borderColor: 'rgba(80,200,120,0.15)', color: 'rgba(80,200,120,0.5)' }
                                                         ),
                                                     }}
                                                 >
-                                                    {user.is_leader ? 'Líder ✓' : 'Líder'}
+                                                    {u.isLeader ? 'Líder ✓' : 'Líder'}
                                                 </button>
                                                 <button
-                                                    onClick={() => handleToggleActive(user)}
-                                                    title={user.isActive ? 'Desactivar acceso' : 'Activar acceso'}
+                                                    onClick={() => handleTogglePremium(u)}
+                                                    title={u.isPremium ? 'Quitar Premium' : 'Asignar Premium'}
                                                     style={{
                                                         padding: '0.35rem 0.8rem',
                                                         borderRadius: '7px',
@@ -439,17 +464,36 @@ const UserManager = () => {
                                                         cursor: 'pointer',
                                                         whiteSpace: 'nowrap',
                                                         transition: 'all 0.2s',
-                                                        ...(user.isActive
+                                                        ...(u.isPremium
+                                                            ? { background: 'rgba(245,158,11,0.08)', borderColor: 'rgba(245,158,11,0.3)', color: '#f59e0b' }
+                                                            : { background: 'rgba(245,158,11,0.04)', borderColor: 'rgba(245,158,11,0.15)', color: 'rgba(245,158,11,0.5)' }
+                                                        ),
+                                                    }}
+                                                >
+                                                    {u.isPremium ? 'Premium ✓' : 'Premium'}
+                                                </button>
+                                                <button
+                                                    onClick={() => handleToggleActive(u)}
+                                                    title={u.isActive ? 'Desactivar acceso' : 'Activar acceso'}
+                                                    style={{
+                                                        padding: '0.35rem 0.8rem',
+                                                        borderRadius: '7px',
+                                                        border: '1px solid',
+                                                        fontSize: '0.78rem',
+                                                        cursor: 'pointer',
+                                                        whiteSpace: 'nowrap',
+                                                        transition: 'all 0.2s',
+                                                        ...(u.isActive
                                                             ? { background: 'rgba(255,100,100,0.08)', borderColor: 'rgba(255,100,100,0.25)', color: '#ff8080' }
                                                             : { background: 'rgba(0,212,255,0.08)', borderColor: 'rgba(0,212,255,0.25)', color: 'var(--color-primary)' }
                                                         ),
                                                     }}
                                                 >
-                                                    {user.isActive ? 'Desactivar' : 'Activar'}
+                                                    {u.isActive ? 'Desactivar' : 'Activar'}
                                                 </button>
                                                 <button
-                                                    onClick={() => handleDelete(user)}
-                                                    title="Eliminar administrador"
+                                                    onClick={() => handleDelete(u)}
+                                                    title="Eliminar usuario"
                                                     style={{
                                                         padding: '0.35rem 0.8rem',
                                                         borderRadius: '7px',
@@ -466,9 +510,9 @@ const UserManager = () => {
                                                 </button>
                                             </>
                                         )}
-                                        {(!isLeader || isMe || user.isSuperuser) && (
+                                        {(!isAdmin || isMe || u.isSuperuser) && (
                                             <span style={{ color: 'rgba(255,255,255,0.15)', fontSize: '0.78rem', padding: '0.35rem 0' }}>
-                                                {isMe ? '(tu cuenta)' : user.isSuperuser ? '(leader)' : '—'}
+                                                {isMe ? '(tu cuenta)' : u.isSuperuser ? '(superadmin)' : '—'}
                                             </span>
                                         )}
                                     </div>

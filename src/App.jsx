@@ -7,7 +7,7 @@ function AdminGuard({ children }) {
   const user = useStore(s => s.user);
   const token = useStore(s => s.token);
   if (!token) return <Navigate to="/signin" replace />;
-  if (user && !user.isAdmin && !user.is_staff) return <Navigate to="/" replace />;
+  if (user && !user.isAdmin && !user.is_staff && !user.isLeader) return <Navigate to="/" replace />;
   return children;
 }
 import { AnimatePresence, motion } from 'framer-motion';

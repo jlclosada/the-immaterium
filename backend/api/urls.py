@@ -44,6 +44,7 @@ urlpatterns = [
     path('users/create/', views.user_create, name='user_create'),
     path('users/<int:user_id>/toggle-active/', views.user_toggle_active, name='user_toggle_active'),
     path('users/<int:user_id>/toggle-leader/', views.user_toggle_leader, name='user_toggle_leader'),
+    path('users/<int:user_id>/toggle-premium/', views.user_toggle_premium, name='user_toggle_premium'),
     path('users/<int:user_id>/delete/', views.user_delete, name='user_delete'),
     path('builder/', include(builder_router.urls)),
 ]

@@ -302,7 +302,17 @@ export const api = {
   },
 
   toggleUserLeader: async (userId, token) => {
-    const res = await fetch(`${API_URL}/api/auth/users/${userId}/toggle-leader/`, {
+    const res = await fetch(`${API_URL}/api/users/${userId}/toggle-leader/`, {
+      method: 'POST',
+      headers: { 'Authorization': `Token ${token}`, 'Content-Type': 'application/json' },
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Error');
+    return data;
+  },
+
+  toggleUserPremium: async (userId, token) => {
+    const res = await fetch(`${API_URL}/api/users/${userId}/toggle-premium/`, {
       method: 'POST',
       headers: { 'Authorization': `Token ${token}`, 'Content-Type': 'application/json' },
     });
