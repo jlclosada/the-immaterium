@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { Helmet } from 'react-helmet-async';
 import { api } from '../services/api';
 import { useStore } from '../stores/useStore';
 import Navbar from '../components/UI/Navbar';
@@ -9,6 +10,7 @@ import { renderMarkdown } from '../utils/renderMarkdown';
 import { estimateReadTime } from '../utils/readTime';
 import ShareButton from '../components/UI/ShareButton';
 import ReadingProgressBar from '../components/UI/ReadingProgressBar';
+import CommentsSection from '../components/UI/CommentsSection';
 
 const NewsDetailPage = () => {
   const { id } = useParams();
@@ -76,6 +78,17 @@ const NewsDetailPage = () => {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-darker)', display: 'flex', flexDirection: 'column' }}>
+      <Helmet>
+        <title>{article.title} | Noticias | The Immaterium</title>
+        <meta name="description" content={article.excerpt || article.title} />
+        <meta property="og:title" content={article.title} />
+        <meta property="og:description" content={article.excerpt || ''} />
+        {article.coverImage && <meta property="og:image" content={article.coverImage} />}
+        <meta property="og:type" content="article" />
+        {article.publishedAt && <meta property="article:published_time" content={article.publishedAt} />}
+        {article.author && <meta property="article:author" content={article.author} />}
+        <meta name="twitter:card" content="summary_large_image" />
+      </Helmet>
       <ReadingProgressBar />
       <Navbar />
 
@@ -339,6 +352,13 @@ const NewsDetailPage = () => {
             </div>
           </motion.div>
         )}
+
+        {/* Comments */}
+        <CommentsSection
+          contentType="news"
+          contentId={article.id}
+          accentColor="var(--color-primary)"
+        />
       </div>
 
       <Footer />

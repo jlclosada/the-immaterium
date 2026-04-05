@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { Helmet } from 'react-helmet-async';
 import { api } from '../services/api';
 import { useStore } from '../stores/useStore';
 import { useTranslation } from '../i18n/translations';
@@ -10,6 +11,7 @@ import { renderMarkdown } from '../utils/renderMarkdown';
 import { estimateReadTime } from '../utils/readTime';
 import ShareButton from '../components/UI/ShareButton';
 import ReadingProgressBar from '../components/UI/ReadingProgressBar';
+import CommentsSection from '../components/UI/CommentsSection';
 
 const CATEGORY_COLORS = {
   historia: '#a78bfa',
@@ -92,6 +94,14 @@ const LoreDetailPage = () => {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-darker)', display: 'flex', flexDirection: 'column' }}>
+      <Helmet>
+        <title>{lore.title} | Lore | The Immaterium</title>
+        <meta name="description" content={lore.excerpt || lore.title} />
+        <meta property="og:title" content={lore.title} />
+        <meta property="og:description" content={lore.excerpt || ''} />
+        {lore.coverImage && <meta property="og:image" content={lore.coverImage} />}
+        <meta property="og:type" content="article" />
+      </Helmet>
       <ReadingProgressBar />
       <Navbar />
 
@@ -402,6 +412,13 @@ const LoreDetailPage = () => {
             </div>
           </motion.div>
         )}
+
+        {/* Comments */}
+        <CommentsSection
+          contentType="lore"
+          contentId={lore.id}
+          accentColor={categoryColor}
+        />
       </div>
 
       <Footer />

@@ -126,9 +126,12 @@ class GuideStepSerializer(serializers.ModelSerializer):
         fields = ['stepNumber', 'title', 'description', 'images', 'tips']
 
 class CommentSerializer(serializers.ModelSerializer):
+    authorAvatar = serializers.CharField(source='author_avatar', required=False, default='')
+    createdAt = serializers.DateTimeField(source='created_at', read_only=True)
+
     class Meta:
         model = Comment
-        fields = ['id', 'author', 'date', 'text']
+        fields = ['id', 'author', 'authorAvatar', 'date', 'text', 'likes', 'createdAt']
 
 class PaintingGuideSerializer(serializers.ModelSerializer):
     # Allow empty tags list (frontend may send []). Use ListField with allow_empty=True.
@@ -142,6 +145,7 @@ class PaintingGuideSerializer(serializers.ModelSerializer):
     materials = serializers.SerializerMethodField()
     steps = GuideStepSerializer(many=True, read_only=True)
     comments = CommentSerializer(many=True, read_only=True)
+    commentCount = serializers.SerializerMethodField()
 
     class Meta:
         model = PaintingGuide
@@ -149,10 +153,13 @@ class PaintingGuideSerializer(serializers.ModelSerializer):
             'id', 'title', 'difficulty', 'estimated_time', 'author',
             'date_created', 'cover_image', 'tags', 'likes', 'views',
             'is_premium', 'price', 'youtube_url',
-            'materials', 'steps', 'comments', 'faction',
+            'materials', 'steps', 'comments', 'commentCount', 'faction',
             # camelCase read‑only aliases
             'estimatedTime', 'dateCreated', 'coverImage', 'isPremium'
         ]
+
+    def get_commentCount(self, obj):
+        return obj.comments.count()
         
     def get_materials(self, obj):
         return GuideMaterialSerializer(
@@ -256,13 +263,15 @@ class LoreEntrySerializer(serializers.ModelSerializer):
     isFeatured = serializers.BooleanField(source='is_featured', required=False, default=False)
     coverImage = serializers.URLField(source='cover_image', required=False, allow_blank=True, default='')
     relatedFaction = serializers.SerializerMethodField()
+    comments = CommentSerializer(many=True, read_only=True)
+    commentCount = serializers.SerializerMethodField()
 
     class Meta:
         model = LoreEntry
         fields = [
             'id', 'title', 'category', 'content', 'excerpt',
             'coverImage', 'tags', 'author', 'dateCreated', 'isFeatured', 'views', 'likes',
-            'relatedFaction'
+            'relatedFaction', 'comments', 'commentCount'
         ]
 
     def get_relatedFaction(self, obj):
@@ -274,19 +283,28 @@ class LoreEntrySerializer(serializers.ModelSerializer):
             }
         return None
 
+    def get_commentCount(self, obj):
+        return obj.comments.count()
+
 
 class NewsArticleSerializer(serializers.ModelSerializer):
     coverImage = serializers.URLField(source='cover_image', required=False, allow_blank=True)
     isPublished = serializers.BooleanField(source='is_published', required=False, default=True)
     publishedAt = serializers.DateTimeField(source='published_at', read_only=True)
+    comments = CommentSerializer(many=True, read_only=True)
+    commentCount = serializers.SerializerMethodField()
 
     class Meta:
         model = NewsArticle
         fields = [
             'id', 'title', 'slug', 'content', 'excerpt',
             'coverImage', 'images', 'author', 'tags',
-            'isPublished', 'publishedAt', 'views', 'likes'
+            'isPublished', 'publishedAt', 'views', 'likes',
+            'comments', 'commentCount'
         ]
+
+    def get_commentCount(self, obj):
+        return obj.comments.count()
 
 
 class PurchaseRequestSerializer(serializers.ModelSerializer):

@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { api } from '../services/api';
+import { Helmet } from 'react-helmet-async';
+import { useLoreEntries } from '../hooks/queries';
 import Navbar from '../components/UI/Navbar';
 import Footer from '../components/UI/Footer';
 import { useTheme } from '../hooks/useTheme';
@@ -24,28 +25,9 @@ const getCategoryColor = (value) => {
 
 const LorePage = () => {
   const { isLight } = useTheme();
-  const [loreEntries, setLoreEntries] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { data: loreEntries = [], isLoading } = useLoreEntries();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
-
-  useEffect(() => {
-    document.title = 'Biblioteca de Lore | The Immaterium';
-  }, []);
-
-  useEffect(() => {
-    const fetchLore = async () => {
-      try {
-        const data = await api.getLoreEntries();
-        setLoreEntries(Array.isArray(data) ? data : []);
-      } catch (error) {
-        console.error('Failed to fetch lore:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchLore();
-  }, []);
 
   const filteredEntries = loreEntries.filter(entry => {
     const matchesCategory = selectedCategory === 'all' || entry.category === selectedCategory;
@@ -58,7 +40,7 @@ const LorePage = () => {
     return matchesCategory && matchesSearch;
   });
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div style={{ minHeight: '100vh', background: 'var(--color-darker)', display: 'flex', flexDirection: 'column' }}>
         <Navbar />
@@ -81,6 +63,13 @@ const LorePage = () => {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-darker)', display: 'flex', flexDirection: 'column' }}>
+      <Helmet>
+        <title>Biblioteca de Lore | The Immaterium</title>
+        <meta name="description" content="Sumérgete en el lore del universo Warhammer: historia, facciones, personajes y eventos del 41º milenio." />
+        <meta property="og:title" content="Biblioteca de Lore | The Immaterium" />
+        <meta property="og:description" content="Fragmentos del 41º milenio — archivo de conocimiento Warhammer 40,000." />
+        <meta property="og:type" content="website" />
+      </Helmet>
       <Navbar />
 
       <div style={{

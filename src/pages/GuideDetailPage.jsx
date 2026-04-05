@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { Helmet } from 'react-helmet-async';
 import { api } from '../services/api';
 import { useStore } from '../stores/useStore';
 import Navbar from '../components/UI/Navbar';
@@ -9,6 +10,7 @@ import ImageModal from '../components/Gallery/ImageModal';
 import PremiumGate from '../components/Auth/PremiumGate';
 import ShareButton from '../components/UI/ShareButton';
 import ReadingProgressBar from '../components/UI/ReadingProgressBar';
+import CommentsSection from '../components/UI/CommentsSection';
 
 // ── YouTube helpers ────────────────────────────────────────────────────────────
 function getYouTubeId(url) {
@@ -120,6 +122,17 @@ const GuideDetailPage = () => {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-darker)', display: 'flex', flexDirection: 'column' }}>
+      {guide && (
+        <Helmet>
+          <title>{guide.title} | Guías de Pintura | The Immaterium</title>
+          <meta name="description" content={`Guía de pintura ${guide.difficulty || ''}: ${guide.title}. Por ${guide.author || 'The Immaterium'}.`} />
+          <meta property="og:title" content={guide.title} />
+          <meta property="og:description" content={`Aprende a pintar ${guide.title}. Dificultad: ${guide.difficulty || 'N/A'}. Tiempo estimado: ${guide.estimatedTime || guide.estimated_time || 'N/A'}.`} />
+          {(guide.coverImage || guide.cover_image) && <meta property="og:image" content={guide.coverImage || guide.cover_image} />}
+          <meta property="og:type" content="article" />
+          <meta name="twitter:card" content="summary_large_image" />
+        </Helmet>
+      )}
       <ReadingProgressBar />
       <Navbar />
 
@@ -613,6 +626,15 @@ const GuideDetailPage = () => {
               })}
             </div>
           </motion.div>
+        )}
+
+        {/* Comments */}
+        {guide && (
+          <CommentsSection
+            contentType="guides"
+            contentId={guide.id}
+            accentColor="var(--color-secondary)"
+          />
         )}
       </div>
 

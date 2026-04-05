@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../services/api';
+import { Helmet } from 'react-helmet-async';
+import { useBattleReports } from '../hooks/queries';
 import Navbar from '../components/UI/Navbar';
 import Footer from '../components/UI/Footer';
 import { useTheme } from '../hooks/useTheme';
@@ -9,31 +10,10 @@ import { useTheme } from '../hooks/useTheme';
 const BattleReportsPage = () => {
   const { isLight } = useTheme();
   const navigate = useNavigate();
-  const [reports, setReports] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { data: rawReports, isLoading, isError, error } = useBattleReports();
+  const reports = Array.isArray(rawReports) ? rawReports : (rawReports?.results || []);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
-
-  useEffect(() => {
-    document.title = 'Battle Reports | The Immaterium';
-  }, []);
-
-  useEffect(() => {
-    const fetchReports = async () => {
-      try {
-        const data = await api.getBattleReports();
-        const list = Array.isArray(data) ? data : (data?.results || []);
-        setReports(list);
-      } catch (error) {
-        console.error('Failed to fetch reports:', error);
-        setError(error.message || 'Error al cargar los informes');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchReports();
-  }, []);
 
   const filteredReports = reports.filter(r => {
     const term = searchTerm.toLowerCase();
@@ -52,6 +32,13 @@ const BattleReportsPage = () => {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-darker)', display: 'flex', flexDirection: 'column' }}>
+      <Helmet>
+        <title>Battle Reports | The Immaterium</title>
+        <meta name="description" content="Crónicas de combate Warhammer: revive las batallas más épicas de la comunidad." />
+        <meta property="og:title" content="Battle Reports | The Immaterium" />
+        <meta property="og:description" content="Informes de batalla detallados con resultados, estrategias y galería de fotos." />
+        <meta property="og:type" content="website" />
+      </Helmet>
       <Navbar />
 
       <div style={{
@@ -148,7 +135,7 @@ const BattleReportsPage = () => {
           ))}
         </motion.div>
 
-        {loading ? (
+        {isLoading ? (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 320px), 1fr))', gap: '1.5rem' }}>
             {[...Array(6)].map((_, i) => (
               <div key={i} style={{ borderRadius: '16px', overflow: 'hidden', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
@@ -161,13 +148,13 @@ const BattleReportsPage = () => {
               </div>
             ))}
           </div>
-        ) : error ? (
+        ) : isError ? (
           <div style={{ textAlign: 'center', padding: '5rem 2rem', color: 'rgba(255,255,255,0.4)' }}>
             <div style={{ marginBottom: '1rem', opacity: 0.3 }}>
               <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
             </div>
             <p style={{ fontSize: '1rem', marginBottom: '0.5rem' }}>No se pudieron cargar los informes</p>
-            <p style={{ fontSize: '0.8rem', opacity: 0.6 }}>{error}</p>
+            <p style={{ fontSize: '0.8rem', opacity: 0.6 }}>{error?.message || 'Error al cargar los informes'}</p>
           </div>
         ) : filteredReports.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '5rem 2rem', color: 'rgba(255,255,255,0.3)' }}>

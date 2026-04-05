@@ -247,19 +247,25 @@ class BattleNarrative(models.Model):
 
 
 class Comment(models.Model):
-    """Comments on guides and battle reports"""
+    """Comments on guides, battle reports, news and lore"""
     CONTENT_TYPES = [
         ('guide', 'Painting Guide'),
         ('report', 'Battle Report'),
+        ('news', 'News Article'),
+        ('lore', 'Lore Entry'),
     ]
 
     id = models.CharField(max_length=100, primary_key=True)
     content_type = models.CharField(max_length=20, choices=CONTENT_TYPES)
     guide = models.ForeignKey(PaintingGuide, on_delete=models.CASCADE, null=True, blank=True, related_name='comments')
     battle_report = models.ForeignKey(BattleReport, on_delete=models.CASCADE, null=True, blank=True, related_name='comments')
+    news_article = models.ForeignKey('NewsArticle', on_delete=models.CASCADE, null=True, blank=True, related_name='comments')
+    lore_entry = models.ForeignKey('LoreEntry', on_delete=models.CASCADE, null=True, blank=True, related_name='comments')
     author = models.CharField(max_length=200)
+    author_avatar = models.URLField(blank=True, default='')
     date = models.DateField()
     text = models.TextField()
+    likes = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

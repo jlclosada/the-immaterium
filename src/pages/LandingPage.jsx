@@ -5,6 +5,7 @@
 import { AnimatePresence, motion, useScroll, useTransform } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import Footer from '../components/UI/Footer';
 import Navbar from '../components/UI/Navbar';
 import { useTheme } from '../hooks/useTheme';
@@ -359,6 +360,17 @@ export default function LandingPage() {
 
   return (
     <div style={{ background: bg, minHeight: '100vh', color: isLight ? 'var(--text-primary)' : '#fff', overflowX: 'hidden' }}>
+      <Helmet>
+        <title>The Immaterium | Comunidad Warhammer 40,000 en Español</title>
+        <meta name="description" content="La comunidad de Warhammer 40,000 en español. Guías de pintura, ejércitos, informes de batalla, lore, noticias y marketplace de miniaturas." />
+        <meta property="og:title" content="The Immaterium — Comunidad Warhammer 40,000" />
+        <meta property="og:description" content="Guías de pintura, ejércitos, lore, noticias y marketplace. La mejor comunidad de Warhammer 40K en español." />
+        <meta property="og:image" content="https://theimmaterium.com/logo-full.svg" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://theimmaterium.com" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <link rel="canonical" href="https://theimmaterium.com" />
+      </Helmet>
 
       {/* ── Ambient orbs ── */}
       {!isLight && (

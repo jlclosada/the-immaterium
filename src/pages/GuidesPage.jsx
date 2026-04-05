@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../services/api';
+import { Helmet } from 'react-helmet-async';
+import { useGuides } from '../hooks/queries';
 import Navbar from '../components/UI/Navbar';
 import Footer from '../components/UI/Footer';
 import { useTheme } from '../hooks/useTheme';
+
 
 const DIFFICULTY_COLORS = {
   beginner: { bg: 'rgba(80,200,120,0.15)', border: 'rgba(80,200,120,0.35)', color: '#50c878', label: 'Principiante' },
@@ -20,28 +22,9 @@ const getDifficultyStyle = (difficulty) => {
 const GuidesPage = () => {
   const { isLight } = useTheme();
   const navigate = useNavigate();
-  const [guides, setGuides] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { data: guides = [], isLoading } = useGuides();
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
-
-  useEffect(() => {
-    document.title = 'Guías de Pintura | The Immaterium';
-  }, []);
-
-  useEffect(() => {
-    const fetchGuides = async () => {
-      try {
-        const data = await api.getPaintingGuides();
-        setGuides(Array.isArray(data) ? data : []);
-      } catch (error) {
-        console.error('Failed to fetch guides:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchGuides();
-  }, []);
 
   const filteredGuides = guides.filter(g => {
     const term = searchTerm.toLowerCase();
@@ -63,6 +46,13 @@ const GuidesPage = () => {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-darker)', display: 'flex', flexDirection: 'column' }}>
+      <Helmet>
+        <title>Guías de Pintura | The Immaterium</title>
+        <meta name="description" content="Aprende a pintar miniaturas Warhammer con nuestras guías paso a paso para todos los niveles." />
+        <meta property="og:title" content="Guías de Pintura | The Immaterium" />
+        <meta property="og:description" content="Guías de pintura de miniaturas Warhammer para principiantes, intermedios y avanzados." />
+        <meta property="og:type" content="website" />
+      </Helmet>
       <Navbar />
 
       <div style={{
@@ -166,7 +156,7 @@ const GuidesPage = () => {
           ))}
         </motion.div>
 
-        {loading ? (
+        {isLoading ? (
           <div className="cards-grid">
             {[...Array(6)].map((_, i) => (
               <div key={i} style={{ borderRadius: '16px', overflow: 'hidden', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>

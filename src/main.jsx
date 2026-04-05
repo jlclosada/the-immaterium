@@ -1,9 +1,22 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { HelmetProvider } from 'react-helmet-async';
 import App from './App';
 import { ToastProvider } from './components/Admin/Toast';
 import ErrorBoundary from './components/UI/ErrorBoundary';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5,      // 5 min — data stays fresh
+      gcTime: 1000 * 60 * 30,         // 30 min — keep in memory
+      retry: 2,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 // Global image fade-in: add .loaded class when any <img> finishes loading
 document.addEventListener('load', (e) => {
@@ -27,12 +40,16 @@ new MutationObserver(markLoadedImages).observe(document.body || document.documen
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <ErrorBoundary>
-        <ToastProvider>
-          <App />
-        </ToastProvider>
-      </ErrorBoundary>
-    </BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <HelmetProvider>
+        <BrowserRouter>
+          <ErrorBoundary>
+            <ToastProvider>
+              <App />
+            </ToastProvider>
+          </ErrorBoundary>
+        </BrowserRouter>
+      </HelmetProvider>
+    </QueryClientProvider>
   </React.StrictMode>
 );

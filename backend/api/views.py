@@ -252,13 +252,19 @@ class PaintingGuideViewSet(viewsets.ModelViewSet):
         guide.refresh_from_db()
         return Response({'views': guide.views})
 
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=['get', 'post'])
     def comment(self, request, id=None):
         guide = self.get_object()
+        if request.method == 'GET':
+            comments = guide.comments.all()
+            serializer = CommentSerializer(comments, many=True)
+            return Response(serializer.data)
         serializer = CommentSerializer(data=request.data)
         if serializer.is_valid():
+            import uuid as _uuid
+            comment_id = f"gc-{str(_uuid.uuid4())[:8]}"
             serializer.save(
-                id=f"comment-{request.data.get('date', '')}",
+                id=comment_id,
                 content_type='guide',
                 guide=guide
             )
@@ -433,13 +439,19 @@ class BattleReportViewSet(viewsets.ModelViewSet):
         report.refresh_from_db()
         return Response({'views': report.views})
 
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=['get', 'post'])
     def comment(self, request, id=None):
         report = self.get_object()
+        if request.method == 'GET':
+            comments = report.comments.all()
+            serializer = CommentSerializer(comments, many=True)
+            return Response(serializer.data)
         serializer = CommentSerializer(data=request.data)
         if serializer.is_valid():
+            import uuid as _uuid
+            comment_id = f"rc-{str(_uuid.uuid4())[:8]}"
             serializer.save(
-                id=f"comment-{request.data.get('date', '')}",
+                id=comment_id,
                 content_type='report',
                 battle_report=report
             )
@@ -495,6 +507,25 @@ class LoreEntryViewSet(viewsets.ModelViewSet):
         serializer.save()
 
         return Response(serializer.data)
+
+    @action(detail=True, methods=['get', 'post'])
+    def comment(self, request, id=None):
+        lore = self.get_object()
+        if request.method == 'GET':
+            comments = lore.comments.all()
+            serializer = CommentSerializer(comments, many=True)
+            return Response(serializer.data)
+        serializer = CommentSerializer(data=request.data)
+        if serializer.is_valid():
+            import uuid as _uuid
+            comment_id = f"lc-{str(_uuid.uuid4())[:8]}"
+            serializer.save(
+                id=comment_id,
+                content_type='lore',
+                lore_entry=lore
+            )
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['post'])
     def increment_views(self, request, id=None):
@@ -593,6 +624,25 @@ class NewsArticleViewSet(viewsets.ModelViewSet):
             NewsArticle.objects.filter(id=article.id).update(likes=F('likes') + 1)
             article.refresh_from_db()
             return Response({'status': 'liked', 'likes': article.likes})
+
+    @action(detail=True, methods=['get', 'post'])
+    def comment(self, request, id=None):
+        article = self.get_object()
+        if request.method == 'GET':
+            comments = article.comments.all()
+            serializer = CommentSerializer(comments, many=True)
+            return Response(serializer.data)
+        serializer = CommentSerializer(data=request.data)
+        if serializer.is_valid():
+            import uuid as _uuid
+            comment_id = f"nc-{str(_uuid.uuid4())[:8]}"
+            serializer.save(
+                id=comment_id,
+                content_type='news',
+                news_article=article
+            )
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])

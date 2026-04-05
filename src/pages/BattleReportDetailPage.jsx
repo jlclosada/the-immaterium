@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { Helmet } from 'react-helmet-async';
 import { api } from '../services/api';
 import { useStore } from '../stores/useStore';
 import Navbar from '../components/UI/Navbar';
 import Footer from '../components/UI/Footer';
 import ShareButton from '../components/UI/ShareButton';
 import ReadingProgressBar from '../components/UI/ReadingProgressBar';
+import CommentsSection from '../components/UI/CommentsSection';
 
 const BattleReportDetailPage = () => {
   const { id } = useParams();
@@ -82,6 +84,17 @@ const BattleReportDetailPage = () => {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-darker)', display: 'flex', flexDirection: 'column' }}>
+      {report && (
+        <Helmet>
+          <title>{report.title} | Battle Reports | The Immaterium</title>
+          <meta name="description" content={`${report.player1_faction || 'Facción 1'} vs ${report.player2_faction || 'Facción 2'} — ${report.mission || 'Batalla'} (${report.points || ''}pts)`} />
+          <meta property="og:title" content={report.title} />
+          <meta property="og:description" content={`Informe de batalla: ${report.player1_faction || ''} vs ${report.player2_faction || ''}. Misión: ${report.mission || ''}. ${report.points || ''}pts.`} />
+          {report.images?.[0] && <meta property="og:image" content={report.images[0]} />}
+          <meta property="og:type" content="article" />
+          <meta name="twitter:card" content="summary_large_image" />
+        </Helmet>
+      )}
       <ReadingProgressBar />
       <Navbar />
 
@@ -632,6 +645,15 @@ const BattleReportDetailPage = () => {
               })}
             </div>
           </motion.div>
+        )}
+
+        {/* Comments */}
+        {report && (
+          <CommentsSection
+            contentType="battle-reports"
+            contentId={report.id}
+            accentColor="#ff6464"
+          />
         )}
       </div>
 

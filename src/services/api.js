@@ -637,4 +637,37 @@ export const api = {
     if (!res.ok) throw new Error(data.error || 'Error al actualizar perfil')
     return data
   },
+
+  // ── Comments ────────────────────────────────────────────────────────────
+  // contentType: 'guides' | 'battle-reports' | 'news' | 'lore'
+  getComments: async (contentType, contentId) => {
+    const endpointMap = {
+      guides: 'guides',
+      'battle-reports': 'battle-reports',
+      news: 'news',
+      lore: 'lore',
+    };
+    const endpoint = endpointMap[contentType] || contentType;
+    const res = await fetch(`${API_URL}/api/${endpoint}/${contentId}/comment/`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return Array.isArray(data) ? data : (data.results || []);
+  },
+
+  addComment: async (contentType, contentId, commentData) => {
+    const endpointMap = {
+      guides: 'guides',
+      'battle-reports': 'battle-reports',
+      news: 'news',
+      lore: 'lore',
+    };
+    const endpoint = endpointMap[contentType] || contentType;
+    const res = await fetch(`${API_URL}/api/${endpoint}/${contentId}/comment/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(commentData),
+    });
+    if (!res.ok) throw new Error('Error al publicar comentario');
+    return res.json();
+  },
 }

@@ -1,34 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { api } from '../services/api';
+import { Helmet } from 'react-helmet-async';
+import { useNews } from '../hooks/queries';
 import Navbar from '../components/UI/Navbar';
 import Footer from '../components/UI/Footer';
 import { useTheme } from '../hooks/useTheme';
 
 const NewsPage = () => {
   const { isLight } = useTheme();
-  const [articles, setArticles] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { data: articles = [], isLoading } = useNews();
   const [searchTerm, setSearchTerm] = useState('');
-
-  useEffect(() => {
-    document.title = 'Noticias | The Immaterium';
-  }, []);
-
-  useEffect(() => {
-    const fetch = async () => {
-      try {
-        const data = await api.getNewsArticles();
-        setArticles(Array.isArray(data) ? data : []);
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetch();
-  }, []);
 
   const filtered = articles.filter(a => {
     const term = searchTerm.toLowerCase();
@@ -41,6 +23,13 @@ const NewsPage = () => {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-darker)', display: 'flex', flexDirection: 'column' }}>
+      <Helmet>
+        <title>Noticias | The Immaterium</title>
+        <meta name="description" content="Últimas noticias del universo Warhammer: lanzamientos, torneos y novedades de la comunidad." />
+        <meta property="og:title" content="Noticias | The Immaterium" />
+        <meta property="og:description" content="Mantente al día con todo lo que ocurre en la comunidad Warhammer." />
+        <meta property="og:type" content="website" />
+      </Helmet>
       <Navbar />
 
       <div style={{
@@ -89,7 +78,7 @@ const NewsPage = () => {
           </div>
         </motion.div>
 
-        {loading ? (
+        {isLoading ? (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 320px), 1fr))', gap: '1.5rem' }}>
             {[...Array(6)].map((_, i) => (
               <div key={i} style={{ borderRadius: '16px', overflow: 'hidden', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>

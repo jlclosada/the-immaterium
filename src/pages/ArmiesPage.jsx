@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../services/api';
+import { Helmet } from 'react-helmet-async';
+import { useArmies, useGames } from '../hooks/queries';
 import { useStore } from '../stores/useStore';
 import { useTranslation } from '../i18n/translations';
 import Navbar from '../components/UI/Navbar';
@@ -29,36 +30,10 @@ const ArmiesPage = () => {
   const navigate = useNavigate();
   const language = useStore(state => state.language);
   const t = useTranslation(language);
-  const [armies, setArmies] = useState([]);
-  const [games, setGames] = useState([]);
+  const { data: armies = [], isLoading } = useArmies();
+  const { data: games = [] } = useGames();
   const [selectedGameId, setSelectedGameId] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-
-  useEffect(() => {
-    document.title = 'Ejércitos & Facciones | The Immaterium';
-  }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [armiesData, gamesData] = await Promise.allSettled([
-          api.getArmies(),
-          api.getGames(),
-        ]);
-        const armiesList = armiesData.status === 'fulfilled' ? (Array.isArray(armiesData.value) ? armiesData.value : []) : [];
-        const gamesList = gamesData.status === 'fulfilled' ? (Array.isArray(gamesData.value) ? gamesData.value : []) : [];
-        setArmies(armiesList);
-        setGames(gamesList);
-        // No auto-select — null = "Todos"
-      } catch (error) {
-        console.error('Failed to fetch data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
 
   const selectedGame = games.find(g => g.id === selectedGameId) || null;
   const theme = THEMES[selectedGame?.theme] || THEMES['sci-fi'];
@@ -106,6 +81,13 @@ const ArmiesPage = () => {
       '--page-secondary': secondaryColor,
       transition: 'background 0.5s ease',
     }}>
+      <Helmet>
+        <title>Ejércitos & Facciones | The Immaterium</title>
+        <meta name="description" content="Explora todas las facciones y ejércitos de Warhammer 40,000 y Age of Sigmar." />
+        <meta property="og:title" content="Ejércitos & Facciones | The Immaterium" />
+        <meta property="og:description" content="Descubre las facciones del universo Warhammer: trasfondo, lore y guías de pintura." />
+        <meta property="og:type" content="website" />
+      </Helmet>
       <Navbar />
 
       <div style={{
@@ -227,7 +209,7 @@ const ArmiesPage = () => {
           </div>
         </motion.div>
 
-        {loading ? (
+        {isLoading ? (
           <div className="loading-spinner" style={{ margin: '5rem auto' }} />
         ) : sortedArmies.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '5rem 2rem', color: 'rgba(255,255,255,0.3)' }}>
