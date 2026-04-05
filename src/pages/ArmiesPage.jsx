@@ -277,9 +277,12 @@ const ArmiesPage = () => {
 
 const ArmyCard = ({ army, index, language, theme, accentColor, onClick }) => {
   const { isLight } = useTheme();
+  const [hovered, setHovered] = React.useState(false);
   const name = language === 'es' && army.nameEs ? army.nameEs : army.name;
   const description = language === 'es' && army.descriptionEs ? army.descriptionEs : army.description;
   const imageCount = army.images?.length || 0;
+  // Use first gallery image as cover if available, fallback to iconUrl
+  const coverPhoto = army.images?.[0]?.url || null;
 
   return (
     <motion.div
@@ -287,6 +290,8 @@ const ArmyCard = ({ army, index, language, theme, accentColor, onClick }) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.07, duration: 0.4 }}
       onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       whileHover={{ y: -5, boxShadow: `0 16px 48px rgba(0,0,0,0.4), 0 0 0 1px ${accentColor}30` }}
       style={{
         background: 'rgba(255,255,255,0.03)',
@@ -302,9 +307,9 @@ const ArmyCard = ({ army, index, language, theme, accentColor, onClick }) => {
       }}
     >
 
-      {/* Icon area */}
+      {/* Cover area — gallery photo if available, else icon on gradient */}
       <div style={{
-        height: '140px',
+        height: '180px',
         background: `linear-gradient(160deg, ${theme.cardBg} 0%, ${theme.cardBg2} 100%)`,
         display: 'flex',
         alignItems: 'center',
@@ -312,8 +317,43 @@ const ArmyCard = ({ army, index, language, theme, accentColor, onClick }) => {
         flexShrink: 0,
         borderBottom: '1px solid rgba(255,255,255,0.06)',
         position: 'relative',
+        overflow: 'hidden',
       }}>
-        {army.iconUrl ? (
+        {coverPhoto ? (
+          <>
+            <img
+              src={coverPhoto}
+              alt={name}
+              loading="lazy"
+              decoding="async"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                transition: 'transform 0.5s ease',
+                transform: hovered ? 'scale(1.06)' : 'scale(1)',
+              }}
+            />
+            {/* Gradient overlay so the icon is visible on top */}
+            <div style={{
+              position: 'absolute', inset: 0,
+              background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)',
+              pointerEvents: 'none',
+            }} />
+            {/* Icon overlay bottom-left */}
+            {army.iconUrl && (
+              <img
+                src={army.iconUrl}
+                alt=""
+                style={{
+                  position: 'absolute', bottom: '0.75rem', left: '0.75rem',
+                  width: '40px', height: '40px', objectFit: 'contain',
+                  filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.8)) brightness(1.2)',
+                }}
+              />
+            )}
+          </>
+        ) : army.iconUrl ? (
           <img
             src={army.iconUrl}
             alt={name}
@@ -338,16 +378,24 @@ const ArmyCard = ({ army, index, language, theme, accentColor, onClick }) => {
           </div>
         )}
 
-        {imageCount > 0 && (
+        {/* Top accent line */}
+        <div style={{
+          position: 'absolute', top: 0, left: 0, right: 0, height: '2px',
+          background: `linear-gradient(90deg, transparent, ${accentColor}88, transparent)`,
+          pointerEvents: 'none',
+        }} />
+
+        {imageCount > 1 && (
           <div style={{
             position: 'absolute', bottom: '0.6rem', right: '0.6rem',
-            background: `${accentColor}1a`,
-            border: `1px solid ${accentColor}33`,
+            background: 'rgba(0,0,0,0.55)',
+            border: `1px solid ${accentColor}44`,
             borderRadius: '20px',
             padding: '2px 7px',
             fontSize: '0.68rem',
             color: accentColor,
             display: 'flex', alignItems: 'center', gap: '3px',
+            backdropFilter: 'blur(4px)',
           }}>
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
             {imageCount}
