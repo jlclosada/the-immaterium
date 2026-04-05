@@ -221,7 +221,7 @@ function AddCommentForm({ contentType, contentId, isLight, userDisplayName, user
 /* ── Main CommentsSection ────────────────────────────────────────────────── */
 export default function CommentsSection({ contentType, contentId, accentColor }) {
   const { isLight } = useTheme();
-  const { user } = useStore(s => ({ user: s.user }));
+  const user = useStore(s => s.user);
   const [expanded, setExpanded] = useState(true);
 
   const { data: comments = [], isLoading } = useComments(contentType, contentId);
