@@ -1067,17 +1067,14 @@ input:focus-visible {
   color: #fff;
 }
 
-/* Image lazy loading fade */
+/* Image lazy loading fade — uses onLoad to add .loaded class via global handler */
 img {
-  opacity: 1;
-  transition: opacity 0.3s ease;
-}
-
-img[loading="lazy"] {
   opacity: 0;
+  transition: opacity 0.35s ease;
 }
 
-img[loading="lazy"].loaded {
+img.loaded,
+img:not([loading="lazy"]) {
   opacity: 1;
 }
 
